@@ -24,6 +24,10 @@
                         <a class="nav-link {{ request()->routeIs('empaques.create') ? 'active' : '' }}"
                            href="{{ route('empaques.create') }}">Nuevo empaque</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('lector') ? 'active' : '' }}"
+                           href="{{ route('lector') }}">Lector QR</a>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -37,9 +41,17 @@
             </div>
         @endif
 
+        @if (session('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+            </div>
+        @endif
+
         @yield('content')
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    @stack('scripts')
 </body>
 </html>

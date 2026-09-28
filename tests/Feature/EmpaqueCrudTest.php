@@ -109,8 +109,13 @@ class EmpaqueCrudTest extends TestCase
 
         $this->delete(route('empaques.destroy', $empaque))
             ->assertRedirect(route('empaques.index'));
+        $this->get(route('empaques.index'))->assertSee("Empaque {$empaque->codigo} eliminado.");
 
         $this->assertSoftDeleted($empaque);
-        $this->get(route('empaques.show', $empaque))->assertNotFound();
+        $this->get(route('empaques.index'))->assertDontSee($empaque->codigo);
+
+        // Su detalle (lo que abre el QR impreso) avisa que fue dado de baja; editar ya no es posible.
+        $this->get(route('empaques.show', $empaque))->assertOk()->assertSee('Empaque dado de baja');
+        $this->get(route('empaques.edit', $empaque))->assertNotFound();
     }
 }

@@ -81,6 +81,17 @@ class Empaque extends Model
     }
 
     /**
+     * Extrae el código EMP-XXXXXX de un texto: puede ser el código solo
+     * o la URL completa leída de un QR (sin importar el dominio).
+     */
+    public static function extraerCodigo(string $texto): ?string
+    {
+        return preg_match('/EMP-[A-Z0-9]{6}/', strtoupper($texto), $coincidencia)
+            ? $coincidencia[0]
+            : null;
+    }
+
+    /**
      * Genera un código con formato EMP-XXXXXX que no exista en la base,
      * incluyendo empaques eliminados, para que un código nunca se reutilice.
      */

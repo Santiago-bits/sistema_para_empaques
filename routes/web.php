@@ -2,11 +2,13 @@
 
 use App\Http\Controllers\EmpaqueController;
 use App\Http\Controllers\EmpaqueQrController;
+use App\Http\Controllers\LectorController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => to_route('empaques.index'));
 
-Route::resource('empaques', EmpaqueController::class);
+// withTrashed en show: escanear el QR de un empaque dado de baja muestra el aviso en vez de un 404.
+Route::resource('empaques', EmpaqueController::class)->withTrashed(['show']);
 
 // Código QR de cada empaque
 Route::controller(EmpaqueQrController::class)
@@ -17,3 +19,7 @@ Route::controller(EmpaqueQrController::class)
         Route::get('qr/descargar.{formato}', 'descargar')->whereIn('formato', ['png', 'svg'])->name('qr.descargar');
         Route::get('etiqueta', 'etiqueta')->name('etiqueta');
     });
+
+// Lector QR
+Route::get('lector', [LectorController::class, 'index'])->name('lector');
+Route::get('lector/buscar', [LectorController::class, 'buscar'])->name('lector.buscar');

@@ -64,6 +64,11 @@ class EmpaqueController extends Controller
      */
     public function show(Empaque $empaque): View
     {
+        // La ruta admite empaques eliminados (withTrashed) para poder avisar que fue dado de baja.
+        if ($empaque->trashed()) {
+            return view('empaques.baja', ['empaque' => $empaque]);
+        }
+
         // Si APP_URL es localhost, el QR no abrirá nada al escanearlo desde otro dispositivo.
         $hostQr = parse_url(config('app.url'), PHP_URL_HOST);
 
