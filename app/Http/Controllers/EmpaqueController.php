@@ -64,7 +64,13 @@ class EmpaqueController extends Controller
      */
     public function show(Empaque $empaque): View
     {
-        return view('empaques.show', ['empaque' => $empaque]);
+        // Si APP_URL es localhost, el QR no abrirá nada al escanearlo desde otro dispositivo.
+        $hostQr = parse_url(config('app.url'), PHP_URL_HOST);
+
+        return view('empaques.show', [
+            'empaque' => $empaque,
+            'qrSoloLocal' => in_array($hostQr, ['localhost', '127.0.0.1'], true),
+        ]);
     }
 
     /**

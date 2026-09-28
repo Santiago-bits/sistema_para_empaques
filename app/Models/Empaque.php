@@ -71,6 +71,16 @@ class Empaque extends Model
     }
 
     /**
+     * URL absoluta del detalle del empaque: es lo que se codifica en el QR.
+     * Usa APP_URL (y no el host de la petición actual) para que el QR
+     * apunte siempre al dominio configurado, aunque se genere desde localhost.
+     */
+    public function urlPublica(): string
+    {
+        return rtrim(config('app.url'), '/').route('empaques.show', $this, false);
+    }
+
+    /**
      * Genera un código con formato EMP-XXXXXX que no exista en la base,
      * incluyendo empaques eliminados, para que un código nunca se reutilice.
      */
