@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\EstadoEmpaque;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -84,6 +85,31 @@ class Empaque extends Model
         } while (static::withTrashed()->where('codigo', $codigo)->exists());
 
         return $codigo;
+    }
+
+    /**
+     * Filtra por texto en código o nombre. Si el texto está vacío, no filtra.
+     */
+    public function scopeBuscar(Builder $query, ?string $texto): void
+    {
+        if (blank($texto)) {
+            return;
+        }
+
+        $query->where(function (Builder $q) use ($texto) {
+            $q->where('codigo', 'like', "%{$texto}%")
+                ->orWhere('nombre', 'like', "%{$texto}%");
+        });
+    }
+
+    /**
+     * Filtra por estado. Si el estado es null, no filtra.
+     */
+    public function scopeConEstado(Builder $query, ?EstadoEmpaque $estado): void
+    {
+        if ($estado) {
+            $query->where('estado', $estado);
+        }
     }
 
     /**

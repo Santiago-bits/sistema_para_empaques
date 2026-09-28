@@ -25,4 +25,17 @@ enum EstadoEmpaque: string
             self::Entregado => 'Entregado',
         };
     }
+
+    /**
+     * Color de Bootstrap asociado a cada estado (para badges).
+     */
+    public function color(): string
+    {
+        return match ($this) {
+            self::Pendiente => 'secondary',
+            self::EnProceso => 'warning',
+            self::Despachado => 'primary',
+            self::Entregado => 'success',
+        };
+    }
 }
