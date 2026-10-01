@@ -67,6 +67,11 @@ class ProductionRecord extends Model
         return $this->belongsTo(User::class, 'authorized_by');
     }
 
+    public function voider(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'voided_by');
+    }
+
     public function scopeValid(Builder $query): Builder
     {
         return $query->whereNull('voided_at');

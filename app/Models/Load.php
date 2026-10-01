@@ -18,6 +18,9 @@ class Load extends Model
 {
     use Auditable, BelongsToWarehouse, HasFactory, HasStateHistory, SoftDeletes;
 
+    /** Bloqueo optimista: se incrementa en cada cambio de estado o edición crítica. */
+    protected $attributes = ['version' => 0];
+
     protected $fillable = [
         'warehouse_id', 'number', 'date', 'truck_id', 'driver_id', 'transporter_id', 'destination_id',
         'client_id', 'owner_id', 'status', 'planned_crates', 'total_crates', 'total_kg', 'notes',

@@ -19,6 +19,9 @@ class Crate extends Model
 
     public const QUALITY_STATUSES = ['pending' => 'Pendiente', 'approved' => 'Aprobado', 'rejected' => 'Rechazado'];
 
+    /** Bloqueo optimista: se incrementa en cada cambio de estado o edición crítica. */
+    protected $attributes = ['version' => 0];
+
     protected $fillable = [
         'warehouse_id', 'season_id', 'code', 'barcode', 'pallet_id', 'lot_id', 'producer_id', 'owner_id',
         'variety_id', 'size_id', 'packer_id', 'shift_id', 'production_line_id', 'weight', 'status',
