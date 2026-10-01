@@ -177,15 +177,15 @@ class DemoSeeder extends Seeder
 
         $col = 0;
         foreach (['A', 'B'] as $s) {
-            $sector = $make(['type' => 'sector', 'code' => "S-$s", 'name' => "Sector $s", 'capacity_pallets' => 40, 'map_x' => $col, 'map_y' => 0, 'map_w' => 4, 'map_h' => 3]);
+            $sector = $make(['type' => 'sector', 'code' => "S-$s", 'name' => "Sector $s", 'capacity_pallets' => 120, 'map_x' => $col + 1, 'map_y' => 1, 'map_w' => 4, 'map_h' => 3]);
             for ($p = 1; $p <= 4; $p++) {
                 $make(['type' => 'position', 'parent_id' => $sector->id, 'code' => sprintf('%s%02d', $s, $p), 'name' => sprintf('Posición %s%02d', $s, $p), 'capacity_pallets' => 10]);
             }
             $col += 4;
         }
-        $cam1 = $make(['type' => 'cold_room', 'code' => 'CAM-1', 'name' => 'Cámara 1', 'capacity_pallets' => 30, 'map_x' => 0, 'map_y' => 3, 'map_w' => 3, 'map_h' => 2]);
-        $cam2 = $make(['type' => 'cold_room', 'code' => 'CAM-2', 'name' => 'Cámara 2', 'capacity_pallets' => 30, 'map_x' => 3, 'map_y' => 3, 'map_w' => 3, 'map_h' => 2]);
-        $make(['type' => 'dispatch', 'code' => 'DESP', 'name' => 'Zona de despacho', 'capacity_pallets' => 20, 'map_x' => 6, 'map_y' => 3, 'map_w' => 2, 'map_h' => 2]);
+        $cam1 = $make(['type' => 'cold_room', 'code' => 'CAM-1', 'name' => 'Cámara 1', 'capacity_pallets' => 30, 'map_x' => 1, 'map_y' => 4, 'map_w' => 3, 'map_h' => 2]);
+        $cam2 = $make(['type' => 'cold_room', 'code' => 'CAM-2', 'name' => 'Cámara 2', 'capacity_pallets' => 30, 'map_x' => 4, 'map_y' => 4, 'map_w' => 3, 'map_h' => 2]);
+        $make(['type' => 'dispatch', 'code' => 'DESP', 'name' => 'Zona de despacho', 'capacity_pallets' => 20, 'map_x' => 7, 'map_y' => 4, 'map_w' => 2, 'map_h' => 2]);
 
         ColdRoom::query()->firstOrCreate(['code' => 'CAM-1'], ['name' => 'Cámara 1', 'location_id' => $cam1->id, 'temp_min' => 2, 'temp_max' => 6, 'humidity_min' => 85, 'humidity_max' => 95, 'sensor_key' => Str::random(32)]);
         ColdRoom::query()->firstOrCreate(['code' => 'CAM-2'], ['name' => 'Cámara 2', 'location_id' => $cam2->id, 'temp_min' => 2, 'temp_max' => 6, 'humidity_min' => 85, 'humidity_max' => 95, 'sensor_key' => Str::random(32)]);
@@ -217,7 +217,7 @@ class DemoSeeder extends Seeder
         $crateSeq = 1;
         $lotSeq = 1;
 
-        for ($d = 29; $d >= 0; $d--) {
+        for ($d = app()->runningUnitTests() ? 3 : 29; $d >= 0; $d--) {
             $day = now()->subDays($d)->startOfDay();
             if ($day->isSunday()) {
                 continue;
