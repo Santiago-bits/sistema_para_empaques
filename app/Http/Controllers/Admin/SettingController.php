@@ -113,7 +113,7 @@ class SettingController extends Controller
             'crate' => ['array'],
             'crate.*' => [Rule::in(['required', 'optional', 'hidden'])],
         ]);
-        $allowed = ['weight', 'lot_id', 'pallet_id', 'notes'];
+        $allowed = array_keys(\App\Services\CrateService::CONFIGURABLE_FIELDS);
         $config = array_intersect_key($data['crate'] ?? [], array_flip($allowed));
         // El peso nunca puede ocultarse: es la base de producción y facturación.
         if (($config['weight'] ?? 'required') === 'hidden') {

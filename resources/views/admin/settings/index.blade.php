@@ -63,7 +63,7 @@
                     @case('fields')
                         <p class="mb-4 text-sm text-stone-500">Definí qué campos del cajón son obligatorios, opcionales u ocultos.</p>
                         <div class="grid gap-4 md:grid-cols-2">
-                            @foreach (['weight' => 'Peso', 'lot_id' => 'Lote', 'pallet_id' => 'Pallet', 'notes' => 'Observación'] as $field => $label)
+                            @foreach (\App\Services\CrateService::CONFIGURABLE_FIELDS as $field => $label)
                                 <x-select :name="'crate['.$field.']'" :label="$label" :value="$s['fields.crate'][$field] ?? 'optional'"
                                           :options="$field === 'weight' ? ['required' => 'Obligatorio'] : ['required' => 'Obligatorio', 'optional' => 'Opcional', 'hidden' => 'Oculto']"/>
                             @endforeach

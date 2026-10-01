@@ -17,6 +17,9 @@ class Pallet extends Model
 {
     use Auditable, BelongsToWarehouse, HasFactory, HasStateHistory, SoftDeletes;
 
+    /** Bloqueo optimista: se incrementa en cada cambio de estado o edición crítica. */
+    protected $attributes = ['version' => 0];
+
     protected $fillable = [
         'warehouse_id', 'season_id', 'code', 'barcode', 'lot_id', 'producer_id', 'owner_id', 'variety_id',
         'origin', 'received_at', 'quantity', 'gross_weight', 'status', 'location_id', 'notes', 'created_by',
@@ -74,5 +77,10 @@ class Pallet extends Model
     public function documents(): MorphMany
     {
         return $this->morphMany(Document::class, 'documentable');
+    }
+
+    public function season(): BelongsTo
+    {
+        return $this->belongsTo(Season::class);
     }
 }
