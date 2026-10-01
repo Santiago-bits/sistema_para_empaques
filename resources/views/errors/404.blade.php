@@ -1,18 +1,10 @@
-@extends('layouts.app')
-
-@section('title', 'No encontrado')
-
-@section('content')
-    <div class="row justify-content-center">
-        <div class="col-lg-7 text-center py-5">
-            <h1 class="display-6">No encontrado</h1>
-            <p class="text-muted">
-                La página o el empaque que buscás no existe. Verificá el código e intentá de nuevo.
-            </p>
-            <div class="d-flex flex-wrap justify-content-center gap-2">
-                <a href="{{ route('lector') }}" class="btn btn-primary">Ir al lector QR</a>
-                <a href="{{ route('empaques.index') }}" class="btn btn-outline-secondary">Ir al listado</a>
-            </div>
+<x-layouts.guest title="No encontrado">
+    <div class="grid min-h-screen place-items-center p-6">
+        <div class="panel max-w-md p-8 text-center">
+            <p class="code text-5xl font-bold text-stone-300 dark:text-stone-700">404</p>
+            <h1 class="mt-3 text-xl font-semibold">No encontrado</h1>
+            <p class="mt-2 text-sm text-stone-600 dark:text-stone-400">La página o el registro que buscás no existe o el módulo está desactivado.</p>
+            <a href="{{ url('/') }}" class="btn btn-primary mt-6">Volver al inicio</a>
         </div>
     </div>
-@endsection
+</x-layouts.guest>

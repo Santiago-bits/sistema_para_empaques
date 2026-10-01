@@ -1,6 +1,0 @@
-# En hostings donde la raíz del sitio es la carpeta del proyecto (ej: Hostinger public_html),
-# redirige internamente todas las peticiones a public/, el único directorio que debe ser accesible.
-<IfModule mod_rewrite.c>
-    RewriteEngine On
-    RewriteRule ^(.*)$ public/$1 [L]
-</IfModule>
