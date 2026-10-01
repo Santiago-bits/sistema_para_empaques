@@ -71,7 +71,10 @@ return new class extends Migration
         Schema::create('remitos', function (Blueprint $table) {
             $table->id();
             $table->string('number', 30)->unique();
-            $table->foreignId('load_id')->unique()->constrained()->restrictOnDelete();
+            $table->foreignId('load_id')->constrained()->restrictOnDelete();
+            // = load_id mientras el remito no está anulado; NULL al anularlo. El índice único
+            // garantiza un solo remito vigente por carga y permite reemitir tras una anulación.
+            $table->unsignedBigInteger('active_load_id')->nullable()->unique();
             $table->foreignId('client_id')->nullable()->constrained()->restrictOnDelete();
             $table->foreignId('destination_id')->nullable()->constrained()->restrictOnDelete();
             $table->foreignId('truck_id')->nullable()->constrained()->restrictOnDelete();

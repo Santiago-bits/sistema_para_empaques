@@ -32,9 +32,6 @@ Route::middleware(['auth', 'active', 'kiosk'])->group(function () {
     Route::put('/perfil/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
     Route::post('/perfil/tema', [ProfileController::class, 'updateTheme'])->name('profile.theme');
 
-    // Latido para detectar pérdida de conexión con el servidor desde las PCs del galpón.
-    Route::get('/heartbeat', fn () => response()->json(['ok' => true, 'time' => now()->toIso8601String()]))->name('heartbeat');
-
     foreach (glob(__DIR__.'/modules/*.php') as $file) {
         require $file;
     }

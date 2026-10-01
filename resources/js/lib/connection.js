@@ -13,8 +13,8 @@ function setOnline(value) {
 
 async function ping() {
     try {
-        const r = await fetch('/heartbeat', { headers: { Accept: 'application/json' }, credentials: 'same-origin', cache: 'no-store' });
-        setOnline(r.ok || r.status === 401 || r.status === 419);
+        const r = await fetch('/api/heartbeat', { headers: { Accept: 'application/json' }, credentials: 'omit', cache: 'no-store' });
+        setOnline(r.ok || r.status === 429);
     } catch (e) {
         setOnline(false);
     }

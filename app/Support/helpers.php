@@ -59,3 +59,14 @@ if (! function_exists('fdate')) {
         return $date->format($withTime ? 'd/m/Y H:i' : 'd/m/Y');
     }
 }
+
+if (! function_exists('field_label')) {
+    /** Nombre legible de una columna (lang/es/fields.php); si no existe, la columna tal cual. */
+    function field_label(string $column): string
+    {
+        $key = 'fields.'.$column;
+        $label = __($key);
+
+        return $label === $key ? $column : $label;
+    }
+}
