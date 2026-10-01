@@ -100,6 +100,18 @@ class Load extends Model
         return $this->hasOne(Remito::class);
     }
 
+    /** Todos los remitos de la carga (incluye anulados). */
+    public function remitos(): HasMany
+    {
+        return $this->hasMany(Remito::class);
+    }
+
+    /** Remito vigente (no anulado): como máximo uno, garantizado por remitos.active_load_id UNIQUE. */
+    public function activeRemito(): HasOne
+    {
+        return $this->hasOne(Remito::class, 'active_load_id');
+    }
+
     public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);

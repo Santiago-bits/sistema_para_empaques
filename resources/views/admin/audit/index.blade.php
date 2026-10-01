@@ -4,7 +4,7 @@
     <x-filters>
         <x-select name="user_id" label="Usuario" :options="$users" :value="request('user_id')" placeholder="Todos"/>
         <x-select name="action" label="Acción" :options="$actions->map(fn ($a) => __('audit.actions.'.$a))" :value="request('action')" placeholder="Todas"/>
-        <x-select name="type" label="Entidad" :options="$types" :value="request('type')" placeholder="Todas"/>
+        <x-select name="type" label="Entidad" :options="$types->map(fn ($t) => __('entities.'.$t))" :value="request('type')" placeholder="Todas"/>
         <x-input name="id" label="ID entidad" :value="request('id')" inputmode="numeric"/>
         <x-input name="from" type="date" label="Desde" :value="request('from')"/>
         <x-input name="to" type="date" label="Hasta" :value="request('to')"/>
@@ -18,11 +18,11 @@
                     <td class="tabular-nums whitespace-nowrap">{{ fdate($log->created_at, true) }}</td>
                     <td>{{ $log->user?->full_name ?? 'Sistema' }}</td>
                     <td><x-badge :color="match (true) { str_contains($log->action, 'delete') || str_contains($log->action, 'void') || $log->action === 'login_failed' => 'red', $log->action === 'create' => 'emerald', $log->action === 'update' => 'blue', default => 'stone' }">{{ __('audit.actions.'.$log->action) }}</x-badge></td>
-                    <td class="whitespace-nowrap"><span class="code">{{ $log->auditable_type }}</span>{{ $log->auditable_id ? ' #'.$log->auditable_id : '' }}</td>
+                    <td class="whitespace-nowrap">{{ $log->auditable_type ? __('entities.'.$log->auditable_type) : '—' }}{{ $log->auditable_id ? ' #'.$log->auditable_id : '' }}</td>
                     <td class="max-w-md truncate text-stone-500">
                         {{ $log->description }}
                         @if ($log->action === 'update' && $log->new_values)
-                            {{ collect($log->new_values)->keys()->take(4)->join(', ') }}
+                            {{ collect($log->new_values)->keys()->take(4)->map(fn ($k) => field_label($k))->join(', ') }}
                         @endif
                         @if ($log->reason) · <em>{{ $log->reason }}</em> @endif
                     </td>

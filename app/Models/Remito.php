@@ -16,7 +16,7 @@ class Remito extends Model
     use Auditable, HasStateHistory, SoftDeletes;
 
     protected $fillable = [
-        'number', 'load_id', 'client_id', 'destination_id', 'truck_id', 'driver_id', 'issued_at',
+        'number', 'load_id', 'active_load_id', 'client_id', 'destination_id', 'truck_id', 'driver_id', 'issued_at',
         'total_crates', 'total_kg', 'status', 'public_token', 'notes', 'delivered_at', 'receiver_name',
         'receiver_dni', 'signature_path', 'delivery_notes', 'created_by',
     ];

@@ -25,7 +25,7 @@
                 <tbody>
                     @forelse ($keys as $key)
                         <tr>
-                            <td class="code">{{ $key }}</td>
+                            <td>{{ field_label($key) }} <span class="code text-xs text-stone-400">{{ $key }}</span></td>
                             <td class="text-red-700 dark:text-red-400">{{ is_array($old[$key] ?? null) ? json_encode($old[$key], JSON_UNESCAPED_UNICODE) : ($old[$key] ?? '—') }}</td>
                             <td class="text-emerald-700 dark:text-emerald-400">{{ is_array($new[$key] ?? null) ? json_encode($new[$key], JSON_UNESCAPED_UNICODE) : ($new[$key] ?? '—') }}</td>
                         </tr>

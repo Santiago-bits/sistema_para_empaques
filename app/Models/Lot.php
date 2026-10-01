@@ -63,4 +63,9 @@ class Lot extends Model
     {
         return $this->morphMany(Document::class, 'documentable');
     }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
 }
