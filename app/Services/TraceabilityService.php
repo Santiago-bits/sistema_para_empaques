@@ -67,7 +67,8 @@ class TraceabilityService
         $lastControl = QualityControl::query()->where('crate_id', $crate->id)->latest('controlled_at')->first();
         $producer = $crate->producer ?? $crate->lot?->producer ?? $crate->pallet?->producer;
         $owner = $crate->owner ?? $crate->lot?->owner;
-        $location = $crate->location ?? $crate->pallet?->location;
+        $shipped = in_array($crate->status, [\App\Enums\CrateStatus::Dispatched, \App\Enums\CrateStatus::Invoiced], true);
+        $location = $shipped ? null : ($crate->location ?? $crate->pallet?->location);
 
         $chain = [
             $this->node('producer', 'Productor', $producer?->name, $producer?->code),
@@ -82,7 +83,8 @@ class TraceabilityService
             $this->node('weight', 'Peso', $crate->weight !== null ? kg($crate->weight) : null),
             $this->node('quality', 'Calidad', \App\Models\Crate::QUALITY_STATUSES[$crate->quality_status] ?? $crate->quality_status,
                 $lastControl ? 'Control '.fdate($lastControl->controlled_at, true) : null),
-            $this->node('location', 'Ubicación', $location?->path()),
+            $this->node('location', 'Ubicación', $shipped ? 'Fuera del galpón (despachado)' : $location?->path(),
+                $shipped && $load?->truck ? 'Camión '.$load->truck->plate : null),
             $this->node('load', 'Carga', $load?->number, $load ? $load->status->label() : null, $this->url('loads.show', $load)),
             $this->node('truck', 'Camión', $load?->truck?->plate, $load?->driver ? trim($load->driver->first_name.' '.$load->driver->last_name) : null),
             $this->node('destination', 'Destino', $load?->destination?->name, $load?->client?->business_name),

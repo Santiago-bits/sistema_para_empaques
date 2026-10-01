@@ -145,6 +145,8 @@
                             <x-select name="mode" label="Modo" :value="$s['arca.mode']" :options="collect(\App\Enums\ArcaMode::cases())->mapWithKeys(fn ($m) => [$m->value => $m->label()])"/>
                             <x-input name="point_of_sale" type="number" label="Punto de venta" :value="$s['arca.point_of_sale']"/>
                             <x-input name="cuit" label="CUIT emisor" :value="$s['arca.cuit']" hint="11 dígitos"/>
+                            <x-select name="emitter_condition" label="Condición del emisor" :value="$s['arca.emitter_condition']"
+                                      :options="['RI' => 'Responsable Inscripto (Factura A / B)', 'MT' => 'Monotributo (Factura C)']"/>
                         </div>
                         @break
                 @endswitch

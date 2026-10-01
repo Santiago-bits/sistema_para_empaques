@@ -21,9 +21,9 @@ class LoadCrate extends Model
         ];
     }
 
-    public function load(): BelongsTo
+    public function loadRecord(): BelongsTo
     {
-        return $this->belongsTo(Load::class);
+        return $this->belongsTo(Load::class, 'load_id');
     }
 
     public function crate(): BelongsTo

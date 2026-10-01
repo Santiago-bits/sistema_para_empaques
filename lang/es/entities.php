@@ -33,6 +33,7 @@ return [
     'reject' => 'Rechazo',
     'stoppage' => 'Parada',
     'load' => 'Carga',
+    'dispatch_check' => 'Control de despacho',
     'remito' => 'Remito',
     'document' => 'Documento',
     'invoice' => 'Factura',

@@ -199,6 +199,7 @@ class SettingController extends Controller
             'mode' => ['required', Rule::in(['simulation', 'homologation', 'production'])],
             'point_of_sale' => ['required', 'integer', 'min:1', 'max:99999'],
             'cuit' => ['nullable', 'digits:11'],
+            'emitter_condition' => ['required', Rule::in(['RI', 'MT'])],
         ]);
         foreach ($data as $key => $value) {
             $this->settings->set("arca.$key", $value);
