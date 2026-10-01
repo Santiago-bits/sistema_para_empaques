@@ -28,6 +28,7 @@ use App\Models\WarehouseLocation;
 use App\Services\AuditService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -68,6 +69,7 @@ class DemoSeeder extends Seeder
                 $this->locations();
                 $this->operations();
                 $this->admin();
+                $this->logistics();
             });
         });
 
@@ -349,5 +351,85 @@ class DemoSeeder extends Seeder
             }
             DB::table('temperature_records')->insert($rows);
         }
+    }
+
+    /**
+     * Cargas de ejemplo recorriendo el circuito real con los mismos servicios que usa la
+     * aplicación: armado → cierre → remito → checklist → despacho → entrega → factura (simulada).
+     */
+    private function logistics(): void
+    {
+        if (\App\Models\Load::query()->exists()) {
+            return;
+        }
+
+        $user = User::query()->where('username', 'admin.demo')->firstOrFail();
+        Auth::setUser($user);
+
+        $loads = app(\App\Services\LoadService::class);
+        $remitos = app(\App\Services\RemitoService::class);
+        $invoices = app(\App\Services\InvoiceService::class);
+        $destinations = Destination::query()->with('client')->get();
+        $trucks = Truck::query()->pluck('id')->all();
+        $drivers = Driver::query()->where('license_expires_on', '>', now())->pluck('id')->all();
+
+        $plan = [['delivered', 80], ['dispatched', 60], ['closed', 50], ['draft', 30]];
+        foreach ($plan as $i => [$target, $quantity]) {
+            $destination = $destinations[$i % $destinations->count()];
+            $load = $loads->create([
+                'client_id' => $destination->client_id, 'destination_id' => $destination->id,
+                'truck_id' => $trucks[$i % count($trucks)], 'driver_id' => $drivers[$i % count($drivers)],
+                'planned_crates' => $quantity, 'date' => today()->subDays(3 - $i),
+            ], $user);
+            $loads->assignCrates($load, $loads->takeAvailable($load, [], $quantity), $user);
+            if ($target === 'draft') {
+                continue;
+            }
+
+            $loads->close($load->fresh(), $user);
+            $remito = $remitos->issue($load->fresh(), $user);
+            if ($target === 'closed') {
+                continue;
+            }
+
+            foreach (array_keys(\App\Models\DispatchCheck::ITEMS) as $item) {
+                $loads->checkItem($load->fresh(), $item, true, $user);
+            }
+            $loads->dispatch($load->fresh(), $user);
+
+            $invoice = $invoices->create([
+                'client_id' => $destination->client_id,
+                'load_id' => $load->id,
+                'items' => array_map(fn ($row) => array_merge($row, ['unit_price' => 420]), $invoices->suggestedItems($load->fresh())),
+            ], $user);
+
+            if ($target === 'delivered') {
+                $remitos->deliver($remito->fresh(), [
+                    'receiver_name' => 'Recepción '.$destination->name,
+                    'receiver_dni' => '30111222',
+                    'signature' => 'data:image/png;base64,'.base64_encode($this->signaturePng()),
+                ], $user);
+                $invoices->submit($invoice, $user);
+            }
+        }
+
+        Auth::forgetUser();
+    }
+
+    /** Firma de ejemplo (PNG generado sin ext-gd). */
+    private function signaturePng(int $w = 120, int $h = 40): string
+    {
+        $chunk = fn (string $type, string $data) => pack('N', strlen($data)).$type.$data.pack('N', crc32($type.$data));
+        $rows = '';
+        for ($y = 0; $y < $h; $y++) {
+            $rows .= chr(0);
+            for ($x = 0; $x < $w; $x++) {
+                $ink = abs(($h / 2) + sin($x / 8) * ($h / 3) - $y) < 1.5;
+                $rows .= $ink ? chr(20).chr(20).chr(60) : chr(255).chr(255).chr(255);
+            }
+        }
+
+        return chr(137).'PNG'.chr(13).chr(10).chr(26).chr(10)
+            .$chunk('IHDR', pack('NNCCCCC', $w, $h, 8, 2, 0, 0, 0)).$chunk('IDAT', gzcompress($rows)).$chunk('IEND', '');
     }
 }

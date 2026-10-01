@@ -66,6 +66,7 @@ class AppServiceProvider extends ServiceProvider
             'reject' => \App\Models\Reject::class,
             'stoppage' => \App\Models\ProductionStoppage::class,
             'load' => \App\Models\Load::class,
+            'dispatch_check' => \App\Models\DispatchCheck::class,
             'remito' => \App\Models\Remito::class,
             'document' => \App\Models\Document::class,
             'invoice' => \App\Models\Invoice::class,

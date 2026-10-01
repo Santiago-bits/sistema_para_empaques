@@ -31,9 +31,9 @@ class Remito extends Model
         ];
     }
 
-    public function load(): BelongsTo
+    public function loadRecord(): BelongsTo
     {
-        return $this->belongsTo(Load::class);
+        return $this->belongsTo(Load::class, 'load_id');
     }
 
     public function client(): BelongsTo

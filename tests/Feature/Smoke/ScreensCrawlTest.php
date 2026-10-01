@@ -57,6 +57,9 @@ class ScreensCrawlTest extends TestCase
     {
         parent::setUp();
         $this->seed(DemoSeeder::class);
+        $this->assertSame(4, \App\Models\Load::query()->count(), 'El seeder demo debe generar cargas');
+        $this->assertSame(1, \App\Models\Invoice::query()->where('status', 'authorized')->count());
+        $this->assertSame(1, \App\Models\Remito::query()->where('status', 'delivered')->count());
         Module::query()->update(['enabled' => true]);
         app(ModuleService::class)->flush();
     }

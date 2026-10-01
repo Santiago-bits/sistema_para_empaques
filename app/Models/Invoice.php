@@ -53,9 +53,9 @@ class Invoice extends Model
         return $this->belongsTo(Remito::class);
     }
 
-    public function load(): BelongsTo
+    public function loadRecord(): BelongsTo
     {
-        return $this->belongsTo(Load::class);
+        return $this->belongsTo(Load::class, 'load_id');
     }
 
     public function creator(): BelongsTo

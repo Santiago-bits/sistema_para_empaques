@@ -54,6 +54,7 @@ class SettingsService
         'arca.mode' => ['simulation', 'string', 'arca'],
         'arca.point_of_sale' => [1, 'int', 'arca'],
         'arca.cuit' => ['', 'string', 'arca'],
+        'arca.emitter_condition' => ['RI', 'string', 'arca'], // RI = Responsable Inscripto (A/B), MT = Monotributo (C)
         'backup.retention_days' => [30, 'int', 'backup'],
         'backup.daily' => [true, 'bool', 'backup'],
         'backup.weekly' => [true, 'bool', 'backup'],
