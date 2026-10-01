@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
@@ -12,34 +13,30 @@ use Illuminate\Support\Str;
  */
 class UserFactory extends Factory
 {
-    /**
-     * The current password being used by the factory.
-     */
     protected static ?string $password;
 
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
+            'first_name' => fake()->firstName(),
+            'last_name' => fake()->lastName(),
+            'username' => fake()->unique()->userName().Str::random(3),
+            'dni' => (string) fake()->unique()->numberBetween(20000000, 45000000),
             'email' => fake()->unique()->safeEmail(),
-            'email_verified_at' => now(),
+            'status' => 'active',
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
         ];
     }
 
-    /**
-     * Indicate that the model's email address should be unverified.
-     */
-    public function unverified(): static
+    /** Asigna un rol por slug (debe existir: ejecutar SystemSeeder antes). */
+    public function role(string $slug): static
     {
-        return $this->state(fn (array $attributes) => [
-            'email_verified_at' => null,
-        ]);
+        return $this->state(fn () => ['role_id' => Role::query()->where('slug', $slug)->value('id')]);
+    }
+
+    public function inactive(): static
+    {
+        return $this->state(fn () => ['status' => 'inactive', 'deactivated_at' => now()]);
     }
 }
