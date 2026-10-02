@@ -1,5 +1,7 @@
 <?php
 
+use App\Services\SystemInfoService;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schedule;
 
 /*
@@ -10,6 +12,10 @@ use Illuminate\Support\Facades\Schedule;
 |   php artisan schedule:run
 | (ver docs/INSTALACION.md). Todas evitan superponerse si una corrida se demora.
 */
+
+// Señal de vida del programador (el panel de desarrollador avisa si dejó de correr).
+Schedule::call(fn () => Cache::put(SystemInfoService::SCHEDULER_CACHE_KEY, now()->toIso8601String(), now()->addDay()))
+    ->everyMinute()->name('scheduler-heartbeat');
 
 // Cola de trabajos (exportaciones grandes, avisos por WhatsApp): sin servicio aparte en Windows/XAMPP.
 Schedule::command('queue:work --stop-when-empty --max-time=50 --tries=3')->everyMinute()->withoutOverlapping(5);

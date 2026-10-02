@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\ApiTokenController;
 use App\Http\Controllers\Admin\AuditController;
 use App\Http\Controllers\Admin\ModuleController;
 use App\Http\Controllers\Admin\RoleController;
@@ -23,6 +24,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('usuarios/{user}/restablecer-contrasena', [UserController::class, 'resetPassword'])->middleware(['can:users.manage', 'throttle:10,1'])->name('users.password.reset');
         Route::get('usuarios/{user}/permisos', [UserController::class, 'permissions'])->middleware('can:roles.manage')->name('users.permissions');
         Route::put('usuarios/{user}/permisos', [UserController::class, 'updatePermissions'])->middleware('can:roles.manage')->name('users.permissions.update');
+    });
+
+    Route::middleware('can:api.tokens')->group(function () {
+        Route::get('tokens', [ApiTokenController::class, 'index'])->name('tokens.index');
+        Route::post('tokens', [ApiTokenController::class, 'store'])->middleware('throttle:10,1')->name('tokens.store');
+        Route::delete('tokens/{token}', [ApiTokenController::class, 'destroy'])->whereNumber('token')->name('tokens.destroy');
     });
 
     Route::middleware('can:roles.manage')->group(function () {

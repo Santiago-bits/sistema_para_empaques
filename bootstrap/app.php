@@ -34,8 +34,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'active' => EnsureUserIsActive::class,
             'kiosk' => KioskMode::class,
             'password.fresh' => RequirePasswordChange::class,
+            'abilities' => \Laravel\Sanctum\Http\Middleware\CheckAbilities::class,
+            'ability' => \Laravel\Sanctum\Http\Middleware\CheckForAnyAbility::class,
         ]);
         $middleware->web(append: [SecurityHeaders::class, RedirectIfNotInstalled::class]);
+        $middleware->api(prepend: [\App\Http\Middleware\ForceJsonResponse::class], append: [SecurityHeaders::class]);
         $middleware->redirectGuestsTo(fn () => route('login'));
         $middleware->redirectUsersTo(fn () => route('home'));
         // Para usar detrás de un proxy en la LAN (IIS/Apache/Nginx).
