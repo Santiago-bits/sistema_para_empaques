@@ -14,6 +14,20 @@
             Sin él no hay backups automáticos, alertas ni cola de trabajos. Configurá la tarea de Windows con <span class="code">php artisan schedule:run</span> cada minuto (ver docs/INSTALACION.md).
         </div>
     @endif
+    @if ($devServer)
+        <div class="mb-4 rounded-lg border border-sky-300 bg-sky-50 px-4 py-3 text-sm text-sky-900 dark:border-sky-800 dark:bg-sky-950/40 dark:text-sky-200">
+            Corriendo con el servidor de desarrollo (<span class="code">php artisan serve</span>): atiende un pedido a la vez y es más lento. En el galpón usá Apache (docs/INSTALACION.md).
+        </div>
+    @elseif ($opcacheOff)
+        <div class="mb-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200" role="alert">
+            <strong>OPcache está desactivado.</strong> Cada pedido recompila el sistema (~0,6 s de más). Activalo en <span class="code">php.ini</span> (docs/INSTALACION.md, paso 1).
+        </div>
+    @endif
+    @if ($cachesOff && app()->environment('production'))
+        <div class="mb-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
+            Faltan las cachés de configuración y rutas: ejecutá <span class="code">php artisan optimize</span>.
+        </div>
+    @endif
     @if ($missing)
         <div class="mb-4 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-900 dark:bg-red-950/40 dark:text-red-200" role="alert">
             Faltan extensiones de PHP: <span class="code">{{ implode(', ', $missing) }}</span>

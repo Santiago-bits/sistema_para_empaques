@@ -32,6 +32,21 @@ Extensiones de PHP necesarias (en `C:\xampp\php\php.ini`, quitar el `;` de adela
 `extension=fileinfo`, `extension=curl`. No hace falta `gd` ni `soap` (QR y códigos se generan en SVG
 y ARCA se consume por HTTP).
 
+**OPcache (obligatorio para la velocidad):** en el mismo `php.ini` agregar o descomentar:
+
+```ini
+zend_extension=opcache
+opcache.enable=1
+opcache.memory_consumption=256
+opcache.max_accelerated_files=20000
+opcache.validate_timestamps=1
+opcache.revalidate_freq=60
+```
+
+Sin OPcache cada pedido recompila todo el sistema (medido: ~0,6 s de más por pedido); con OPcache y las
+cachés del paso 4 las pantallas y el escaneo responden en décimas de segundo. El Panel desarrollador avisa
+si está desactivado.
+
 ## 2. Darle IP fija al servidor
 
 1. Panel de control → Redes → adaptador → Propiedades → IPv4.
