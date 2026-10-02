@@ -20,7 +20,7 @@ class QualityControlRequest extends FormRequest
         $merge = [];
         foreach (self::DECIMALS as $field) {
             if (is_string($this->input($field))) {
-                $merge[$field] = str_replace(',', '.', trim($this->input($field)));
+                $merge[$field] = parse_number($this->input($field), $field === 'reject_weight');
             }
         }
         $merge['register_reject'] = $this->boolean('register_reject');

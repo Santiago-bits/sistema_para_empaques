@@ -20,6 +20,9 @@ final class Field
 
     public bool $wide = false;
 
+    /** Número con decimales escrito como texto (formato argentino): se normaliza con parse_number(). */
+    public bool $isDecimal = false;
+
     /** @var array<string, mixed> Atributos HTML extra (inputmode, maxlength, step...). */
     public array $attributes = [];
 
@@ -47,7 +50,20 @@ final class Field
 
     public static function number(string $name, string $label, string $step = '1'): self
     {
+        // Con decimales (kg, importes) se usa texto con teclado numérico: un campo «number» del
+        // navegador convertiría «10.000» en 10 antes de enviarlo. El servidor lo interpreta con parse_number().
+        if ($step !== '1') {
+            return (new self($name, $label, 'text'))->attrs(['inputmode' => 'decimal'])->decimal();
+        }
+
         return (new self($name, $label, 'number'))->attrs(['step' => $step, 'min' => '0']);
+    }
+
+    public function decimal(): self
+    {
+        $this->isDecimal = true;
+
+        return $this;
     }
 
     public static function date(string $name, string $label): self

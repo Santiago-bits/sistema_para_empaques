@@ -70,3 +70,44 @@ if (! function_exists('field_label')) {
         return $label === $key ? $column : $label;
     }
 }
+
+if (! function_exists('parse_number')) {
+    /**
+     * Interpreta un número escrito por el usuario en formato argentino y lo devuelve normalizado
+     * ("1234.56") para validarlo como numeric. Si no parece un número, lo devuelve tal cual
+     * para que la validación lo rechace.
+     *
+     *  - "1.234,56" → 1234.56   ·   "1,5" → 1.5   ·   "1,234.56" → 1234.56
+     *  - Con $dotThousands (importes, cantidades, stock): "1.500" → 1500 y "125.000" → 125000.
+     *  - Sin $dotThousands (peso de un cajón, temperatura, porcentaje): "18.5" → 18.5.
+     */
+    function parse_number(mixed $value, bool $dotThousands = true): mixed
+    {
+        if (! is_string($value)) {
+            return $value;
+        }
+        $clean = str_replace(['$', '%', ' ', "\u{00A0}", 'kg', 'u'], '', trim($value));
+        if ($clean === '') {
+            return null;
+        }
+        if (! preg_match('/^-?[\d.,]+$/', $clean)) {
+            return $value;
+        }
+
+        $hasDot = str_contains($clean, '.');
+        $hasComma = str_contains($clean, ',');
+
+        if ($hasDot && $hasComma) {
+            // El último separador es el decimal; el otro, de miles.
+            $decimal = strrpos($clean, ',') > strrpos($clean, '.') ? ',' : '.';
+            $thousands = $decimal === ',' ? '.' : ',';
+            $clean = str_replace([$thousands, $decimal], ['', '.'], $clean);
+        } elseif ($hasComma) {
+            $clean = substr_count($clean, ',') > 1 ? str_replace(',', '', $clean) : str_replace(',', '.', $clean);
+        } elseif ($hasDot && (substr_count($clean, '.') > 1 || ($dotThousands && preg_match('/^-?\d{1,3}(\.\d{3})+$/', $clean)))) {
+            $clean = str_replace('.', '', $clean);
+        }
+
+        return $clean;
+    }
+}

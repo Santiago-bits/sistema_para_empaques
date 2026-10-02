@@ -89,6 +89,14 @@ class SettingController extends Controller
 
     private function saveProduction(Request $request): void
     {
+        // Pesos de un cajón con punto decimal («18.5»); objetivos con punto de miles («10.000»).
+        $request->merge([
+            'weight_min' => parse_number($request->input('weight_min'), false),
+            'weight_max' => parse_number($request->input('weight_max'), false),
+            'target_daily_kg' => parse_number($request->input('target_daily_kg')),
+            'target_weekly_kg' => parse_number($request->input('target_weekly_kg')),
+            'target_monthly_kg' => parse_number($request->input('target_monthly_kg')),
+        ]);
         $data = $request->validate([
             'weight_min' => ['required', 'numeric', 'min:0', 'max:1000'],
             'weight_max' => ['required', 'numeric', 'gt:weight_min', 'max:1000'],

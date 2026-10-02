@@ -18,7 +18,7 @@ class SupplyMovementRequest extends FormRequest
         $merge = [];
         foreach (['quantity', 'unit_cost'] as $field) {
             if (is_string($this->input($field))) {
-                $merge[$field] = str_replace(',', '.', trim($this->input($field)));
+                $merge[$field] = parse_number($this->input($field));
             }
         }
         $this->merge($merge);

@@ -15,12 +15,8 @@ class CostRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
-        $amount = is_string($this->input('amount')) ? trim(str_replace(['$', ' '], '', $this->input('amount'))) : $this->input('amount');
-        // Formato argentino: "1.234,56" → 1234.56 y "125.000" → 125000 (puntos de miles); "18.5" se respeta.
-        if (is_string($amount) && (str_contains($amount, ',') || preg_match('/^\d{1,3}(\.\d{3})+$/', $amount))) {
-            $amount = str_replace(',', '.', str_replace('.', '', $amount));
-        }
-        $this->merge(['amount' => $amount]);
+        // Formato argentino: "1.234,56" → 1234.56 y "125.000" → 125000.
+        $this->merge(['amount' => parse_number($this->input('amount'))]);
     }
 
     public function rules(): array

@@ -19,9 +19,9 @@
     <div class="grid gap-6 lg:grid-cols-3">
         @can('supplies.manage')
             <x-panel title="Registrar movimiento">
-                <form method="POST" action="{{ route('supplies.movements.store', $supply) }}" class="space-y-4" x-data="{ type: 'in' }">
+                <form method="POST" action="{{ route('supplies.movements.store', $supply) }}" class="space-y-4" x-data="{ type: {{ \Illuminate\Support\Js::from(in_array(old('type'), ['in', 'out', 'adjust'], true) ? old('type') : 'in') }} }">
                     @csrf
-                    <x-select name="type" label="Tipo" :options="$types" value="in" x-model="type" required/>
+                    <x-select name="type" label="Tipo" :options="$types" :value="old('type', 'in')" x-model="type" required/>
                     <x-input name="quantity" label="Cantidad" inputmode="decimal" required
                              hint="En «Ajuste» se indica el stock real contado (queda el valor informado)."/>
                     <div x-show="type === 'in'" class="space-y-4">
