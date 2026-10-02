@@ -287,7 +287,9 @@ class LoadController extends Controller
         ]);
         $this->loads->checkItem($load, $data['item'], (bool) $data['checked'], $request->user(), $data['notes'] ?? null);
 
-        return back()->with('success', DispatchCheck::ITEMS[$data['item']].($data['checked'] ? ': controlado.' : ': desmarcado.'));
+        // Vuelve directo a la lista de controles (en tablet no hay que desplazarse de nuevo).
+        return redirect()->to(route('loads.dispatch.show', $load).'#controles')
+            ->with('success', DispatchCheck::ITEMS[$data['item']].($data['checked'] ? ': controlado.' : ': desmarcado.'));
     }
 
     public function dispatch(Request $request, Load $load): RedirectResponse
