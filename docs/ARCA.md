@@ -18,9 +18,19 @@ Borrador ──(Enviar a ARCA)──▶ Pendiente ──▶ Autorizado (CAE + ve
    ▲                                    └─▶ Rechazado (motivo de ARCA) ──▶ corregir y reenviar
 ```
 
-- Los totales (neto, IVA por alícuota, total) los calcula **el servidor**, nunca el navegador.
-- El número definitivo lo asigna la autorización, con bloqueo para que dos envíos simultáneos no
-  tomen el mismo número.
+- Los totales (neto, IVA por alícuota, total) los calcula **el servidor**, nunca el navegador, en
+  centavos y con el IVA sobre la base agrupada por alícuota (como lo valida ARCA).
+- El número definitivo lo asigna la autorización, con un bloqueo por punto de venta y tipo para que dos
+  envíos simultáneos nunca pidan el mismo número.
+- **Si ARCA no responde** (corte de internet, demora), el comprobante queda **Pendiente**, no Rechazado:
+  ARCA pudo haberlo autorizado igual. No se puede reenviar ni anular hasta tocar **«Verificar en ARCA»**,
+  que consulta el comprobante (FECompConsultar): si ARCA lo tiene, se completa con su CAE; si no, pasa a
+  Rechazado y se puede reenviar. Así nunca queda un comprobante duplicado en ARCA.
+- El CAE se guarda antes que cualquier otra cosa: un error posterior nunca hace perder una autorización.
+- **Notas de crédito**: se elige la factura que ajustan (misma letra y mismo cliente, autorizada); se
+  informa a ARCA como comprobante asociado.
+- Una carga no puede tener dos facturas vivas; para refacturar hay que anular el borrador o emitir una
+  nota de crédito.
 - Cada intento queda registrado (ARCA → historial) **sin** guardar certificados ni tokens.
 - El PDF del comprobante autorizado incluye el **QR fiscal** (RG 4892).
 - Tipo de comprobante según la condición del emisor (Configuración → ARCA): Responsable Inscripto →
