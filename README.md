@@ -1,59 +1,85 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Sistema de Gestión para Galpón de Empaque
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Sistema web multiusuario para galpones de empaque de fruta: ingreso de pallets y lotes, producción
+por escaneo, calidad, ubicaciones, cargas, remitos con QR, facturación electrónica con ARCA,
+reportes, auditoría y backups. Funciona en la **red local (LAN)** del galpón: un servidor y todas
+las PCs, tablets y celulares acceden desde el navegador.
 
-## About Laravel
+> Prioridades: **integridad de datos · trazabilidad · concurrencia · seguridad · velocidad de operación**.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Qué hace
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+| Área | Funciones principales |
+|---|---|
+| **Producción** | Modo escaneo con lector de códigos (cajón → embalador → peso), modo kiosco, autorización de supervisor, detección de duplicados, idempotencia, paradas de línea, «Mi producción» por embalador |
+| **Ingreso** | Pallets, lotes, productores y propietarios; etiquetas con código de barras |
+| **Calidad** | Controles, rechazos y merma por motivo |
+| **Galpón** | Mapa editable, ubicaciones, movimientos, cámaras frigoríficas (sensores), insumos, mantenimiento |
+| **Logística** | Armado de cargas concurrente (dos operarios no pueden cargar el mismo cajón), cierre con checklist, despacho, remito PDF con QR público y firma de entrega, documentos adjuntos |
+| **Facturación** | Comprobantes A/B/C, totales calculados en el servidor, CAE de ARCA (modo simulación y producción), PDF con QR fiscal RG 4892 |
+| **Gestión** | Tablero en vivo, reportes exportables (Excel/CSV/PDF), estadísticas, cierre diario, costos y rentabilidad, incidentes, alertas automáticas, búsqueda global |
+| **Trazabilidad** | Productor → Lote → Pallet → Cajón → Carga → Remito → Factura, con historial de estados |
+| **Administración** | Usuarios, roles y permisos granulares, módulos activables, configuración, auditoría completa, sesiones activas, backups verificados y restauración, recuperación de contraseña |
+| **Integraciones** | Portal de clientes/propietarios, API REST con tokens (balanzas, sensores), panel de desarrollador, tickets de soporte |
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Tecnología
 
-## Learning Laravel
+Laravel 12 · PHP 8.2+ · MySQL 8 / MariaDB 10.4+ · Blade + Tailwind CSS 4 + Alpine.js · Chart.js · Sanctum.
+Interfaz en español (Argentina), modo claro/oscuro y diseño responsive (PC, tablet y celular).
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## Instalación rápida (desarrollo)
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```bash
+composer install
+npm install && npm run build
+cp .env.example .env && php artisan key:generate
+php artisan migrate --seed          # estructura + roles, permisos y configuración base
+php artisan db:seed --class=DemoSeeder   # opcional: datos de demostración (NUNCA en producción)
+php artisan serve
+```
 
-## Laravel Sponsors
+Abrí `http://127.0.0.1:8000`. Sin usuarios cargados, el sistema abre el **instalador** (`/instalar`)
+para crear la empresa y el super administrador. Con los datos demo, los usuarios son `admin.demo`,
+`ingreso`, `cargas`, `calidad`, `facturacion`, `supervisor`, `embalador`, `kiosco` y `cliente`
+(contraseña: variable `DEMO_PASSWORD`, por defecto `demo1234`).
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+**Instalación en el galpón (Windows + red LAN): ver [docs/INSTALACION.md](docs/INSTALACION.md).**
 
-### Premium Partners
+## Documentación
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+| Documento | Para quién |
+|---|---|
+| [docs/INSTALACION.md](docs/INSTALACION.md) | Técnico: servidor Windows/XAMPP, red LAN, tareas programadas, actualización |
+| [docs/MANUAL_USUARIO.md](docs/MANUAL_USUARIO.md) | Operadores: escaneo, ingreso, calidad, cargas, remitos |
+| [docs/MANUAL_ADMINISTRADOR.md](docs/MANUAL_ADMINISTRADOR.md) | Administración: usuarios, permisos, módulos, configuración, cierre, costos |
+| [docs/BACKUPS.md](docs/BACKUPS.md) | Backups automáticos, verificación y restauración |
+| [docs/ARCA.md](docs/ARCA.md) | Facturación electrónica: certificados, homologación y producción |
+| [docs/API.md](docs/API.md) | Integraciones: tokens, balanzas, sensores, endpoints |
+| [docs/ARQUITECTURA.md](docs/ARQUITECTURA.md) | Desarrolladores: diagrama de datos, flujos, concurrencia, seguridad |
+| [CLAUDE.md](CLAUDE.md) | Reglas de desarrollo del proyecto |
+| [CHANGELOG.md](CHANGELOG.md) | Historial de versiones |
 
-## Contributing
+## Tests
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```bash
+php artisan test
+```
 
-## Code of Conduct
+Más de 170 tests de integración: permisos (403), módulos desactivados (404), validaciones,
+concurrencia (dos intentos sobre el mismo registro → sólo uno gana), idempotencia, aislamiento de
+datos del portal, API, backups/restauración y un recorrido automático de todas las pantallas con
+cada rol.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Comandos útiles
 
-## Security Vulnerabilities
+| Comando | Uso |
+|---|---|
+| `php artisan schedule:run` | Tareas programadas (configurarlo cada minuto, ver instalación) |
+| `php artisan galpon:backup` | Backup manual de la base |
+| `php artisan galpon:check-alerts` | Evaluar alertas ahora |
+| `php artisan galpon:create-admin` | Crear un super administrador si se perdió el acceso |
+| `php artisan galpon:seed-performance` | Generar volumen para pruebas de rendimiento (sólo desarrollo) |
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Licencia
 
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Software propietario. Todos los derechos reservados.
