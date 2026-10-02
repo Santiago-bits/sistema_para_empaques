@@ -224,7 +224,19 @@ class DemoSeeder extends Seeder
         $owners = Owner::query()->pluck('id')->all();
         $shifts = Shift::query()->pluck('id', 'code');
         $lines = ProductionLine::query()->pluck('id')->all();
-        $positions = WarehouseLocation::query()->whereIn('type', ['position', 'cold_room'])->pluck('id')->all();
+        // Capacidad libre por posición: los datos demo respetan la misma regla que el sistema.
+        $free = WarehouseLocation::query()->whereIn('type', ['position', 'cold_room'])->pluck('capacity_pallets', 'id')
+            ->map(fn ($c) => (int) $c > 0 ? (int) $c : 20)->all();
+        $place = function () use (&$free): ?int {
+            $available = array_keys(array_filter($free, fn ($n) => $n > 0));
+            if ($available === []) {
+                return null; // sin lugar: queda «sin ubicar»
+            }
+            $id = $available[array_rand($available)];
+            $free[$id]--;
+
+            return $id;
+        };
         $rejectReasons = Reason::query()->where('type', 'reject')->pluck('id')->all();
         $wid = $this->warehouse->id;
 
@@ -256,7 +268,7 @@ class DemoSeeder extends Seeder
                         'warehouse_id' => $wid, 'season_id' => $season, 'code' => sprintf('PAL-%06d', $palletSeq++),
                         'lot_id' => $lot->id, 'producer_id' => $producer, 'owner_id' => $lot->owner_id, 'variety_id' => $variety,
                         'origin' => $lot->origin, 'received_at' => $receivedAt, 'quantity' => 40, 'gross_weight' => 0,
-                        'status' => 'with_product', 'location_id' => $faker->randomElement($positions), 'created_by' => $operator,
+                        'status' => 'with_product', 'location_id' => $place(), 'created_by' => $operator,
                         'version' => 0, 'created_at' => $receivedAt, 'updated_at' => $receivedAt,
                     ]);
 

@@ -4,6 +4,9 @@
     <div x-data="moveScreen({{ \Illuminate\Support\Js::from(['lookupUrl' => route('locations.lookup'), 'moveUrl' => route('locations.move'), 'initialCode' => $initialCode]) }})" x-init="init()"
          class="grid gap-6 lg:grid-cols-3">
         <div class="space-y-4 lg:col-span-2">
+            {{-- Resultado arriba de todo: visible sin desplazarse mientras se escanea. --}}
+            <p x-show="message" x-cloak x-text="message" class="rounded-lg px-4 py-3 text-sm font-medium" role="status" aria-live="polite"
+               :class="error ? 'bg-red-50 text-red-800 dark:bg-red-950/40 dark:text-red-200' : 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200'"></p>
             <div class="panel p-5">
                 <label for="mv-item" class="form-label">1. Pallet o cajón</label>
                 <input id="mv-item" x-ref="item" x-model.trim="itemCode" @keydown.enter.prevent="findItem()" class="form-input code py-3 text-2xl" placeholder="Escanear código" autocomplete="off">
@@ -41,8 +44,6 @@
             <button type="button" class="btn btn-primary btn-lg w-full" @click="move()" :disabled="!item || !destId || busy">
                 <x-icon name="check" class="size-5"/> Confirmar movimiento
             </button>
-            <p x-show="message" x-text="message" class="rounded-lg px-4 py-3 text-sm font-medium"
-               :class="error ? 'bg-red-50 text-red-800 dark:bg-red-950/40 dark:text-red-200' : 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200'"></p>
         </div>
 
         <x-panel title="Mis últimos movimientos" :padding="false">
@@ -94,6 +95,8 @@
                         } catch (e) {
                             this.dest = null; this.destId = '';
                             this.say(e.message, true);
+                            // Queda seleccionado para reescanear el código correcto.
+                            this.$refs.dest.focus(); this.$refs.dest.select();
                         }
                     },
                     destFromSelect(e) {

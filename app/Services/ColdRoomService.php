@@ -63,7 +63,7 @@ class ColdRoomService
         if ($outOfRange) {
             $this->alerts->raise(
                 'temperature',
-                "Cámara {$room->name}: lectura fuera de rango",
+                "{$room->name}: lectura fuera de rango",
                 $this->alertMessage($room, $temp, $humidity, $at),
                 $room,
                 'critical',
