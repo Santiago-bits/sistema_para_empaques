@@ -8,13 +8,8 @@ use App\Http\Requests\Billing\InvoiceRequest;
 use App\Models\Client;
 use App\Models\Invoice;
 use App\Models\Load;
-use App\Services\AuditService;
+use App\Services\InvoicePdfService;
 use App\Services\InvoiceService;
-use Barryvdh\DomPDF\Facade\Pdf;
-use BaconQrCode\Renderer\Image\SvgImageBackEnd;
-use BaconQrCode\Renderer\ImageRenderer;
-use BaconQrCode\Renderer\RendererStyle\RendererStyle;
-use BaconQrCode\Writer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -115,27 +110,9 @@ class InvoiceController extends Controller
         return redirect()->route('invoices.show', $invoice)->with('success', 'Comprobante anulado.');
     }
 
-    public function pdf(Invoice $invoice, AuditService $audit): Response
+    public function pdf(Invoice $invoice, InvoicePdfService $pdf): Response
     {
-        $invoice->load(['client', 'items']);
-        $audit->log('print', $invoice, description: 'Descargó el PDF del comprobante '.$invoice->formattedNumber());
-
-        $qr = null;
-        if ($invoice->status === InvoiceStatus::Authorized) {
-            // QR fiscal (RG 4892): JSON en base64 apuntando al sitio de ARCA.
-            $payload = base64_encode(json_encode([
-                'ver' => 1, 'fecha' => $invoice->issued_on->format('Y-m-d'), 'cuit' => (int) preg_replace('/\D/', '', (string) setting('arca.cuit', setting('company.cuit'))),
-                'ptoVta' => $invoice->point_of_sale, 'tipoCmp' => $invoice->voucher_type, 'nroCmp' => $invoice->number,
-                'importe' => (float) $invoice->total_amount, 'moneda' => $invoice->currency === 'USD' ? 'DOL' : 'PES',
-                'ctz' => (float) $invoice->exchange_rate, 'tipoDocRec' => strlen((string) $invoice->client->cuit) === 11 ? 80 : 99,
-                'nroDocRec' => (int) preg_replace('/\D/', '', (string) $invoice->client->cuit) ?: 0, 'tipoCodAut' => 'E', 'codAut' => (int) $invoice->cae,
-            ]));
-            $svg = (new Writer(new ImageRenderer(new RendererStyle(140, 1), new SvgImageBackEnd)))->writeString('https://www.arca.gob.ar/fe/qr/?p='.$payload);
-            $qr = 'data:image/svg+xml;base64,'.base64_encode($svg);
-        }
-
-        return Pdf::loadView('invoices.pdf', ['invoice' => $invoice, 'qr' => $qr])->setPaper('a4')
-            ->download('comprobante-'.$invoice->formattedNumber().'.pdf');
+        return $pdf->download($invoice);
     }
 
     private function formData(Invoice $invoice, array $items): array
