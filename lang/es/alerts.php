@@ -13,5 +13,6 @@ return [
         'duplicate_crate' => 'Cajón duplicado',
         'load_incomplete' => 'Carga incompleta',
         'document_missing' => 'Documento faltante',
+        'incident' => 'Incidente de prioridad alta',
     ],
 ];
