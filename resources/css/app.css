@@ -156,7 +156,7 @@
 
     /* Códigos de cajón, pallet, carga: siempre en monoespaciado. */
     .code {
-        @apply font-mono text-[0.92em] font-medium tracking-tight;
+        @apply font-mono text-[0.92em] font-medium tracking-tight whitespace-nowrap;
     }
 
     .link {

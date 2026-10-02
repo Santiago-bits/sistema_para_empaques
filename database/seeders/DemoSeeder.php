@@ -39,7 +39,7 @@ use Illuminate\Support\Str;
  *   php artisan db:seed --class=DemoSeeder
  *
  * Usuarios demo (contraseña común: DEMO_PASSWORD del .env, por defecto "demo1234"):
- *   admin.demo (Administrador), ingreso (Operador de ingreso), cargas (Operador de cargas),
+ *   admin.demo (Administrador), cliente (Portal de cliente), ingreso (Operador de ingreso), cargas (Operador de cargas),
  *   calidad (Control de calidad), facturacion (Facturación), supervisor (Supervisor),
  *   embalador (Embalador vinculado a EMB001), kiosco (Operador de ingreso en modo kiosco).
  */
@@ -73,7 +73,7 @@ class DemoSeeder extends Seeder
             });
         });
 
-        $this->command?->info('Datos demo instalados. Usuarios: admin.demo, ingreso, cargas, calidad, facturacion, supervisor, embalador, kiosco.');
+        $this->command?->info('Datos demo instalados. Usuarios: admin.demo, ingreso, cargas, calidad, facturacion, supervisor, embalador, kiosco, cliente.');
     }
 
     private function catalogs(): void
@@ -160,6 +160,11 @@ class DemoSeeder extends Seeder
             ['supervisor', 'Sergio', 'Supervisor', Role::SUPERVISOR, []],
             ['embalador', 'Juan', 'Pérez', Role::PACKER, ['packer_id' => $this->packers[0] ?? null]],
             ['kiosco', 'Puesto', 'Escaneo 1', Role::INTAKE, ['kiosk_mode' => true]],
+            // Portal: cliente de la primera carga demo (entregada y facturada) y primer propietario.
+            ['cliente', 'Portal', 'Cliente', Role::CLIENT, [
+                'client_id' => Destination::query()->orderBy('id')->value('client_id'),
+                'owner_id' => Owner::query()->orderBy('id')->value('id'),
+            ]],
         ];
         foreach ($users as [$username, $first, $last, $role, $extra]) {
             $user = User::query()->firstOrCreate(['username' => $username], array_merge([
