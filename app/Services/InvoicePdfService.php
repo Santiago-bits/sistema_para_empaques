@@ -20,7 +20,7 @@ class InvoicePdfService
 
     public function download(Invoice $invoice): Response
     {
-        $invoice->load(['client', 'items']);
+        $invoice->load(['client', 'items', 'associated']);
         $this->audit->log('print', $invoice, description: 'Descargó el PDF del comprobante '.$invoice->formattedNumber());
 
         return Pdf::loadView('invoices.pdf', ['invoice' => $invoice, 'qr' => $this->qr($invoice)])->setPaper('a4')

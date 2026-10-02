@@ -78,6 +78,14 @@ class DemoSeeder extends Seeder
 
     private function catalogs(): void
     {
+        // Datos de empresa de demostración (sólo si no fueron configurados).
+        $settings = app(\App\Services\SettingsService::class);
+        if (in_array(setting('company.name'), [null, '', 'Galpón de Empaque'], true)) {
+            $settings->set('company.name', 'Empaque Demo SA');
+            $settings->set('company.cuit', '30712345671');
+            $settings->set('company.address', 'Ruta 9 km 1302, Tafí Viejo, Tucumán');
+        }
+
         $varieties = [
             ['NAR-VAL', 'Naranja Valencia', 'Naranja', '#f97316'],
             ['NAR-NAV', 'Naranja Navel', 'Naranja', '#fb923c'],

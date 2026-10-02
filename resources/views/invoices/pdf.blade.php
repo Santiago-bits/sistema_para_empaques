@@ -54,6 +54,9 @@
             <strong>CUIT/DNI:</strong> {{ \App\Rules\Cuit::format($invoice->client->cuit) ?? $invoice->client->dni ?? '—' }} ·
             <strong>Condición IVA:</strong> {{ \App\Models\Client::TAX_CONDITIONS[$invoice->client->tax_condition] ?? '' }}<br>
             <strong>Domicilio:</strong> {{ trim($invoice->client->address.' '.$invoice->client->locality.' '.$invoice->client->province) ?: '—' }}
+            @if ($invoice->associated)
+                <br><strong>Comprobante asociado:</strong> {{ $invoice->associated->voucherLabel() }} N° {{ $invoice->associated->formattedNumber() }} del {{ fdate($invoice->associated->issued_on) }}
+            @endif
         </td></tr>
     </table>
 
