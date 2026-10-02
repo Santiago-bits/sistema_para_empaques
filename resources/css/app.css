@@ -58,7 +58,7 @@
 @layer components {
     /* Superficies */
     .panel {
-        @apply rounded-xl border border-stone-200 bg-white shadow-sm dark:border-stone-800 dark:bg-stone-900;
+        @apply min-w-0 rounded-xl border border-stone-200 bg-white shadow-sm dark:border-stone-800 dark:bg-stone-900;
     }
 
     .panel-header {
@@ -162,6 +162,15 @@
     .link {
         @apply font-medium text-brand-700 hover:underline dark:text-brand-400;
     }
+
+    /* Barra de desplazamiento discreta del menú lateral (sin carril blanco). */
+    .sidebar-scroll {
+        scrollbar-width: thin;
+        scrollbar-color: rgb(255 255 255 / 0.15) transparent;
+    }
+    .sidebar-scroll::-webkit-scrollbar { width: 6px; }
+    .sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
+    .sidebar-scroll::-webkit-scrollbar-thumb { background: rgb(255 255 255 / 0.15); border-radius: 9999px; }
 
     /* Navegación lateral */
     .nav-item {
