@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\InvoiceStatus;
 use App\Models\Concerns\Auditable;
 use App\Models\Concerns\HasStateHistory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -24,8 +25,11 @@ class Invoice extends Model
         13 => 'Nota de crédito C',
     ];
 
+    /** Nota de crédito => tipo de factura que ajusta (A, B o C). */
+    public const CREDIT_NOTE_FOR = [3 => 1, 8 => 6, 13 => 11];
+
     protected $fillable = [
-        'client_id', 'remito_id', 'load_id', 'voucher_type', 'point_of_sale', 'number', 'issued_on',
+        'client_id', 'remito_id', 'load_id', 'associated_invoice_id', 'voucher_type', 'point_of_sale', 'number', 'issued_on',
         'currency', 'exchange_rate', 'net_amount', 'vat_amount', 'total_amount', 'status', 'cae',
         'cae_expires_on', 'arca_mode', 'attempts', 'last_error', 'notes', 'created_by',
     ];
@@ -56,6 +60,27 @@ class Invoice extends Model
     public function loadRecord(): BelongsTo
     {
         return $this->belongsTo(Load::class, 'load_id');
+    }
+
+    /** Factura que ajusta una nota de crédito. */
+    public function associated(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'associated_invoice_id');
+    }
+
+    public function isCreditNote(): bool
+    {
+        return array_key_exists((int) $this->voucher_type, self::CREDIT_NOTE_FOR);
+    }
+
+    /**
+     * Comprobantes que cuentan como ingresos: autorizados y emitidos en el modo ARCA vigente
+     * (al pasar a producción, los CAE ficticios de simulación dejan de sumar).
+     */
+    public function scopeCountable(Builder $query): Builder
+    {
+        return $query->where('status', InvoiceStatus::Authorized->value)
+            ->where('arca_mode', (string) setting('arca.mode', 'simulation'));
     }
 
     public function creator(): BelongsTo

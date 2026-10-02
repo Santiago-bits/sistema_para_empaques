@@ -50,7 +50,7 @@ class WsfeGateway implements ArcaGateway
 
     public function authorize(Invoice $invoice): ArcaResult
     {
-        $invoice->loadMissing('client', 'items');
+        $invoice->loadMissing('client', 'items', 'associated');
         $auth = $this->auth();
         $number = $this->lastAuthorizedNumber((int) $invoice->point_of_sale, (int) $invoice->voucher_type) + 1;
         $detail = $this->detail($invoice, $number);
@@ -65,8 +65,12 @@ class WsfeGateway implements ArcaGateway
 
         try {
             $xml = $this->call('FECAESolicitar', $body);
+        } catch (BusinessException $e) {
+            // ARCA respondió con un error HTTP o ilegible: no hubo autorización.
+            return ArcaResult::failure($e->getMessage(), $request);
         } catch (Throwable $e) {
-            return ArcaResult::failure('Sin respuesta de ARCA: '.Str::limit($e->getMessage(), 300), $request);
+            // La solicitud pudo haber llegado: no se sabe si ARCA la autorizó. Hay que verificar antes de reenviar.
+            return ArcaResult::uncertain('Sin respuesta de ARCA ('.Str::limit($e->getMessage(), 200).'). Verificá el comprobante antes de reenviarlo.', $number, $request);
         }
 
         $result = $xml->xpath('//*[local-name()="FECAESolicitarResult"]')[0] ?? null;
@@ -98,6 +102,36 @@ class WsfeGateway implements ArcaGateway
         }
 
         return (int) ($xml->xpath('//*[local-name()="CbteNro"]')[0] ?? 0);
+    }
+
+    public function consult(int $pointOfSale, int $voucherType, int $number): ?array
+    {
+        $body = '<ar:FECompConsultar><ar:Auth>'.$this->authXml($this->auth()).'</ar:Auth><ar:FeCompConsReq>'
+            .'<ar:CbteTipo>'.$voucherType.'</ar:CbteTipo><ar:CbteNro>'.$number.'</ar:CbteNro><ar:PtoVta>'.$pointOfSale.'</ar:PtoVta>'
+            .'</ar:FeCompConsReq></ar:FECompConsultar>';
+        $xml = $this->call('FECompConsultar', $body);
+
+        $get = $xml->xpath('//*[local-name()="ResultGet"]')[0] ?? null;
+        $cae = $get ? (string) ($get->xpath('./*[local-name()="CodAutorizacion"]')[0] ?? '') : '';
+        if (! $get || $cae === '') {
+            // Código 602: «No existen datos en nuestros registros para los parámetros ingresados».
+            $errors = $this->messages($xml, 'Err');
+            if ($errors !== [] && ! str_starts_with($errors[0], '602')) {
+                throw new BusinessException('ARCA: '.implode(' | ', $errors));
+            }
+
+            return null;
+        }
+
+        $due = (string) ($get->xpath('./*[local-name()="FchVto"]')[0] ?? '');
+
+        return [
+            'cae' => $cae,
+            'cae_expires_on' => $due ? Carbon::createFromFormat('Ymd', $due)->startOfDay() : null,
+            'total' => (float) ($get->xpath('./*[local-name()="ImpTotal"]')[0] ?? 0),
+            'doc_number' => (string) ($get->xpath('./*[local-name()="DocNro"]')[0] ?? ''),
+            'date' => (string) ($get->xpath('./*[local-name()="CbteFch"]')[0] ?? ''),
+        ];
     }
 
     public function testConnection(): ArcaResult
@@ -148,15 +182,23 @@ class WsfeGateway implements ArcaGateway
             'CondicionIVAReceptorId' => self::RECEIVER_CONDITION[$client->tax_condition] ?? 5,
         ];
 
+        // Nota de crédito: comprobante que ajusta (obligatorio para ARCA).
+        if ($invoice->isCreditNote() && $invoice->associated) {
+            $detail['CbtesAsoc'] = [['CbteAsoc' => [
+                'Tipo' => (int) $invoice->associated->voucher_type,
+                'PtoVta' => (int) $invoice->associated->point_of_sale,
+                'Nro' => (int) $invoice->associated->number,
+                'Cuit' => preg_replace('/\D/', '', (string) (setting('arca.cuit') ?: config('galpon.arca.cuit'))),
+                'CbteFch' => $invoice->associated->issued_on->format('Ymd'),
+            ]]];
+        }
+
         if (! $isC) {
-            $groups = [];
-            foreach ($invoice->items as $item) {
-                $rate = rtrim(rtrim(number_format((float) $item->vat_rate, 2, '.', ''), '0'), '.');
-                $groups[$rate]['base'] = ($groups[$rate]['base'] ?? 0) + (float) $item->subtotal;
-                $groups[$rate]['tax'] = ($groups[$rate]['tax'] ?? 0) + round((float) $item->subtotal * (float) $item->vat_rate / 100, 2);
-            }
+            $groups = VatCalculator::groups($invoice->items->map(fn ($item) => [
+                'subtotal_cents' => (int) round((float) $item->subtotal * 100), 'vat_rate' => $item->vat_rate,
+            ]));
             $detail['Iva'] = array_map(fn ($rate, $g) => [
-                'AlicIva' => ['Id' => self::VAT_IDS[$rate] ?? 5, 'BaseImp' => $this->amount($g['base']), 'Importe' => $this->amount($g['tax'])],
+                'AlicIva' => ['Id' => self::VAT_IDS[(string) $rate] ?? 5, 'BaseImp' => VatCalculator::toAmount($g['base']), 'Importe' => VatCalculator::toAmount($g['tax'])],
             ], array_keys($groups), $groups);
         }
 

@@ -36,6 +36,7 @@ class InvoiceRequest extends FormRequest
         return [
             'client_id' => ['required', 'integer', Rule::exists('clients', 'id')->whereNull('deleted_at')],
             'load_id' => ['nullable', 'integer', Rule::exists('loads', 'id')],
+            'associated_invoice_id' => ['nullable', 'required_if:voucher_type,3,8,13', 'integer', Rule::exists('invoices', 'id')],
             'voucher_type' => ['required', 'integer', Rule::in(array_keys(Invoice::VOUCHER_TYPES))],
             'issued_on' => ['required', 'date', 'before_or_equal:today', 'after_or_equal:'.today()->subDays(5)->toDateString()],
             'currency' => ['required', Rule::in(['ARS', 'USD'])],
@@ -61,7 +62,7 @@ class InvoiceRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'client_id' => 'cliente', 'voucher_type' => 'tipo de comprobante', 'issued_on' => 'fecha', 'currency' => 'moneda',
+            'client_id' => 'cliente', 'associated_invoice_id' => 'factura asociada', 'voucher_type' => 'tipo de comprobante', 'issued_on' => 'fecha', 'currency' => 'moneda',
             'exchange_rate' => 'cotización', 'items.*.description' => 'descripción', 'items.*.quantity' => 'cantidad',
             'items.*.unit_price' => 'precio unitario', 'items.*.vat_rate' => 'alícuota de IVA',
         ];

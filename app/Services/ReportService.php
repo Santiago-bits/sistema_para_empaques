@@ -776,7 +776,9 @@ class ReportService
         $row = DB::table('invoices')
             ->whereNull('deleted_at')
             ->where('status', InvoiceStatus::Authorized->value)
-            ->whereBetween('issued_on', [$f->from->toDateString(), $f->to->toDateString()])
+            // Sólo comprobantes del modo ARCA vigente: los CAE ficticios de simulación no son ingresos reales.
+            ->where('arca_mode', (string) setting('arca.mode', 'simulation'))
+            ->whereDate('issued_on', '>=', $f->from->toDateString())->whereDate('issued_on', '<=', $f->to->toDateString())
             ->when($f->get('client_id'), fn ($q, $id) => $q->where('client_id', $id))
             ->selectRaw("COUNT(*) as n,
                 COALESCE(SUM(CASE WHEN voucher_type IN ({$credit}) THEN -net_amount * exchange_rate ELSE net_amount * exchange_rate END), 0) as net,
@@ -786,7 +788,7 @@ class ReportService
         $pending = DB::table('invoices')
             ->whereNull('deleted_at')
             ->whereIn('status', [InvoiceStatus::Draft->value, InvoiceStatus::Pending->value, InvoiceStatus::Rejected->value])
-            ->whereBetween('issued_on', [$f->from->toDateString(), $f->to->toDateString()])
+            ->whereDate('issued_on', '>=', $f->from->toDateString())->whereDate('issued_on', '<=', $f->to->toDateString())
             ->count();
 
         return ['count' => (int) $row->n, 'net' => round((float) $row->net, 2), 'total' => round((float) $row->total, 2), 'pending' => $pending];
@@ -797,7 +799,7 @@ class ReportService
     {
         $main = (string) setting('regional.currency', 'ARS');
         $rows = DB::table('costs')
-            ->whereBetween('date', [$f->from->toDateString(), $f->to->toDateString()])
+            ->whereDate('date', '>=', $f->from->toDateString())->whereDate('date', '<=', $f->to->toDateString())
             ->selectRaw('category, currency, COALESCE(SUM(amount), 0) as total, COUNT(*) as n')
             ->groupBy('category', 'currency')
             ->get();

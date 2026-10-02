@@ -48,7 +48,7 @@ class PortalTest extends TestCase
     {
         return Invoice::query()->create([
             'client_id' => $client->id, 'voucher_type' => 1, 'point_of_sale' => 1, 'number' => $number, 'issued_on' => today(),
-            'total_amount' => 1000, 'status' => $status, 'cae' => $status === 'authorized' ? '99123456789012' : null,
+            'total_amount' => 1000, 'status' => $status, 'arca_mode' => 'simulation', 'cae' => $status === 'authorized' ? '99123456789012' : null,
         ]);
     }
 

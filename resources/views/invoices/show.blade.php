@@ -19,8 +19,26 @@
                     </form>
                 @endcan
             @endif
+            @if ($status === 'pending')
+                @can('arca.manage')
+                    <form method="POST" action="{{ route('invoices.reconcile', $invoice) }}">
+                        @csrf
+                        <button class="btn btn-primary"><x-icon name="refresh" class="size-4"/> Verificar en ARCA</button>
+                    </form>
+                @endcan
+            @endif
         </x-slot:actions>
     </x-page-header>
+
+    @if ($status === 'pending')
+        <div class="mb-6 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200" role="alert">
+            <strong>Pendiente de respuesta de ARCA.</strong> {{ $invoice->last_error ?: 'El envío está en curso o no se recibió respuesta.' }}
+            No lo reenvíes: usá «Verificar en ARCA» para saber si quedó autorizado.
+        </div>
+    @endif
+    @if ($invoice->associated)
+        <p class="mb-4 text-sm text-stone-600 dark:text-stone-300">Ajusta a: <a href="{{ route('invoices.show', $invoice->associated) }}" class="link code">{{ $invoice->associated->voucherLabel() }} {{ $invoice->associated->formattedNumber() }}</a></p>
+    @endif
 
     @if ($status === 'rejected' && $invoice->last_error)
         <div class="mb-6 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-900 dark:border-red-800 dark:bg-red-950/40 dark:text-red-200">

@@ -69,7 +69,7 @@ class InvoiceController extends Controller
 
     public function show(Invoice $invoice): View
     {
-        $invoice->load(['client', 'items', 'loadRecord', 'remito', 'creator', 'arcaRecords.user', 'stateHistories.user']);
+        $invoice->load(['client', 'items', 'loadRecord', 'remito', 'creator', 'associated', 'arcaRecords.user', 'stateHistories.user']);
 
         return view('invoices.show', ['invoice' => $invoice, 'mode' => setting('arca.mode', 'simulation')]);
     }
@@ -94,12 +94,25 @@ class InvoiceController extends Controller
     {
         $result = $this->invoices->submit($invoice, $request->user());
 
-        return redirect()->route('invoices.show', $invoice)->with(
-            $result->status === InvoiceStatus::Authorized ? 'success' : 'error',
-            $result->status === InvoiceStatus::Authorized
-                ? 'Comprobante autorizado. CAE '.$result->cae.'.'
-                : 'ARCA rechazó el comprobante: '.$result->last_error
-        );
+        return redirect()->route('invoices.show', $invoice)->with(...$this->resultFlash($result));
+    }
+
+    /** Verifica en ARCA un comprobante que quedó pendiente (sin respuesta). */
+    public function reconcile(Request $request, Invoice $invoice): RedirectResponse
+    {
+        $result = $this->invoices->reconcile($invoice, $request->user());
+
+        return redirect()->route('invoices.show', $invoice)->with(...$this->resultFlash($result));
+    }
+
+    /** @return array{0: string, 1: string} */
+    private function resultFlash(Invoice $result): array
+    {
+        return match ($result->status) {
+            InvoiceStatus::Authorized => ['success', 'Comprobante autorizado. CAE '.$result->cae.'.'],
+            InvoiceStatus::Pending => ['error', 'ARCA no respondió. El comprobante quedó pendiente: usá «Verificar en ARCA» antes de reenviarlo.'],
+            default => ['error', 'ARCA rechazó el comprobante: '.$result->last_error],
+        };
     }
 
     public function void(Request $request, Invoice $invoice): RedirectResponse
@@ -124,6 +137,10 @@ class InvoiceController extends Controller
             'types' => Invoice::VOUCHER_TYPES,
             'vatRates' => InvoiceService::VAT_RATES,
             'loads' => Load::query()->whereIn('status', ['closed', 'dispatched', 'delivered'])->latest('date')->limit(200)->pluck('number', 'id'),
+            // Facturas autorizadas que una nota de crédito puede ajustar.
+            'associable' => Invoice::query()->with('client:id,business_name')->where('status', InvoiceStatus::Authorized->value)
+                ->whereIn('voucher_type', array_values(Invoice::CREDIT_NOTE_FOR))->latest('issued_on')->limit(300)->get()
+                ->mapWithKeys(fn (Invoice $i) => [$i->id => $i->voucherLabel().' '.$i->formattedNumber().' · '.$i->client?->business_name.' · '.money($i->total_amount)])->all(),
         ];
     }
 }

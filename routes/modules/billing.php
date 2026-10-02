@@ -17,6 +17,7 @@ Route::prefix('facturacion')->name('invoices.')->middleware('module:billing')->c
     Route::put('{invoice}', 'update')->middleware('can:billing.manage')->name('update');
     Route::get('{invoice}/pdf', 'pdf')->middleware('can:billing.view')->name('pdf');
     Route::post('{invoice}/enviar', 'submit')->middleware(['can:billing.manage', 'can:arca.manage', 'module:arca'])->name('submit');
+    Route::post('{invoice}/verificar', 'reconcile')->middleware(['can:billing.manage', 'can:arca.manage', 'module:arca', 'throttle:10,1'])->name('reconcile');
     Route::post('{invoice}/anular', 'void')->middleware('can:billing.void')->name('void');
 });
 
