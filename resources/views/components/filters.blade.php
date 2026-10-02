@@ -1,6 +1,6 @@
 @props(['action' => null, 'exports' => []])
 {{-- Barra de filtros GET. `exports`: [['label' => 'Excel', 'format' => 'xlsx', 'route' => '...'], ...] respeta los filtros actuales. --}}
-<form method="GET" action="{{ $action ?? url()->current() }}" {{ $attributes->merge(['class' => 'panel mb-4 p-4']) }} data-allow-resubmit>
+<form method="GET" action="{{ $action ?? url()->current() }}" {{ $attributes->merge(['class' => 'panel mb-4 p-4']) }} data-allow-resubmit data-filters>
     <div class="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-6">
         {{ $slot }}
     </div>

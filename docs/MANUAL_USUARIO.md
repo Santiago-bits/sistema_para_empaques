@@ -12,7 +12,24 @@ Cada usuario ve en el menú sólo lo que su rol permite. Si falta una opción, p
 - Si aparece una franja roja **«Sin conexión con el servidor»**, lo que hagas en ese momento **no se
   guarda**. Esperá a que vuelva la conexión.
 
-Atajos: tecla **/** abre el buscador. Botón ☰ (arriba a la izquierda) abre el menú en celular/tablet.
+Botón ☰ (arriba a la izquierda) abre el menú en celular/tablet.
+
+## Atajos de teclado
+
+Apretá **?** en cualquier pantalla para ver todos los atajos (también en **Sistema → Ayuda y atajos**).
+Los más usados:
+
+| Tecla | Qué hace |
+|---|---|
+| **F1** / **F2** / **F3** / **F4** | Ayuda · Modo escaneo · Cargas · Pallets (F8 cajones, F9 tablero) |
+| **G** y luego una letra | Ir a una sección (G C cargas, G J cajones, G F facturación, G T reportes…) |
+| **/** o **Ctrl+K** | Buscador |
+| **Alt+N** | Nuevo registro · **Ctrl+S** guardar · **Ctrl+Shift+E** exportar a Excel |
+| **T** | Entrar a la tabla: **↑ ↓** filas, **Enter** abre, **Av Pág / Re Pág** cambian de página |
+| **Esc** | Cerrar ventanas o salir del campo para usar las teclas de una letra |
+
+Sólo aparecen los atajos de las secciones que tu usuario puede abrir. En el modo escaneo y en calidad,
+F2/F3/F4 mantienen su función propia de esa pantalla.
 
 ## Cómo escanear códigos
 

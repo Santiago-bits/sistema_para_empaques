@@ -11,7 +11,7 @@
         .'focus:border-brand-500 focus:ring-4 focus:ring-brand-500/30 dark:bg-stone-950 dark:text-white '
         .($big ? 'py-4 text-3xl' : 'py-3 text-2xl');
 @endphp
-<div x-data="scanner({{ \Illuminate\Support\Js::from($config) }})" x-init="init()" @keydown.window="globalKeys($event)"
+<div x-data="scanner({{ \Illuminate\Support\Js::from($config) }})" x-init="init()" @keydown.window="globalKeys($event)" data-local-keys="F2 Escape"
      class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]" :class="flashClass">
 
     {{-- Formulario de escaneo --}}

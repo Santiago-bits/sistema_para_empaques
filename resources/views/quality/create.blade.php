@@ -6,7 +6,7 @@
         $config = ['lookupUrl' => route('quality.lookup'), 'storeUrl' => route('quality.store'), 'initialCode' => $initialCode];
     @endphp
 
-    <div x-data="qualityScan(@js($config))" x-init="init()" class="grid gap-6 lg:grid-cols-3">
+    <div x-data="qualityScan(@js($config))" x-init="init()" data-local-keys="F2 F3 F4 Ctrl+Enter" class="grid gap-6 lg:grid-cols-3">
         <div class="space-y-6 lg:col-span-2">
             {{-- 1. Código --}}
             <x-panel title="1. Código del cajón, pallet o lote">

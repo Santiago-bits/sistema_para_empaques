@@ -2,6 +2,17 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versionado semántico.
 
+## [1.1.0] - 2026-10-02
+
+### Agregado
+- Atajos de teclado tipo Excel en todo el sistema: teclas de función (F1 ayuda, F2 modo escaneo, F3 cargas,
+  F4 pallets, F8 cajones, F9 tablero), «G y una letra» para ir a cada sección, Alt+N nuevo, Ctrl+S guardar,
+  / o Ctrl+K buscar, Alt+M menú, Ctrl+Shift+E exportar a Excel.
+- Navegación de listados con el teclado: T entra a la tabla, ↑ ↓ Inicio Fin recorren filas, Enter abre,
+  Av Pág / Re Pág cambian de página.
+- Pantalla «Ayuda y atajos» (menú Sistema y menú del usuario) y ventana rápida con la tecla «?». Sólo muestra
+  los atajos de las secciones habilitadas para cada usuario. La tecla de función figura junto a cada ítem del menú.
+
 ## [1.0.0] - 2026-10-01
 
 Primera versión completa del sistema.

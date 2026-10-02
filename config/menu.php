@@ -80,6 +80,7 @@ return [
             ['label' => 'Sesiones activas', 'route' => 'admin.sessions.index', 'icon' => 'signal', 'permission' => 'sessions.manage', 'module' => 'core'],
             ['label' => 'Backups', 'route' => 'backups.index', 'icon' => 'database', 'permission' => 'backups.manage', 'module' => 'core'],
             ['label' => 'Tokens de API', 'route' => 'admin.tokens.index', 'icon' => 'key', 'permission' => 'api.tokens', 'module' => 'core'],
+            ['label' => 'Ayuda y atajos', 'route' => 'help.shortcuts', 'icon' => 'keyboard', 'permission' => null, 'module' => 'core'],
             ['label' => 'Soporte', 'route' => 'support.index', 'icon' => 'lifebuoy', 'permission' => 'support.use', 'module' => 'core'],
             ['label' => 'Panel desarrollador', 'route' => 'developer.index', 'icon' => 'code', 'permission' => 'developer', 'module' => 'core'],
         ],
