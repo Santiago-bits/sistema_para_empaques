@@ -33,8 +33,12 @@ class LoginController extends Controller
         $login = trim($request->string('login'));
         $user = LoginIdentifiers::find($login);
 
-        if (! $user || ! Hash::check($request->string('password'), $user->password)) {
-            $this->audit->log('login_failed', null, null, ['login' => $login], 'Intento de acceso fallido');
+        // Hash::check siempre (aunque el usuario no exista) para no revelar por tiempo qué usuarios existen.
+        $passwordOk = Hash::check($request->string('password'), $user?->password ?? '$2y$12$usesomesillystringfore7hnbRJHxXVLeakoG8K30oukPsA.ztMG');
+        if (! $user || ! $passwordOk) {
+            // Si el usuario no existe sólo se guarda el comienzo de lo escrito (a veces se tipea la contraseña en ese campo).
+            $logged = $user ? $login : mb_substr($login, 0, 3).'…';
+            $this->audit->log('login_failed', $user, null, ['login' => $logged], 'Intento de acceso fallido');
 
             throw ValidationException::withMessages(['login' => 'Las credenciales no son correctas.']);
         }

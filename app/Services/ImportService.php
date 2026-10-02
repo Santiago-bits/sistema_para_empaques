@@ -65,7 +65,11 @@ class ImportService
     public function upload(string $type, UploadedFile $file, User $user): ImportBatch
     {
         $definition = $this->definition($type);
+        // Sólo extensiones conocidas: nunca se guarda un archivo con la extensión que mande el navegador.
         $extension = strtolower($file->getClientOriginalExtension() ?: 'csv');
+        if (! in_array($extension, ['csv', 'txt', 'xlsx'], true)) {
+            throw new BusinessException('Formato no admitido: subí un archivo CSV o Excel (.xlsx).');
+        }
         $path = $file->storeAs('imports', now()->format('Ymd_His').'_'.Str::random(8).'.'.$extension, self::DISK);
 
         try {

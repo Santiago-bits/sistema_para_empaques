@@ -308,20 +308,27 @@ class ProductionService
             throw new BusinessException('Indicá el motivo de la autorización.', 'authorization_failed', ['field' => 'authorization_reason']);
         }
 
-        $limiterKey = 'scan-authorize:'.$operator->id;
-        if (RateLimiter::tooManyAttempts($limiterKey, 5)) {
-            throw new BusinessException('Demasiados intentos de autorización. Esperá un minuto.', 'authorization_throttled', ['field' => 'supervisor']);
+        // Límites por operador (5/min) y por usuario autorizante (5 cada 15 min). El segundo no se
+        // reinicia con autorizaciones válidas de OTRO supervisor: impide adivinar la clave de un
+        // administrador desde una PC de producción.
+        $operatorKey = 'scan-authorize:op:'.$operator->id;
+        $targetKey = 'scan-authorize:target:'.mb_strtolower($login);
+        if (RateLimiter::tooManyAttempts($operatorKey, 5) || RateLimiter::tooManyAttempts($targetKey, 5)) {
+            throw new BusinessException('Demasiados intentos de autorización. Esperá unos minutos.', 'authorization_throttled', ['field' => 'supervisor']);
         }
 
         $supervisor = User::query()
             ->where(fn ($q) => $q->where('username', $login)->orWhere('dni', $login)->orWhere('internal_code', $login))
             ->first();
 
-        $valid = $supervisor && $supervisor->isActive() && Hash::check($password, $supervisor->password);
+        // Hash::check siempre (aunque el usuario no exista) para no revelar por tiempo qué usuarios existen.
+        $passwordOk = Hash::check($password, $supervisor?->password ?? '$2y$10$usesomesillystringfore7hnbRJHxXVLeakoG8K30oukPsA.ztMG');
+        $valid = $supervisor && $passwordOk && $supervisor->isActive() && ! $supervisor->must_change_password;
         $allowed = $valid && Gate::forUser($supervisor)->allows('production.authorize');
 
         if (! $allowed) {
-            RateLimiter::hit($limiterKey, 60);
+            RateLimiter::hit($operatorKey, 60);
+            RateLimiter::hit($targetKey, 900);
             $this->audit->log('authorization_failed', null, null, [
                 'supervisor_login' => $login,
                 'crate_code' => (string) ($data['crate_code'] ?? ''),
@@ -335,7 +342,7 @@ class ProductionService
             );
         }
 
-        RateLimiter::clear($limiterKey);
+        RateLimiter::clear($targetKey);
 
         return $supervisor;
     }

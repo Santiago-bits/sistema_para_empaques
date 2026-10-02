@@ -31,8 +31,13 @@ class UserPolicy
         return $actor->can('users.manage');
     }
 
+    /** Nadie (salvo el super admin) maneja sus propios permisos individuales: evita autoasignarse accesos. */
     public function managePermissions(User $actor, User $user): bool
     {
+        if ($actor->is($user) && ! $actor->isSuperAdmin()) {
+            return false;
+        }
+
         return $this->update($actor, $user) && $actor->can('roles.manage');
     }
 }
