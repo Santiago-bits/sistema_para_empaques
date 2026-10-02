@@ -14,6 +14,18 @@ Cada usuario ve en el menú sólo lo que su rol permite. Si falta una opción, p
 
 Atajos: tecla **/** abre el buscador. Botón ☰ (arriba a la izquierda) abre el menú en celular/tablet.
 
+## Cómo escanear códigos
+
+Nunca hace falta tipear un código número por número:
+
+- **Lector USB o Bluetooth** (como los de supermercado): apuntá y apretá el gatillo. El código se carga
+  solo y la pantalla avanza al siguiente paso.
+- **Cámara del celular o tablet**: tocá el botón **Cámara** (ícono de cámara) al lado del campo.
+  Apuntá al código de barras o QR de la etiqueta: suena, vibra y se completa solo. Si la cámara en vivo no
+  está disponible, tocá **«Sacar foto del código»**: sacás la foto y el sistema lee el código de la imagen.
+- En el **armado de cargas** la cámara queda abierta: leés un cajón tras otro y tocás **Terminar** al final.
+- Con poca luz usá el botón **Linterna** (si el celular la tiene).
+
 ## Modo escaneo (producción)
 
 Pantalla pensada para usar 100 % con el lector de códigos, sin mouse.

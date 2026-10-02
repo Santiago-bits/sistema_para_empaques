@@ -32,11 +32,14 @@
         <form @submit.prevent="submit()" class="grid gap-5 md:grid-cols-2" autocomplete="off" data-allow-resubmit>
             <div class="md:col-span-2">
                 <label for="scan-crate" class="{{ $label }}">Cajón</label>
-                <div class="relative mt-1">
-                    <input id="scan-crate" x-ref="crate" x-model.trim="form.crate_code" @keydown.enter.prevent="afterCrate()"
+                <div class="mt-1 flex gap-2">
+                <div class="relative min-w-0 flex-1">
+                    <input id="scan-crate" data-scan x-ref="crate" x-model.trim="form.crate_code" @keydown.enter.prevent="afterCrate()"
                            class="{{ $field }}" :class="crateState === 'error' ? 'border-red-500' : (crateState === 'ok' ? 'border-emerald-500' : 'border-stone-300 dark:border-stone-700')"
                            placeholder="Escanear código del cajón" inputmode="text" spellcheck="false">
                     <span x-show="crateInfo" x-text="crateInfo" class="absolute top-1/2 right-4 -translate-y-1/2 text-sm font-medium text-stone-500"></span>
+                </div>
+                <x-scan-camera target="scan-crate" title="Escanear cajón" class="px-4"/>
                 </div>
             </div>
 
@@ -45,11 +48,14 @@
                     <label for="scan-packer" class="{{ $label }}">Embalador</label>
                     <label class="flex items-center gap-1.5 text-xs text-stone-500"><input type="checkbox" x-model="pin.packer" class="rounded"> Fijar</label>
                 </div>
-                <div class="relative mt-1">
-                    <input id="scan-packer" x-ref="packer" x-model.trim="form.packer_code" @keydown.enter.prevent="afterPacker()"
+                <div class="mt-1 flex gap-2">
+                <div class="relative min-w-0 flex-1">
+                    <input id="scan-packer" data-scan x-ref="packer" x-model.trim="form.packer_code" @keydown.enter.prevent="afterPacker()"
                            class="{{ $field }}" :class="packerState === 'error' ? 'border-red-500' : (packerState === 'ok' ? 'border-emerald-500' : 'border-stone-300 dark:border-stone-700')"
                            placeholder="Escanear credencial (EMB…)" spellcheck="false">
                     <span x-show="packerName" x-text="packerName" class="absolute top-1/2 right-4 -translate-y-1/2 text-sm font-medium text-stone-500"></span>
+                </div>
+                <x-scan-camera target="scan-packer" title="Escanear credencial del embalador" class="px-4"/>
                 </div>
             </div>
 

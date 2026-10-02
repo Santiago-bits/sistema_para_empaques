@@ -2,7 +2,8 @@
     <x-page-header title="Buscar" :subtitle="$term !== '' ? 'Resultados para «'.$term.'»' : 'Cajón, pallet, lote, carga, remito, factura, CUIT, patente, chofer o embalador'"/>
 
     <form method="GET" action="{{ route('search') }}" class="panel mb-6 flex gap-3 p-4" role="search" data-allow-resubmit>
-        <input type="search" name="q" value="{{ $term }}" class="form-input flex-1 py-2.5 text-base" placeholder="Escribí o escaneá un código…" autofocus maxlength="100" aria-label="Buscar">
+        <input id="search-q" data-scan type="search" name="q" value="{{ $term }}" class="form-input min-w-0 flex-1 py-2.5 text-base" placeholder="Escribí o escaneá un código…" autofocus maxlength="100" aria-label="Buscar">
+        <x-scan-camera target="search-q" title="Escanear para buscar"/>
         <button class="btn btn-primary"><x-icon name="search" class="size-4"/> Buscar</button>
     </form>
 

@@ -161,13 +161,40 @@ Verificación: el **Panel desarrollador** muestra un aviso si el programador no 
 5 minutos. Qué se programa: alertas cada 5 min, backup diario 02:00, backup semanal domingo 03:00,
 procesamiento de la cola cada minuto y limpieza diaria.
 
-## 8. PCs de producción (modo kiosco)
+## 8. Lectores de códigos y cámara del celular
+
+**Lector USB o Bluetooth (tipo supermercado)** — la opción más rápida para puestos fijos:
+
+- Funciona como un teclado: no requiere drivers ni configuración en el sistema.
+- Configurarlo (con los códigos de su manual) para que envíe **Enter** al final de cada lectura. Así cada
+  pantalla avanza sola: cajón → embalador → peso → guardado.
+- Ideal: lector configurado con el mismo idioma de teclado que Windows (Español Latinoamérica). Si quedó
+  en inglés, el guion de los códigos llega como apóstrofo; el sistema lo corrige solo en los campos de escaneo.
+- Bluetooth: emparejarlo con la PC/tablet en modo «teclado (HID)».
+
+**Cámara del celular o tablet** — botón «Cámara» al lado de cada campo de escaneo (producción, kiosco,
+armado de cargas, mover pallets, calidad, búsqueda):
+
+- Lee códigos de barras de las etiquetas (Code 128) y QR, completa el campo y sigue el flujo solo.
+- En el armado de cargas queda abierta en modo continuo para leer cajón tras cajón.
+- **«Sacar foto del código»** funciona siempre, también con `http://` en la red local.
+- **Cámara en vivo** (apuntar y leer sin sacar foto): los navegadores la permiten sólo con **https**.
+  Para activarla en la LAN:
+  1. Generar un certificado para la IP del servidor, por ejemplo con [mkcert](https://github.com/FiloSottile/mkcert):
+     `mkcert -install` y `mkcert 192.168.1.100` (genera `192.168.1.100.pem` y `192.168.1.100-key.pem`).
+  2. En Apache (`httpd-ssl.conf` de XAMPP) un `<VirtualHost *:443>` igual al del paso 5 con
+     `SSLEngine on`, `SSLCertificateFile` y `SSLCertificateKeyFile` apuntando a esos archivos.
+  3. Instalar el certificado raíz de mkcert (`rootCA.pem`) en cada celular/tablet (Ajustes → Seguridad →
+     Instalar certificado) para que el navegador lo acepte.
+  4. Cambiar `APP_URL=https://192.168.1.100` y ejecutar `php artisan config:cache`.
+
+## 9. PCs de producción (modo kiosco)
 
 - Lector de códigos USB configurado como teclado con **Enter** al final de cada lectura.
 - Crear el usuario del puesto con **modo kiosco** activado: sólo ve la pantalla de escaneo.
 - Navegador en pantalla completa (F11) o acceso directo con `--kiosk http://192.168.1.100/kiosco`.
 
-## 9. Correo (opcional)
+## 10. Correo (opcional)
 
 Para que la recuperación de contraseña envíe enlaces por email, completar en `.env`:
 
@@ -183,7 +210,7 @@ MAIL_FROM_ADDRESS=sistema@tu-empresa.com
 Sin correo configurado el sistema funciona igual: quien no recuerda su contraseña genera un aviso al
 administrador, que le asigna una temporal desde la ficha del usuario.
 
-## 10. Actualizar a una versión nueva
+## 11. Actualizar a una versión nueva
 
 ```powershell
 php artisan galpon:backup          # SIEMPRE antes de actualizar
@@ -195,7 +222,7 @@ php artisan config:cache && php artisan route:cache && php artisan view:cache
 php artisan up
 ```
 
-## 11. Problemas frecuentes
+## 12. Problemas frecuentes
 
 | Síntoma | Causa / solución |
 |---|---|

@@ -1,6 +1,12 @@
 {
+  "node_modules/@zxing/browser/esm/index.js": {
+    "file": "assets/index-iPjrJSYw.js",
+    "name": "index",
+    "src": "node_modules/@zxing/browser/esm/index.js",
+    "isDynamicEntry": true
+  },
   "resources/css/app.css": {
-    "file": "assets/app-ZLG6vKAt.css",
+    "file": "assets/app-BrtdPtar.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
@@ -9,9 +15,13 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-BtnHO5wK.js",
+    "file": "assets/app-ChYySiFT.js",
     "name": "app",
     "src": "resources/js/app.js",
-    "isEntry": true
+    "isEntry": true,
+    "dynamicImports": [
+      "node_modules/@zxing/browser/esm/index.js",
+      "node_modules/@zxing/browser/esm/index.js"
+    ]
   }
 }

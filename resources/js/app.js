@@ -5,6 +5,7 @@ import { api, newIdempotencyKey } from './lib/api';
 import { sounds } from './lib/sounds';
 import { theme } from './lib/theme';
 import './lib/connection';
+import { openCameraScanner, scanInto } from './lib/camera-scanner';
 
 window.Alpine = Alpine;
 window.Chart = Chart;
@@ -12,6 +13,18 @@ window.api = api;
 window.newIdempotencyKey = newIdempotencyKey;
 window.sounds = sounds;
 window.theme = theme;
+window.openCameraScanner = openCameraScanner;
+window.scanInto = scanInto;
+
+// Lectores USB/Bluetooth configurados con teclado en inglés sobre Windows en español: el guion de
+// los códigos («CJ-000123») llega como apóstrofo. En los campos de escaneo se corrige al instante
+// (fase de captura: antes de que Alpine lea el valor). Los códigos del sistema nunca llevan «'».
+document.addEventListener('input', (e) => {
+    const el = e.target;
+    if (el instanceof HTMLInputElement && el.hasAttribute('data-scan') && el.value.includes("'")) {
+        el.value = el.value.replace(/'/g, '-');
+    }
+}, true);
 
 // Paleta para gráficos que funciona en claro y oscuro.
 window.chartColors = ['#16a34a', '#f97316', '#0ea5e9', '#a855f7', '#eab308', '#ef4444', '#14b8a6', '#64748b', '#ec4899', '#84cc16'];
