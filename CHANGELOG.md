@@ -2,6 +2,19 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versionado semántico.
 
+## [1.4.0] - 2026-10-02
+
+### Agregado
+- **Actividad del personal** (Sistema → Actividad del personal): quién está conectado, días activos, ingresos,
+  operaciones y cajones por empleado, uso por día y partes del sistema más usadas.
+- **Romaneo del lote** imprimible: kilos empacados por variedad, calibre y selección, descarte por motivo,
+  rinde contra los kilos recibidos y firmas.
+- Instalación en **Hostinger** (docs/HOSTINGER.md), `scripts/actualizar-servidor.sh` para pasar cambios al hosting,
+  `galpon:deploy-check` que verifica la instalación y scripts para correr el galpón y el Panel General en tu PC.
+
+### Seguridad
+- Nadie puede asignar un rol con permisos que él mismo no tiene.
+
 ## [1.3.0] - 2026-10-02
 
 ### Agregado

@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware('can:users.view')->group(function () {
         Route::get('usuarios', [UserController::class, 'index'])->name('users.index');
+        Route::get('actividad', [\App\Http\Controllers\Admin\ActivityController::class, 'index'])->name('activity.index');
         Route::get('usuarios/nuevo', [UserController::class, 'create'])->middleware('can:users.manage')->name('users.create');
         Route::post('usuarios', [UserController::class, 'store'])->middleware('can:users.manage')->name('users.store');
         Route::get('usuarios/{user}', [UserController::class, 'show'])->name('users.show');
