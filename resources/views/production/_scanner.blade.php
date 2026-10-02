@@ -262,6 +262,13 @@ window.scanner = function (config) {
         },
 
         globalKeys(e) {
+            // Con el pedido de autorización abierto, ninguna tecla puede ir a los campos de atrás
+            // (evita, por ejemplo, que la contraseña del supervisor quede escrita en el campo peso).
+            if (this.auth.open && !e.target.closest('[role=dialog]')) {
+                if (e.key === 'Enter') e.preventDefault();
+                this.$refs.authLogin?.focus();
+                return;
+            }
             if (e.key === 'F2') { e.preventDefault(); this.focus('crate'); }
             if (e.key === 'Escape' && !this.auth.open) { e.preventDefault(); this.reset(true); }
         },
@@ -476,7 +483,13 @@ window.scanner = function (config) {
             this.auth.message = message;
             this.say('auth', message);
             window.sounds.duplicate();
-            this.$nextTick(() => this.$refs.authLogin.focus());
+            // x-show muestra el modal en un setTimeout: se enfoca recién cuando ya es visible.
+            const focusLogin = (tries = 0) => {
+                const el = this.$refs.authLogin;
+                if (el && el.offsetParent !== null) return el.focus();
+                if (tries < 20) setTimeout(() => focusLogin(tries + 1), 15);
+            };
+            focusLogin();
         },
 
         submitAuthorization() {
