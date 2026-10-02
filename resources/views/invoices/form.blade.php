@@ -22,8 +22,14 @@
                         @endforeach
                     </select>
                 </x-field>
-                <x-select name="voucher_type" label="Tipo de comprobante" :options="$types" :value="$invoice->voucher_type" required
-                          hint="A: cliente Resp. Inscripto · B: resto · C: si el emisor es monotributista."/>
+                <div x-data="{ type: '{{ old('voucher_type', $invoice->voucher_type) }}' }" class="space-y-4">
+                    <x-select name="voucher_type" label="Tipo de comprobante" :options="$types" :value="$invoice->voucher_type" required x-model="type"
+                              hint="A: cliente Resp. Inscripto · B: resto · C: si el emisor es monotributista."/>
+                    <div x-show="['3', '8', '13'].includes(String(type))" x-cloak>
+                        <x-select name="associated_invoice_id" label="Factura que ajusta" :options="$associable" :value="$invoice->associated_invoice_id" placeholder="Elegí la factura…"
+                                  hint="Obligatorio para notas de crédito: misma letra y mismo cliente."/>
+                    </div>
+                </div>
                 <x-input name="issued_on" type="date" label="Fecha de emisión" :value="$invoice->issued_on" required/>
                 <x-select name="currency" label="Moneda" :options="['ARS' => 'Pesos (ARS)', 'USD' => 'Dólares (USD)']" :value="$invoice->currency" x-model="currency"/>
                 <div x-show="currency === 'USD'"><x-input name="exchange_rate" label="Cotización" :value="$invoice->exchange_rate" inputmode="decimal"/></div>

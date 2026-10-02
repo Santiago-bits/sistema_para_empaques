@@ -2,9 +2,7 @@
 
 namespace App\Services;
 
-use App\Enums\InvoiceStatus;
 use App\Models\Cost;
-use App\Models\Invoice;
 use App\Models\Load;
 use App\Models\User;
 use App\Services\Reports\ReportFilters;
@@ -17,9 +15,6 @@ use Illuminate\Database\Eloquent\Builder;
  */
 class CostService
 {
-    /** Códigos ARCA de notas de crédito A, B y C. */
-    private const CREDIT_NOTES = [3, 8, 13];
-
     public function __construct(private readonly ReportService $reports)
     {
     }
@@ -60,26 +55,29 @@ class CostService
             ->pluck('total', 'category')->map(fn ($v) => round((float) $v, 2))->all();
     }
 
+    /**
+     * Rentabilidad del período. Los ingresos salen de ReportService::billingTotals (misma cifra que
+     * en Reportes): NETO sin IVA, en pesos según la cotización, con las notas de crédito restando y
+     * sólo comprobantes autorizados del modo ARCA vigente.
+     */
     public function profitability(CarbonInterface $from, CarbonInterface $to): array
     {
-        $invoices = Invoice::query()->where('status', InvoiceStatus::Authorized->value)
-            ->whereDate('issued_on', '>=', $from->toDateString())->whereDate('issued_on', '<=', $to->toDateString())
-            ->get(['voucher_type', 'total_amount', 'exchange_rate']);
-
-        $revenue = round($invoices->sum(fn (Invoice $i) => (float) $i->total_amount * (float) ($i->exchange_rate ?: 1)
-            * (in_array((int) $i->voucher_type, self::CREDIT_NOTES, true) ? -1 : 1)), 2);
+        $filters = ReportFilters::between($from, $to);
+        $billing = $this->reports->billingTotals($filters);
+        $revenue = $billing['net'];
         $costs = round((float) Cost::query()->whereDate('date', '>=', $from->toDateString())->whereDate('date', '<=', $to->toDateString())->sum('amount'), 2);
-        $kg = (float) ($this->reports->indicators(ReportFilters::between($from, $to))['kg_processed'] ?? 0);
+        $kg = (float) ($this->reports->indicators($filters)['kg_processed'] ?? 0);
 
         return [
             'revenue' => $revenue,
+            'revenue_total' => $billing['total'],
             'costs' => $costs,
             'profit' => round($revenue - $costs, 2),
             'margin_pct' => $revenue > 0 ? round(($revenue - $costs) / $revenue * 100, 1) : null,
             'kg' => $kg,
             'cost_per_kg' => $kg > 0 ? round($costs / $kg, 2) : null,
             'revenue_per_kg' => $kg > 0 ? round($revenue / $kg, 2) : null,
-            'invoices' => $invoices->count(),
+            'invoices' => $billing['count'],
         ];
     }
 }

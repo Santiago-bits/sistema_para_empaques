@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Enums\CrateStatus;
-use App\Enums\InvoiceStatus;
 use App\Enums\LoadStatus;
 use App\Models\Crate;
 use App\Models\Invoice;
@@ -53,7 +52,7 @@ class PortalService
     /** Sólo comprobantes autorizados por ARCA: borradores y rechazados son internos. */
     public function invoices(User $user): Builder
     {
-        return Invoice::query()->where('client_id', $this->clientId($user))->where('status', InvoiceStatus::Authorized->value);
+        return Invoice::query()->where('client_id', $this->clientId($user))->countable();
     }
 
     public function summary(User $user): array
@@ -67,7 +66,10 @@ class PortalService
             'crates_season' => $user->owner_id ? $this->crates($user)->when($season, fn ($q) => $q->where('season_id', $season->id))->count() : null,
             'pallets_season' => $user->owner_id ? $this->pallets($user)->when($season, fn ($q) => $q->where('season_id', $season->id))->count() : null,
             'loads_dispatched' => $this->loads($user)->whereIn('status', [LoadStatus::Dispatched->value, LoadStatus::Delivered->value])->count(),
-            'invoiced' => $user->client_id ? (float) $this->invoices($user)->sum('total_amount') : null,
+            // Total facturado en pesos: las notas de crédito restan y los comprobantes en dólares se convierten.
+            'invoiced' => $user->client_id ? round((float) $this->invoices($user)->selectRaw(
+                'COALESCE(SUM(CASE WHEN voucher_type IN ('.implode(',', array_keys(Invoice::CREDIT_NOTE_FOR)).') THEN -total_amount ELSE total_amount END * exchange_rate), 0) as total'
+            )->value('total'), 2) : null,
         ];
     }
 

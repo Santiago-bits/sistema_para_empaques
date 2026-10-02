@@ -461,7 +461,8 @@ class LoadService
             }
 
             // Si la carga ya estaba facturada (CAE antes del despacho), los cajones pasan a Facturado.
-            if (Invoice::query()->where('load_id', $locked->id)->where('status', InvoiceStatus::Authorized->value)->exists()) {
+            if (Invoice::query()->where('load_id', $locked->id)->where('status', InvoiceStatus::Authorized->value)
+                ->whereNotIn('voucher_type', array_keys(Invoice::CREDIT_NOTE_FOR))->exists()) {
                 $this->bulkCrateTransition($locked, CrateStatus::Dispatched, CrateStatus::Invoiced, 'Carga facturada', $by, false);
             }
         });

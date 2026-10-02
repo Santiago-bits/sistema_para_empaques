@@ -38,6 +38,12 @@ class SimulationGateway implements ArcaGateway
             ->where('voucher_type', $voucherType)->max('number');
     }
 
+    /** En simulación nunca hay envíos sin respuesta: no hay nada que consultar. */
+    public function consult(int $pointOfSale, int $voucherType, int $number): ?array
+    {
+        return null;
+    }
+
     public function testConnection(): ArcaResult
     {
         return new ArcaResult(true, operation: 'FEDummy', response: ['simulado' => true]);
