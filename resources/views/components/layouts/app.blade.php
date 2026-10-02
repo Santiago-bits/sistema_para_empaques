@@ -24,7 +24,7 @@
     @stack('head')
 </head>
 <body class="min-h-screen" x-data="{ sidebar: false, offline: false }" :class="sidebar && 'max-lg:overflow-hidden'"
-      @keydown.escape.window="sidebar = false"
+      @keydown.escape.window="sidebar = false" @toggle-sidebar.window="sidebar = ! sidebar"
       @connection-lost.window="offline = true" @connection-restored.window="offline = false">
 
 {{-- Aviso de conexión perdida: el operador no debe asumir que la operación se guardó. --}}
@@ -69,6 +69,8 @@
                                 <span class="truncate">{{ $item['label'] }}</span>
                                 @if ($item['route'] === 'alerts.index' && $openAlertsCount > 0)
                                     <span class="ml-auto rounded-full bg-accent-500 px-1.5 text-[11px] font-semibold text-white">{{ $openAlertsCount }}</span>
+                                @elseif ($fkey = $shortcuts['routeKeys'][$item['route']] ?? null)
+                                    <span class="ml-auto hidden rounded border border-white/10 px-1 font-mono text-[10px] text-stone-500 lg:inline" title="Atajo de teclado">{{ $fkey }}</span>
                                 @endif
                             </a>
                         @endforeach
@@ -95,8 +97,7 @@
                 <form action="{{ route('search') }}" method="GET" class="relative min-w-0 flex-1 sm:max-w-md" role="search">
                     <x-icon name="search" class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-stone-400"/>
                     <input type="search" name="q" value="{{ request('q') }}" placeholder="Buscar código, CUIT, patente…"
-                           class="form-input pl-9" autocomplete="off" x-ref="globalSearch"
-                           @keydown.window.slash.prevent="if (! ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) $refs.globalSearch.focus()">
+                           class="form-input pl-9" autocomplete="off" data-global-search aria-keyshortcuts="/ Control+K">
                 </form>
             @endif
 
@@ -148,6 +149,9 @@
                         <a href="{{ route('profile.show') }}" class="flex items-center gap-2 rounded-md px-3 py-2 hover:bg-stone-100 dark:hover:bg-stone-800">
                             <x-icon name="user-chart" class="size-4"/> Mi perfil
                         </a>
+                        <a href="{{ route('help.shortcuts') }}" class="flex items-center gap-2 rounded-md px-3 py-2 hover:bg-stone-100 dark:hover:bg-stone-800">
+                            <x-icon name="keyboard" class="size-4"/> Ayuda y atajos <kbd class="kbd ml-auto">?</kbd>
+                        </a>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <button class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40">
@@ -173,9 +177,21 @@
     </div>
 </div>
 
+{{-- Ventana de atajos: tecla «?» en cualquier pantalla. --}}
+<x-modal name="shortcuts" title="Atajos de teclado" max-width="max-w-4xl">
+    <div class="max-h-[70vh] overflow-y-auto pr-1">
+        @include('help._shortcuts', ['groups' => $shortcuts['groups']])
+    </div>
+    <div class="mt-4 flex items-center justify-between gap-3 border-t border-stone-200 pt-3 text-sm dark:border-stone-800">
+        <span class="text-stone-500">Cerrar con <kbd class="kbd">Esc</kbd></span>
+        <a href="{{ route('help.shortcuts') }}" class="link">Ver la pantalla de ayuda completa</a>
+    </div>
+</x-modal>
+
 <script>
     window.galpon = {
         sounds: {{ \Illuminate\Support\Js::from(['success' => (bool) setting('production.sound_success'), 'error' => (bool) setting('production.sound_error'), 'duplicate' => (bool) setting('production.sound_duplicate')]) }},
+        shortcuts: {{ \Illuminate\Support\Js::from($shortcuts['bindings']) }},
     };
 </script>
 @stack('scripts')

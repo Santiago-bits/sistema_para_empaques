@@ -6,6 +6,7 @@ import { sounds } from './lib/sounds';
 import { theme } from './lib/theme';
 import './lib/connection';
 import { openCameraScanner, scanInto } from './lib/camera-scanner';
+import { initShortcuts } from './lib/shortcuts';
 
 window.Alpine = Alpine;
 window.Chart = Chart;
@@ -73,3 +74,6 @@ document.addEventListener('submit', (event) => {
 });
 
 Alpine.start();
+
+// Atajos de teclado: sólo en el layout principal (el kiosco y el login no los cargan).
+if (window.galpon?.shortcuts) initShortcuts(window.galpon.shortcuts);

@@ -26,8 +26,9 @@ class Menu
                 if (! $modules->enabled($item['module'])) {
                     continue;
                 }
+                // permission null = cualquier usuario con sesión (p. ej. «Ayuda y atajos»).
                 $permissions = (array) $item['permission'];
-                if (! collect($permissions)->contains(fn ($p) => $user->can($p))) {
+                if ($permissions !== [] && ! collect($permissions)->contains(fn ($p) => $user->can($p))) {
                     continue;
                 }
                 $pattern = str_ends_with($item['route'], '.index')
