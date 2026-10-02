@@ -103,7 +103,11 @@ El Panel General corre en Hostinger, que tiene **`proc_open` deshabilitado**. Po
    regenera solo o con `php artisan package:discover` desde la consola (`scripts/actualizar-servidor.sh`).
 2. **Tareas programadas**: en `routes/console.php` usar `Schedule::call(fn () => Artisan::call('…'))`
    (helper `$artisan`), **nunca** `Schedule::command(...)`, que abre un proceso nuevo.
-3. Todo lo que use `Symfony\Component\Process` (backups con mysqldump) debe fallar con un mensaje claro y no
+3. **No borrar el `.htaccess` de la raíz**: el deploy por Git de Hostinger deja el proyecto dentro de `public_html`
+   y ese archivo manda todo a `public/` (se borró por error en 22120d7 y el sitio dio 404).
+4. `bootstrap/app.php` descarta las cachés de `bootstrap/cache` más viejas que el código (Hostinger las conserva
+   entre deploys). Después de cada deploy: `bash scripts/despues-del-deploy.sh` (migraciones y datos base).
+5. Todo lo que use `Symfony\Component\Process` (backups con mysqldump) debe fallar con un mensaje claro y no
    romper nada si `proc_open` no está disponible.
 
 ## Git
