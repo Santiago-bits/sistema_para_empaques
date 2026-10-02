@@ -95,6 +95,8 @@ class RoleController extends Controller
     private function syncPermissions(Role $role, array $slugs): void
     {
         $before = $role->permissions()->pluck('slug')->sort()->values()->all();
+        // Un administrador no puede agregar (ni quitar) permisos reservados al super administrador.
+        $slugs = Permission::guardProtected($slugs, $before, auth()->user());
         $role->permissions()->sync(Permission::query()->whereIn('slug', $slugs)->pluck('id'));
         $after = collect($slugs)->sort()->values()->all();
 

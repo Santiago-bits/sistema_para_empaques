@@ -59,7 +59,27 @@ class InstallController extends Controller
 
     public function store(Request $request, SettingsService $settings): RedirectResponse
     {
-        abort_if($this->installed(), 404);
+        // Falla CERRADO: si no se puede comprobar el estado de la base, no se instala nada.
+        try {
+            abort_if(Schema::hasTable('users') && User::query()->exists(), 404);
+        } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
+            throw $e;
+        } catch (\Throwable) {
+            abort(503, 'No se pudo verificar la base de datos. Revisá la conexión antes de instalar.');
+        }
+
+        // Un solo instalador a la vez: dos envíos simultáneos no pueden crear dos super administradores.
+        $lock = \Illuminate\Support\Facades\Cache::lock('galpon:install', 120);
+        abort_unless($lock->get(), 409, 'La instalación ya está en curso.');
+        try {
+            return $this->install($request, $settings);
+        } finally {
+            $lock->release();
+        }
+    }
+
+    private function install(Request $request, SettingsService $settings): RedirectResponse
+    {
 
         $data = $request->validate([
             'company_name' => ['required', 'string', 'max:120'],
@@ -88,6 +108,7 @@ class InstallController extends Controller
         ]);
 
         DB::transaction(function () use ($data, $settings) {
+            abort_if(User::query()->lockForUpdate()->exists(), 404);
             (new SystemSeeder)->run();
 
             $company = Company::query()->firstOrFail();

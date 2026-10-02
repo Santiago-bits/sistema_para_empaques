@@ -41,8 +41,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->api(prepend: [\App\Http\Middleware\ForceJsonResponse::class], append: [SecurityHeaders::class]);
         $middleware->redirectGuestsTo(fn () => route('login'));
         $middleware->redirectUsersTo(fn () => route('home'));
-        // Para usar detrás de un proxy en la LAN (IIS/Apache/Nginx).
-        $middleware->trustProxies(at: ['127.0.0.1', '192.168.0.0/16', '10.0.0.0/8', '172.16.0.0/12']);
+        // Proxies de confianza: SÓLO las IP indicadas en GALPON_TRUSTED_PROXIES (vacío = ninguno).
+        // Confiar en toda la LAN permitiría a cualquier PC falsificar su IP con X-Forwarded-For
+        // (y así saltear los límites de intentos de login y la restricción por IP).
+        $proxies = array_values(array_filter(array_map('trim', explode(',', (string) env('GALPON_TRUSTED_PROXIES', '')))));
+        if ($proxies !== []) {
+            $middleware->trustProxies(at: $proxies);
+        }
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // Errores de negocio: mensaje claro al usuario, sin registrar como falla técnica.

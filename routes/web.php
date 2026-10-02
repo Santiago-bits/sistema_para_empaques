@@ -38,7 +38,7 @@ Route::middleware(['auth', 'active', 'password.fresh', 'kiosk'])->group(function
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 
     Route::get('/perfil', [ProfileController::class, 'show'])->name('profile.show');
-    Route::put('/perfil/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+    Route::put('/perfil/password', [ProfileController::class, 'updatePassword'])->middleware('throttle:10,1')->name('profile.password');
     Route::post('/perfil/tema', [ProfileController::class, 'updateTheme'])->name('profile.theme');
 
     foreach (glob(__DIR__.'/modules/*.php') as $file) {

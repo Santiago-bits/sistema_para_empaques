@@ -15,6 +15,7 @@ use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use App\View\Composers\AppLayoutComposer;
 use Illuminate\Support\ServiceProvider;
@@ -32,6 +33,15 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Paginator::defaultView('vendor.pagination.galpon');
+
+        // Los enlaces absolutos (QR de remitos, emails de recuperación) usan SIEMPRE APP_URL, nunca el
+        // encabezado Host del pedido: así nadie puede hacer que un email lleve a una PC ajena.
+        if (filled(config('app.url'))) {
+            URL::forceRootUrl(rtrim((string) config('app.url'), '/'));
+            if (str_starts_with((string) config('app.url'), 'https://')) {
+                URL::forceScheme('https');
+            }
+        }
 
         // Alias estables para relaciones polimórficas (no dependen del namespace).
         Relation::enforceMorphMap([

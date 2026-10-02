@@ -48,7 +48,8 @@ class NotificationController extends Controller
 
     private function isInternal(Request $request, string $url): bool
     {
-        if (str_starts_with($url, '/') && ! str_starts_with($url, '//')) {
+        // «//host» y «/\host» los navegadores los interpretan como otro sitio.
+        if (str_starts_with($url, '/') && ! in_array(substr($url, 1, 1), ['/', '\\'], true)) {
             return true;
         }
 

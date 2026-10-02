@@ -44,9 +44,13 @@ class UserService
             $user->update(Arr::except($data, ['warehouses', 'password_confirmation']));
             $user->warehouses()->sync($data['warehouses'] ?? []);
 
-            // Al dar de baja a un usuario se cierran sus sesiones y tokens de API.
-            if ($wasActive && $status !== UserStatus::Active) {
+            // Al dar de baja a un usuario, o al cambiarle la contraseña, se cierran sus sesiones y tokens de API.
+            $passwordChanged = ! empty($data['password']);
+            if (($wasActive && $status !== UserStatus::Active) || ($passwordChanged && ! $user->is(auth()->user()))) {
                 $this->sessions->terminateAllFor($user);
+            }
+            if ($passwordChanged) {
+                $user->forceFill(['password_changed_at' => now()])->saveQuietly();
             }
 
             return $user;
@@ -62,6 +66,13 @@ class UserService
     {
         DB::transaction(function () use ($user, $overrides) {
             $before = $user->permissionOverrides()->get()->mapWithKeys(fn ($p) => [$p->slug => $p->pivot->granted ? 'grant' : 'revoke'])->all();
+
+            // Los permisos reservados al super administrador sólo los cambia un super administrador.
+            $actor = auth()->user();
+            if ($actor && ! $actor->isSuperAdmin()) {
+                $overrides = array_diff_key($overrides, array_flip(Permission::SUPER_ADMIN_ONLY))
+                    + array_intersect_key($before, array_flip(Permission::SUPER_ADMIN_ONLY));
+            }
 
             $ids = Permission::query()->whereIn('slug', array_keys($overrides))->pluck('id', 'slug');
             $sync = [];

@@ -140,11 +140,11 @@ class ExportService
 
         $written = 0;
         foreach ($dataset->rows() as $row) {
-            $writer->addRow(Row::fromValues($this->values($dataset, $row)));
+            $writer->addRow(Row::fromValues($this->values($dataset, $row, $format === 'csv')));
             $written++;
         }
         if ($dataset->totals !== []) {
-            $writer->addRow(Row::fromValues($this->values($dataset, $dataset->totals), $format === 'xlsx' ? $bold : null));
+            $writer->addRow(Row::fromValues($this->values($dataset, $dataset->totals, $format === 'csv'), $format === 'xlsx' ? $bold : null));
         }
 
         $writer->close();
@@ -153,14 +153,28 @@ class ExportService
     }
 
     /** @return list<mixed> */
-    private function values(ReportDataset $dataset, array $row): array
+    private function values(ReportDataset $dataset, array $row, bool $csv = false): array
     {
         $values = [];
         foreach ($dataset->columns as $key => $column) {
-            $values[] = Format::cell($row[$key] ?? null, $column['type']);
+            $value = Format::cell($row[$key] ?? null, $column['type']);
+            $values[] = $csv ? self::neutralizeFormula($value) : $value;
         }
 
         return $values;
+    }
+
+    /**
+     * Evita la inyección de fórmulas al abrir un CSV en Excel: un texto que empieza con
+     * = + - @ tabulación o retorno se antepone con un apóstrofo (Excel lo muestra como texto).
+     */
+    public static function neutralizeFormula(mixed $value): mixed
+    {
+        if (is_string($value) && $value !== '' && in_array($value[0], ['=', '+', '-', '@', "\t", "\r"], true) && ! is_numeric($value)) {
+            return "'".$value;
+        }
+
+        return $value;
     }
 
     private function pdf(ReportDataset $dataset, ReportFilters $filters, ?User $user): \Barryvdh\DomPDF\PDF
