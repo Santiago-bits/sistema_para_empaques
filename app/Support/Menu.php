@@ -18,6 +18,9 @@ class Menu
         $sections = [];
 
         foreach (config('menu', []) as $section) {
+            if (($section['central'] ?? false) && ! config('galpon.central.mode')) {
+                continue;
+            }
             $items = [];
             foreach ($section['items'] as $item) {
                 if (! Route::has($item['route'])) {

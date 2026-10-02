@@ -2,6 +2,19 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versionado semántico.
 
+## [1.3.0] - 2026-10-02
+
+### Agregado
+- **Empleados por sectores**: al crear un usuario, el dueño tilda los sectores que atiende (Etiquetas, Romaneo y
+  producción, Ingreso de fruta, Calidad, Galpón y cámaras, Cargas, Facturación, Contabilidad y tesorería,
+  Insumos, Reportes, Personal, Incidentes) o le da Acceso total. Sólo se reparten sectores que quien edita
+  tiene y nadie cambia sus propios accesos.
+- **Panel General del proveedor** (`GALPON_CENTRAL_MODE=true`): alta de muchos empaques clientes con su licencia,
+  uso de cada uno (conexión, versión, usuarios activos, cajones, kilos, cargas, facturas, errores, gráfico de 30
+  días) y bandeja de **soporte de clientes** para responder pedidos de cambios o mejoras.
+- Cada empaque se conecta solo al Panel General (`GALPON_CENTRAL_URL` + `GALPON_LICENSE_KEY`): envía totales de
+  uso, sube sus tickets y baja las respuestas (`galpon:central-sync`, cada 5 minutos, y botón «Sincronizar ahora»).
+
 ## [1.2.0] - 2026-10-02
 
 ### Agregado

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class SupportTicketReply extends Model
 {
     protected $fillable = [
-        'support_ticket_id', 'user_id', 'body', 'from_developer',
+        'support_ticket_id', 'user_id', 'body', 'from_developer', 'central_id', 'central_synced_at',
     ];
 
     protected function casts(): array

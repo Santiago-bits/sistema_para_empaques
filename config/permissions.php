@@ -212,6 +212,11 @@ return [
                 'supplies.view', 'maintenance.view', 'cold_rooms.view', 'support.use', 'staff.view', 'treasury.view',
             ],
         ],
+        'employee' => [
+            'name' => 'Empleado (por sectores)',
+            'description' => 'Base para empleados: el administrador le suma los sectores que atiende.',
+            'permissions' => ['dashboard.view', 'alerts.view', 'support.use'],
+        ],
         'client_portal' => [
             'name' => 'Cliente / Propietario',
             'description' => 'Consulta la información de su mercadería.',

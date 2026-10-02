@@ -13,5 +13,6 @@ Route::middleware('can:support.use')->group(function () {
     Route::post('soporte', [SupportController::class, 'store'])->middleware('throttle:10,10')->name('support.store');
     Route::get('soporte/{ticket}', [SupportController::class, 'show'])->whereNumber('ticket')->name('support.show');
     Route::post('soporte/{ticket}/responder', [SupportController::class, 'reply'])->whereNumber('ticket')->middleware('throttle:30,10')->name('support.reply');
+    Route::post('soporte/sincronizar', [SupportController::class, 'sync'])->middleware('throttle:6,1')->name('support.sync');
     Route::post('soporte/{ticket}/estado', [SupportController::class, 'status'])->whereNumber('ticket')->name('support.status');
 });

@@ -16,6 +16,15 @@ Route::get('/heartbeat', fn () => response()->json(['ok' => true, 'time' => now(
     ->middleware('throttle:120,1')
     ->name('api.heartbeat');
 
+// Panel General (sólo en el servidor del proveedor): los empaques reportan uso y soporte con su licencia.
+Route::prefix('central/v1')->name('api.central.')->middleware(['central', 'throttle:60,1', 'installation'])
+    ->controller(\App\Http\Controllers\Api\Central\InstallationController::class)->group(function () {
+        Route::post('reportes', 'report')->name('report');
+        Route::post('tickets', 'ticket')->name('ticket');
+        Route::get('novedades', 'updates')->name('updates');
+        Route::post('novedades/recibidas', 'acknowledge')->name('acknowledge');
+    });
+
 Route::prefix('v1')->name('api.v1.')->middleware(['auth:sanctum', 'active', 'throttle:api'])->group(function () {
     Route::get('me', [ReadController::class, 'me'])->name('me');
 

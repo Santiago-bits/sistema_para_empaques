@@ -26,7 +26,27 @@ class SupportController extends Controller
                 ->when($request->filled('status'), fn ($q) => $q->where('status', $request->query('status')))
                 ->latest('updated_at')->paginate($this->perPage($request))->withQueryString(),
             'isDeveloper' => $request->user()->can('developer'),
+            'central' => [
+                'enabled' => app(\App\Services\Central\CentralSyncService::class)->enabled(),
+                'last_sync' => \Illuminate\Support\Facades\Cache::get(\App\Services\Central\CentralSyncService::LAST_SYNC_KEY),
+                'error' => \Illuminate\Support\Facades\Cache::get(\App\Services\Central\CentralSyncService::LAST_ERROR_KEY),
+            ],
         ]);
+    }
+
+    /** Envía y recibe ya mismo las novedades con el soporte del proveedor (Panel General). */
+    public function sync(\App\Services\Central\CentralSyncService $sync): \Illuminate\Http\RedirectResponse
+    {
+        abort_unless($sync->enabled(), 404);
+        try {
+            $result = $sync->sync();
+        } catch (\Throwable $e) {
+            report($e);
+
+            return back()->with('error', 'No se pudo conectar con el soporte central. Revisá la conexión a internet; se reintenta solo cada 5 minutos.');
+        }
+
+        return back()->with('success', 'Sincronizado con soporte: '.$result['tickets'].' ticket(s) enviados, '.$result['messages'].' respuesta(s) recibidas.');
     }
 
     public function create(): View

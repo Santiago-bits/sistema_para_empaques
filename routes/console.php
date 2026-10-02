@@ -30,5 +30,9 @@ Schedule::command('galpon:backup --type=weekly')->weeklyOn(0, '03:00')->withoutO
     ->when(fn () => (bool) setting('backup.weekly', true));
 
 // Limpieza: enlaces de recuperación de contraseña vencidos y trabajos fallidos viejos.
+// Panel General del proveedor: uso, soporte y licencia (sólo si GALPON_CENTRAL_URL está configurado).
+Schedule::command('galpon:central-sync')->everyFiveMinutes()->withoutOverlapping(10)
+    ->when(fn () => app(\App\Services\Central\CentralSyncService::class)->enabled());
+
 Schedule::command('auth:clear-resets')->daily();
 Schedule::command('queue:prune-failed --hours=720')->daily();

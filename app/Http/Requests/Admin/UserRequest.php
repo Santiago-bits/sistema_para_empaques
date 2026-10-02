@@ -24,6 +24,15 @@ class UserRequest extends FormRequest
             'email' => $this->filled('email') ? mb_strtolower(trim((string) $this->input('email'))) : null,
             'internal_code' => $this->filled('internal_code') ? trim((string) $this->input('internal_code')) : null,
         ]);
+
+        // Acceso: por sectores (rol base Empleado + permisos de cada sector), total (Administrador) o un rol elegido.
+        $mode = $this->input('access_mode') ?: 'role';
+        $this->merge(['access_mode' => $mode]);
+        if ($mode === 'sectors') {
+            $this->merge(['role_id' => Role::query()->where('slug', \App\Support\Sectors::ROLE)->value('id')]);
+        } elseif ($mode === 'full') {
+            $this->merge(['role_id' => Role::query()->where('slug', 'admin')->value('id')]);
+        }
     }
 
     public function rules(): array
@@ -46,6 +55,9 @@ class UserRequest extends FormRequest
                     $fail('Sólo un Super Administrador puede asignar ese rol.');
                 }
             }],
+            'access_mode' => ['required', Rule::in(['sectors', 'full', 'role'])],
+            'sectors' => [Rule::requiredIf($this->input('access_mode') === 'sectors'), 'array'],
+            'sectors.*' => ['string', Rule::in(array_keys(\App\Support\Sectors::all()))],
             'packer_id' => ['nullable', 'exists:packers,id'],
             'owner_id' => ['nullable', 'exists:owners,id'],
             'client_id' => ['nullable', 'exists:clients,id'],
@@ -62,7 +74,7 @@ class UserRequest extends FormRequest
     {
         return [
             'first_name' => 'nombre', 'last_name' => 'apellido', 'username' => 'usuario', 'internal_code' => 'código interno',
-            'role_id' => 'rol', 'packer_id' => 'embalador', 'status' => 'estado', 'password' => 'contraseña', 'phone' => 'teléfono',
+            'role_id' => 'rol', 'access_mode' => 'tipo de acceso', 'sectors' => 'sectores', 'packer_id' => 'embalador', 'status' => 'estado', 'password' => 'contraseña', 'phone' => 'teléfono',
         ];
     }
 }

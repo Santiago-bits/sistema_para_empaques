@@ -21,8 +21,19 @@
 
 ## Usuarios
 
-Administración → Usuarios. Datos: usuario, DNI, CUIT, código interno, email (opcional), rol, galpones,
+Administración → Usuarios. Datos: usuario, DNI, CUIT, código interno, email (opcional), galpones,
 embalador vinculado, cliente/propietario vinculado (portal) y **modo kiosco**.
+
+**¿A qué partes del sistema puede entrar?** Al crear o editar un empleado elegís:
+
+- **Por sectores** (recomendado): tildás lo que atiende — Etiquetas, Romaneo y producción, Ingreso de fruta,
+  Calidad, Galpón y cámaras, Cargas y despacho, Facturación, Contabilidad y tesorería, Insumos y mantenimiento,
+  Reportes, Personal y catálogos, Incidentes. Sólo ve eso en el menú (más el tablero, las alertas y soporte).
+- **Acceso total**: rol Administrador del galpón, ve y configura todo.
+- **Rol predefinido**: los roles armados (Operador de cargas, Calidad, etc.) para casos avanzados.
+
+Sólo podés repartir sectores que vos mismo tenés, y nadie puede cambiarse sus propios accesos. Para un ajuste
+fino (un permiso suelto), usá «Permisos» en la ficha del usuario.
 
 - **Dar de baja**: cambiar el estado a Inactivo. Sus sesiones abiertas se cierran solas en el siguiente clic.
   Nunca se borran usuarios: su historial queda.

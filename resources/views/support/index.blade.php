@@ -10,6 +10,21 @@
         </x-slot:actions>
     </x-page-header>
 
+    @if ($central['enabled'])
+        <div class="panel mb-4 flex flex-wrap items-center gap-3 p-4 text-sm">
+            <x-icon name="signal" class="size-5 {{ $central['error'] ? 'text-amber-500' : 'text-emerald-600' }}"/>
+            <div class="min-w-0 flex-1">
+                <p class="font-medium text-stone-900 dark:text-white">Conectado con el soporte del proveedor del sistema</p>
+                <p class="text-stone-500">
+                    Tus tickets le llegan al administrador general para resolver problemas o agregar lo que necesites.
+                    @if ($central['last_sync']) Última sincronización: {{ fdate(\Illuminate\Support\Carbon::parse($central['last_sync']), true) }}.@endif
+                    @if ($central['error']) <span class="text-amber-700 dark:text-amber-400">Último intento sin conexión.</span>@endif
+                </p>
+            </div>
+            <form method="POST" action="{{ route('support.sync') }}">@csrf<button class="btn btn-secondary btn-sm"><x-icon name="refresh" class="size-4"/> Sincronizar ahora</button></form>
+        </div>
+    @endif
+
     <x-filters>
         <x-select name="status" label="Estado" :options="$statuses" :value="request('status')" placeholder="Todos"/>
     </x-filters>

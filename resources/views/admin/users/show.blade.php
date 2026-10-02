@@ -32,6 +32,8 @@
             <x-dl :items="[
                 'Usuario' => $user->username,
                 'Estado' => $user->status->label(),
+                'Acceso' => $user->isSuperAdmin() || $user->role?->slug === 'admin' ? 'Acceso total'
+                    : (($s = \App\Support\Sectors::of($user)) ? 'Sectores: '.collect($s)->map(fn ($k) => \App\Support\Sectors::all()[$k]['label'])->join(', ') : ($user->role?->name ?? 'Sin rol')),
                 'DNI' => $user->dni,
                 'CUIT' => $user->cuit,
                 'Código interno' => $user->internal_code,

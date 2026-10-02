@@ -99,6 +99,7 @@ class AppServiceProvider extends ServiceProvider
             'check' => \App\Models\Check::class,
             'cash_session' => \App\Models\CashSession::class,
             'cash_movement' => \App\Models\CashMovement::class,
+            'client_ticket' => \App\Models\ClientTicket::class,
         ]);
 
         Model::preventSilentlyDiscardingAttributes(! $this->app->isProduction());

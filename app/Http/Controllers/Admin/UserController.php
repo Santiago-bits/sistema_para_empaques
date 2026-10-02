@@ -58,7 +58,7 @@ class UserController extends Controller
 
     public function store(UserRequest $request): RedirectResponse
     {
-        $user = $this->users->create($request->validated());
+        $user = $this->users->create($request->validated(), $request->user());
 
         return redirect()->route('admin.users.show', $user)->with('success', 'Usuario creado.');
     }
@@ -129,9 +129,15 @@ class UserController extends Controller
             ->when(! auth()->user()->isSuperAdmin(), fn ($q) => $q->where('slug', '!=', Role::SUPER_ADMIN))
             ->pluck('name', 'id');
 
+        $slug = $user->exists ? $user->role?->slug : null;
+
         return [
             'user' => $user,
             'roles' => $roles,
+            'sectors' => \App\Support\Sectors::all(),
+            'assignableSectors' => \App\Support\Sectors::assignableBy(auth()->user()),
+            'accessMode' => old('access_mode', ! $user->exists || $slug === \App\Support\Sectors::ROLE ? 'sectors' : ($slug === 'admin' ? 'full' : 'role')),
+            'currentSectors' => old('sectors', $slug === \App\Support\Sectors::ROLE ? \App\Support\Sectors::of($user) : []),
             'statuses' => UserStatus::options(),
             'packers' => Packer::query()->where('active', true)->orderBy('last_name')->get()
                 ->mapWithKeys(fn ($p) => [$p->id => $p->code.' — '.$p->full_name]),
