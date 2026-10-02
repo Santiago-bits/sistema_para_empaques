@@ -233,3 +233,39 @@ php artisan up
 | Backups/alertas no corren solos | Falta la tarea programada del paso 7 |
 | Error con código `ERR-AAAAMMDD-XXXXX` | Enviar el código a soporte (Soporte → Nuevo ticket); el detalle queda en Panel desarrollador → Errores |
 | Se perdió la contraseña del administrador | En el servidor: `php artisan galpon:create-admin` |
+
+## 13. Panel General del proveedor (muchos clientes)
+
+Cada empaque tiene **su propia instalación** en su red (funciona sin internet). El proveedor del sistema
+tiene además un **Panel General**: una instalación más, en un servidor accesible por internet (con https),
+desde donde da de alta a cada empaque cliente, ve cuánto usa el sistema y responde sus pedidos de soporte.
+
+**En el servidor del proveedor** (una sola vez):
+
+1. Instalar el sistema igual que en los pasos 3 a 7, en un hosting o VPS con dominio y https.
+2. En `.env`: `GALPON_CENTRAL_MODE=true` y `php artisan config:cache`.
+3. Entrar como Super Administrador: aparece **Panel general → Clientes y uso** y **Soporte de clientes**.
+4. **Nuevo cliente**: nombre del empaque, contacto, plan, vencimiento y módulos. La ficha muestra las tres
+   líneas de conexión para ese empaque.
+
+**En cada empaque**: pegar en su `.env` las líneas que muestra la ficha del cliente:
+
+```ini
+GALPON_INSTALLATION_ID=empaque-del-sur-ab12cd
+GALPON_CENTRAL_URL=https://panel.tu-dominio.com
+GALPON_LICENSE_KEY=XXXXXX-XXXXXX-XXXXXX-XXXXXX
+```
+
+y ejecutar `php artisan config:cache`. Con la tarea programada del paso 7 funcionando, cada 5 minutos el
+empaque:
+
+- envía (como máximo una vez por hora) un **reporte de uso con totales**: usuarios activos, cajones del día y
+  del mes, kilos, cargas, facturas, errores y módulos activos. **Nunca** envía nombres, documentos, clientes,
+  precios ni contraseñas;
+- sube sus **tickets de soporte** (Soporte → Nuevo ticket) y las respuestas de sus usuarios;
+- baja las **respuestas del proveedor**, los cambios de estado y el estado de su licencia.
+
+La conexión siempre la inicia el empaque: no hay que abrir puertos en el galpón. Sin internet, el sistema
+sigue funcionando igual y se reintenta solo. Para probar a mano: `php artisan galpon:central-sync --report`,
+o el botón **Sincronizar ahora** en Soporte. Una licencia vencida o suspendida **nunca bloquea** datos ni la
+operación: sólo muestra un aviso.

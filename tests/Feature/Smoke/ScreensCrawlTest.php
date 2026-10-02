@@ -51,7 +51,9 @@ class ScreensCrawlTest extends TestCase
 
     /** Rutas que no son pantallas navegables (descargas, JSON de soporte, impresión directa). */
     private const SKIP = ['/^api\./', '/^install\./', '/^login$/', '/heartbeat/', '/\.pdf$/', '/download/', '/^imports\.(errors|template)$/',
-        '/^production\.scan\.(lookup|scale)$/', '/^locations\.(lookup|content)$/', '/^quality\.lookup$/', '/^storage\./', '/\.data$/'];
+        '/^production\.scan\.(lookup|scale)$/', '/^locations\.(lookup|content)$/', '/^quality\.lookup$/', '/^storage\./', '/\.data$/',
+        // Panel General: sólo existe con GALPON_CENTRAL_MODE=true (lo cubre CentralPanelTest).
+        '/^central\./'];
 
     protected function setUp(): void
     {

@@ -94,4 +94,13 @@ return [
             ['label' => 'Panel desarrollador', 'route' => 'developer.index', 'icon' => 'code', 'permission' => 'developer', 'module' => 'core'],
         ],
     ],
+    [
+        // Sólo en el servidor del proveedor (GALPON_CENTRAL_MODE=true).
+        'title' => 'Panel general',
+        'central' => true,
+        'items' => [
+            ['label' => 'Clientes y uso', 'route' => 'central.clients.index', 'icon' => 'briefcase', 'permission' => 'developer', 'module' => 'core'],
+            ['label' => 'Soporte de clientes', 'route' => 'central.tickets.index', 'icon' => 'lifebuoy', 'permission' => 'developer', 'module' => 'core'],
+        ],
+    ],
 ];

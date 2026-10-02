@@ -2,10 +2,20 @@
 
 return [
     // Versión del sistema (se actualiza en cada release; ver CHANGELOG.md).
-    'version' => '1.2.0',
+    'version' => '1.3.0',
 
     // Identificador de esta instalación (para licencias y soporte).
     'installation_id' => env('GALPON_INSTALLATION_ID', 'local-dev'),
+
+    // Panel General del proveedor. En TU servidor central: GALPON_CENTRAL_MODE=true.
+    // En cada empaque: GALPON_CENTRAL_URL (dirección del Panel General) y GALPON_LICENSE_KEY (su clave).
+    // Cada empaque envía sólo totales de uso (sin datos de personas ni de clientes) y sus pedidos de soporte.
+    'central' => [
+        'mode' => (bool) env('GALPON_CENTRAL_MODE', false),
+        'url' => env('GALPON_CENTRAL_URL'),
+        'key' => env('GALPON_LICENSE_KEY'),
+        'timeout' => (int) env('GALPON_CENTRAL_TIMEOUT', 10),
+    ],
 
     // Soporte del proveedor del sistema.
     'support_email' => env('GALPON_SUPPORT_EMAIL', 'soporte@example.com'),

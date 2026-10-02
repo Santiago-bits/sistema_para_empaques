@@ -16,14 +16,44 @@ class UserService
     {
     }
 
-    public function create(array $data): User
+    public function create(array $data, ?User $actor = null): User
     {
-        return DB::transaction(function () use ($data) {
-            $user = User::query()->create(Arr::except($data, ['warehouses', 'password_confirmation']));
+        return DB::transaction(function () use ($data, $actor) {
+            $user = User::query()->create(Arr::except($data, ['warehouses', 'password_confirmation', 'access_mode', 'sectors']));
             $user->warehouses()->sync($data['warehouses'] ?? []);
+            if (($data['access_mode'] ?? 'role') === 'sectors') {
+                $this->syncSectors($user, $data['sectors'] ?? [], $actor ?? auth()->user());
+            }
 
             return $user;
         });
+    }
+
+    /**
+     * Acceso por sectores: el usuario queda con el rol base «Empleado» y los permisos de cada sector
+     * tildado como permisos individuales. Sólo se reparten sectores que quien edita tiene completos.
+     *
+     * @param  list<string>  $sectors
+     */
+    public function syncSectors(User $user, array $sectors, ?User $actor): void
+    {
+        $allowed = $actor ? \App\Support\Sectors::assignableBy($actor) : array_keys(\App\Support\Sectors::all());
+        $chosen = array_values(array_intersect($sectors, $allowed));
+        if ($chosen === []) {
+            throw new BusinessException('Elegí al menos un sector que puedas asignar.');
+        }
+
+        $user->load('role.permissions');
+        $fromRole = $user->role?->permissions->pluck('slug')->all() ?? [];
+        $grants = array_values(array_diff(\App\Support\Sectors::permissionsFor($chosen), $fromRole));
+        $ids = Permission::query()->whereIn('slug', $grants)->pluck('id');
+
+        $before = $user->permissionOverrides()->pluck('slug')->all();
+        $user->permissionOverrides()->sync($ids->mapWithKeys(fn ($id) => [$id => ['granted' => true]])->all());
+        $user->flushPermissionCache();
+
+        $labels = array_map(fn ($k) => \App\Support\Sectors::all()[$k]['label'], $chosen);
+        $this->audit->log('permissions', $user, ['overrides' => $before], ['sectors' => $chosen], 'Sectores asignados: '.implode(', ', $labels));
     }
 
     public function update(User $user, array $data, User $actor): User
@@ -32,8 +62,20 @@ class UserService
             throw new BusinessException('No podés desactivar tu propio usuario.');
         }
         $this->guardLastSuperAdmin($user, $data);
+        $mode = $data['access_mode'] ?? 'role';
+        $wasSectors = $user->role?->slug === \App\Support\Sectors::ROLE;
+        // Nadie (salvo el super admin) cambia sus propios accesos: evita autoasignarse más permisos.
+        if ($user->is($actor) && ! $actor->isSuperAdmin()) {
+            $sameRole = (int) ($data['role_id'] ?? $user->role_id) === (int) $user->role_id;
+            $sameSectors = $mode !== 'sectors' || array_values(array_diff($data['sectors'] ?? [], \App\Support\Sectors::of($user))) === [];
+            if (! $sameRole || ! $sameSectors) {
+                throw new BusinessException('No podés cambiar tus propios accesos. Pedíselo a otro administrador.');
+            }
+        }
 
-        return DB::transaction(function () use ($user, $data) {
+        return DB::transaction(function () use ($user, $data, $mode, $wasSectors, $actor) {
+            $sectors = $data['sectors'] ?? [];
+            $data = Arr::except($data, ['access_mode', 'sectors']);
             if (empty($data['password'])) {
                 unset($data['password']);
             }
@@ -51,6 +93,14 @@ class UserService
             }
             if ($passwordChanged) {
                 $user->forceFill(['password_changed_at' => now()])->saveQuietly();
+            }
+
+            if ($mode === 'sectors' && ! ($user->is($actor) && ! $actor->isSuperAdmin())) {
+                $this->syncSectors($user->fresh(), $sectors, $actor);
+            } elseif ($mode !== 'sectors' && $wasSectors) {
+                // Pasó de «por sectores» a un rol: los permisos de los sectores dejan de valer.
+                $user->permissionOverrides()->sync([]);
+                $user->flushPermissionCache();
             }
 
             return $user;

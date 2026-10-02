@@ -36,6 +36,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'password.fresh' => RequirePasswordChange::class,
             'abilities' => \Laravel\Sanctum\Http\Middleware\CheckAbilities::class,
             'ability' => \Laravel\Sanctum\Http\Middleware\CheckForAnyAbility::class,
+            'central' => \App\Http\Middleware\EnsureCentralMode::class,
+            'installation' => \App\Http\Middleware\AuthenticateInstallation::class,
         ]);
         $middleware->web(append: [SecurityHeaders::class, RedirectIfNotInstalled::class]);
         $middleware->api(prepend: [\App\Http\Middleware\ForceJsonResponse::class], append: [SecurityHeaders::class]);

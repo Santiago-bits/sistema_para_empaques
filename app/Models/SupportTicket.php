@@ -20,7 +20,7 @@ class SupportTicket extends Model
     ];
 
     protected $fillable = [
-        'number', 'subject', 'description', 'priority', 'status', 'user_id',
+        'number', 'subject', 'description', 'priority', 'status', 'user_id', 'central_synced_at',
     ];
 
     public function user(): BelongsTo
