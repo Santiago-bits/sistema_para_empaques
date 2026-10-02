@@ -34,6 +34,11 @@
                 return {
                     ctx: null, drawing: false, dirty: false, error: '',
                     init() {
+                        this.setup();
+                        // Al girar la tablet cambia el tamaño: se reajusta el lienzo si todavía no se firmó.
+                        window.addEventListener('resize', () => { if (!this.dirty) this.setup(); });
+                    },
+                    setup() {
                         const c = this.$refs.canvas;
                         const ratio = window.devicePixelRatio || 1;
                         c.width = c.offsetWidth * ratio;
@@ -46,7 +51,7 @@
                     },
                     pos(e) { const r = this.$refs.canvas.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; },
                     start(e) { this.drawing = true; const [x, y] = this.pos(e); this.ctx.beginPath(); this.ctx.moveTo(x, y); },
-                    draw(e) { if (!this.drawing) return; const [x, y] = this.pos(e); this.ctx.lineTo(x, y); this.ctx.stroke(); this.dirty = true; },
+                    draw(e) { if (!this.drawing) return; const [x, y] = this.pos(e); this.ctx.lineTo(x, y); this.ctx.stroke(); this.dirty = true; this.error = ''; },
                     end() { this.drawing = false; },
                     clear() { this.ctx.clearRect(0, 0, this.$refs.canvas.width, this.$refs.canvas.height); this.dirty = false; },
                     beforeSubmit(e) {
