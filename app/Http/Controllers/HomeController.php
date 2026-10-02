@@ -11,6 +11,8 @@ class HomeController extends Controller
     public function __invoke(Request $request): RedirectResponse
     {
         $user = $request->user();
+        // Sólo redirige: conserva los mensajes flash para la pantalla de destino.
+        $request->session()->reflash();
 
         return match (true) {
             $user->kiosk_mode => redirect()->route('kiosk'),

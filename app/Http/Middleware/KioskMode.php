@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class KioskMode
 {
-    private const ALLOWED = ['production.scan', 'production.scan.*', 'kiosk', 'logout', 'api.*', 'notifications.*', 'heartbeat'];
+    private const ALLOWED = ['production.scan', 'production.scan.*', 'kiosk', 'logout', 'password.change', 'password.change.update', 'api.*', 'notifications.*', 'heartbeat'];
 
     public function handle(Request $request, Closure $next): Response
     {
