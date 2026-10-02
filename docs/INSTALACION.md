@@ -68,8 +68,12 @@ GALPON_INSTALLATION_ID=empaque-nombre-del-cliente
 GALPON_MYSQL_BIN=C:\xampp\mysql\bin # para los backups
 ```
 
-> `APP_URL` **debe** ser la IP (o nombre) con la que entran las otras PCs. Si queda `localhost`,
-> el QR de los remitos y los enlaces de recuperación de contraseña no funcionan en otras PCs.
+> `APP_URL` **debe** ser la IP (o nombre) con la que entran las otras PCs. Todos los enlaces absolutos
+> (QR de remitos, emails de recuperación) se arman con ese valor, nunca con lo que envía el navegador.
+> Si queda `localhost`, el QR y los enlaces no funcionan en otras PCs.
+>
+> `GALPON_TRUSTED_PROXIES` se deja **vacío** si Apache atiende directamente (lo normal). Sólo si hay un
+> proxy inverso adelante se pone su IP; nunca un rango de toda la red.
 
 ## 4. Base de datos
 
