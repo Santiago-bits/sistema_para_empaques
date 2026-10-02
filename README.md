@@ -52,6 +52,7 @@ para crear la empresa y el super administrador. Con los datos demo, los usuarios
 | [docs/INSTALACION.md](docs/INSTALACION.md) | Técnico: servidor Windows/XAMPP, red LAN, tareas programadas, actualización |
 | [docs/MANUAL_USUARIO.md](docs/MANUAL_USUARIO.md) | Operadores: escaneo, ingreso, calidad, cargas, remitos |
 | [docs/MANUAL_ADMINISTRADOR.md](docs/MANUAL_ADMINISTRADOR.md) | Administración: usuarios, permisos, módulos, configuración, cierre, costos |
+| [docs/HOSTINGER.md](docs/HOSTINGER.md) | Panel General en Hostinger, trabajar en tu PC y pasar los cambios al hosting |
 | [docs/BACKUPS.md](docs/BACKUPS.md) | Backups automáticos, verificación y restauración |
 | [docs/ARCA.md](docs/ARCA.md) | Facturación electrónica: certificados, homologación y producción |
 | [docs/API.md](docs/API.md) | Integraciones: tokens, balanzas, sensores, endpoints |

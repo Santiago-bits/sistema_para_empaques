@@ -53,6 +53,20 @@ class UserRequest extends FormRequest
                 $isSuper = Role::query()->whereKey($value)->value('slug') === Role::SUPER_ADMIN;
                 if ($isSuper && ! $this->user()->isSuperAdmin()) {
                     $fail('Sólo un Super Administrador puede asignar ese rol.');
+
+                    return;
+                }
+                // Nadie da un rol con permisos que él mismo no tiene (evita escalar privilegios).
+                $actor = $this->user();
+                $unchanged = (int) $this->route('user')?->role_id === (int) $value;
+                // El rol base «Empleado» sólo trae tablero, alertas y soporte: los sectores se controlan aparte.
+                $isBase = Role::query()->whereKey($value)->value('slug') === \App\Support\Sectors::ROLE;
+                if (! $actor->isSuperAdmin() && ! $unchanged && ! $isBase) {
+                    $missing = Role::query()->with('permissions:id,slug')->find($value)?->permissions->pluck('slug')
+                        ->diff($actor->permissionSlugs()) ?? collect();
+                    if ($missing->isNotEmpty()) {
+                        $fail('No podés asignar un rol con permisos que vos no tenés ('.$missing->take(3)->join(', ').($missing->count() > 3 ? '…' : '').').');
+                    }
                 }
             }],
             'access_mode' => ['required', Rule::in(['sectors', 'full', 'role'])],

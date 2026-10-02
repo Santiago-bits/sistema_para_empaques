@@ -88,6 +88,15 @@ class UserSectorsTest extends TestCase
         $this->assertFalse($editor->is($created));
     }
 
+    public function test_user_manager_cannot_grant_a_role_above_own_permissions(): void
+    {
+        $this->actingWithPermissions(['users.view', 'users.manage', 'labels.print']);
+        $this->post(route('admin.users.store'), $this->payload(['username' => 'jefe', 'access_mode' => 'full']))->assertSessionHasErrors('role_id');
+        $this->post(route('admin.users.store'), $this->payload(['username' => 'jefe', 'access_mode' => 'role',
+            'role_id' => Role::query()->where('slug', 'billing')->value('id')]))->assertSessionHasErrors('role_id');
+        $this->assertFalse(User::query()->where('username', 'jefe')->exists());
+    }
+
     public function test_admin_cannot_change_own_access(): void
     {
         $admin = $this->actingAsRole('admin', ['username' => 'duenio']);

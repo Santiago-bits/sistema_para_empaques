@@ -70,6 +70,14 @@ class LotController extends Controller
         ]);
     }
 
+    /** Planilla de romaneo del lote (imprimible). */
+    public function romaneo(Lot $lot): View
+    {
+        $lot->load(['producer', 'owner', 'variety', 'season', 'containerType']);
+
+        return view('lots.romaneo', ['lot' => $lot] + $this->lots->romaneo($lot));
+    }
+
     public function edit(Lot $lot): View
     {
         abort_if($lot->status === 'voided', 403, 'Un lote anulado no se puede modificar.');

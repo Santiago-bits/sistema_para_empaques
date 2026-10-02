@@ -47,6 +47,7 @@ Route::middleware('module:catalogs')->group(function () {
         Route::get('nuevo', 'create')->middleware('can:lots.manage')->name('create');
         Route::post('/', 'store')->middleware('can:lots.manage')->name('store');
         Route::get('{lot}', 'show')->middleware('can:lots.view')->name('show');
+        Route::get('{lot}/romaneo', 'romaneo')->middleware('can:lots.view')->name('romaneo');
         Route::get('{lot}/editar', 'edit')->middleware('can:lots.manage')->name('edit');
         Route::put('{lot}', 'update')->middleware('can:lots.manage')->name('update');
         Route::post('{lot}/cerrar', 'close')->middleware('can:lots.manage')->name('close');
