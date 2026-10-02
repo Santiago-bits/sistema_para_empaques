@@ -12,8 +12,12 @@
         <section class="space-y-4">
             <div class="panel p-4">
                 <label for="lb-scan" class="form-label">Escanear cajón o pallet</label>
-                <input id="lb-scan" x-ref="scan" x-model.trim="scanCode" @keydown.enter.prevent="scan()" class="form-input code py-3 text-xl"
-                       placeholder="Código de cajón o pallet + Enter" autocomplete="off">
+                <div class="flex gap-2">
+                    <input id="lb-scan" data-scan x-ref="scan" x-model.trim="scanCode" @keydown.enter.prevent="scan()" class="form-input code min-w-0 flex-1 py-3 text-xl"
+                           placeholder="Código de cajón o pallet + Enter" autocomplete="off">
+                    {{-- Continuo: la cámara queda abierta y cada lectura entra a la cola de la carga. --}}
+                    <x-scan-camera target="lb-scan" :continuous="true" title="Cargar cajones y pallets"/>
+                </div>
                 {{-- Resultado al lado del campo: el operario lo ve sin desplazarse (también en tablet/celular). --}}
                 <div class="mt-3 flex flex-wrap items-center justify-between gap-2 text-sm">
                     <p class="tabular-nums text-stone-600 dark:text-stone-300">

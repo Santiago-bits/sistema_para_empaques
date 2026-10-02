@@ -9,7 +9,10 @@
                :class="error ? 'bg-red-50 text-red-800 dark:bg-red-950/40 dark:text-red-200' : 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200'"></p>
             <div class="panel p-5">
                 <label for="mv-item" class="form-label">1. Pallet o cajón</label>
-                <input id="mv-item" x-ref="item" x-model.trim="itemCode" @keydown.enter.prevent="findItem()" class="form-input code py-3 text-2xl" placeholder="Escanear código" autocomplete="off">
+                <div class="flex gap-2">
+                <input id="mv-item" data-scan x-ref="item" x-model.trim="itemCode" @keydown.enter.prevent="findItem()" class="form-input code min-w-0 flex-1 py-3 text-2xl" placeholder="Escanear código" autocomplete="off">
+                    <x-scan-camera target="mv-item" title="Escanear pallet o cajón"/>
+                </div>
                 <template x-if="item">
                     <p class="mt-2 text-sm"><span x-text="item.type_label"></span> <strong class="code" x-text="item.code"></strong> ·
                         <span x-text="item.status"></span> · ahora en <strong x-text="item.location"></strong>
@@ -20,7 +23,8 @@
             <div class="panel p-5">
                 <label for="mv-dest" class="form-label">2. Ubicación de destino</label>
                 <div class="flex gap-2">
-                    <input id="mv-dest" x-ref="dest" x-model.trim="destCode" @keydown.enter.prevent="findDest()" class="form-input code py-3 text-2xl" placeholder="Escanear código de ubicación" autocomplete="off">
+                    <input id="mv-dest" data-scan x-ref="dest" x-model.trim="destCode" @keydown.enter.prevent="findDest()" class="form-input code min-w-0 flex-1 py-3 text-2xl" placeholder="Escanear código de ubicación" autocomplete="off">
+                    <x-scan-camera target="mv-dest" title="Escanear ubicación"/>
                 </div>
                 <div class="mt-3">
                     <label for="mv-select" class="form-label">o elegir de la lista</label>

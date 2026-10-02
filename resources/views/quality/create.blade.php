@@ -11,8 +11,9 @@
             {{-- 1. Código --}}
             <x-panel title="1. Código del cajón, pallet o lote">
                 <form @submit.prevent="lookup()" class="flex gap-3" data-allow-resubmit>
-                    <input x-ref="code" x-model="code" type="text" autocomplete="off" autofocus
-                           class="form-input py-3 font-mono text-2xl" placeholder="Escanear código…" aria-label="Código">
+                    <input id="qc-code" data-scan x-ref="code" x-model="code" type="text" autocomplete="off" autofocus
+                           class="form-input min-w-0 flex-1 py-3 font-mono text-2xl" placeholder="Escanear código…" aria-label="Código">
+                    <x-scan-camera target="qc-code" title="Escanear cajón, pallet o lote"/>
                     <button type="submit" class="btn btn-secondary btn-lg" :disabled="loading"><x-icon name="search" class="size-5"/> Buscar</button>
                 </form>
                 {{-- Resultado de la última operación junto al campo (visible sin desplazarse en tablet/celular). --}}
