@@ -24,7 +24,7 @@
             @endif
         </x-panel>
 
-        <x-panel title="Controles" :padding="false" class="lg:col-span-2">
+        <x-panel id="controles" title="Controles" :padding="false" class="scroll-mt-20 lg:col-span-2">
             <ul class="divide-y divide-stone-100 dark:divide-stone-800">
                 @foreach ($items as $key => $label)
                     @php $check = $checks->get($key); $done = (bool) $check?->checked; @endphp
