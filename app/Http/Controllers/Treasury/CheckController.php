@@ -120,6 +120,33 @@ class CheckController extends Controller
         ]);
     }
 
+    public function edit(Check $check): View
+    {
+        return view('treasury.checks.edit', ['check' => $check]);
+    }
+
+    public function update(Request $request, Check $check): RedirectResponse
+    {
+        $request->merge(['amount' => parse_number($request->input('amount'))]);
+        $data = $request->validate([
+            'bank' => ['required', 'string', 'max:80'],
+            'number' => ['required', 'string', 'max:30'],
+            'amount' => ['required', 'numeric', 'gt:0', 'max:999999999999'],
+            'issued_on' => ['required', 'date'],
+            'payment_date' => ['required', 'date', 'after_or_equal:issued_on'],
+            'electronic' => ['boolean'],
+            'issuer_name' => ['nullable', 'string', 'max:120'],
+            'issuer_cuit' => ['nullable', 'string', 'max:13'],
+            'notes' => ['nullable', 'string', 'max:2000'],
+            'reason' => ['required', 'string', 'min:5', 'max:255'],
+        ], [], ['bank' => 'banco', 'number' => 'número', 'amount' => 'importe', 'issued_on' => 'fecha de emisión',
+            'payment_date' => 'fecha de cobro', 'reason' => 'motivo de la corrección']);
+
+        $this->checks->update($check, $data, $data['reason'], $request->user());
+
+        return redirect()->route('checks.show', $check)->with('success', 'Cheque corregido.');
+    }
+
     public function transition(Request $request, Check $check): RedirectResponse
     {
         $data = $request->validate([

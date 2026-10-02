@@ -9,6 +9,7 @@
         <x-slot:actions>
             <x-badge :color="$color" class="text-sm">{{ \App\Models\QualityControl::RESULTS[$control->result] ?? $control->result }}</x-badge>
             @if ($target[2])<a href="{{ $target[2] }}" class="btn btn-secondary">Ver {{ mb_strtolower($target[0]) }}</a>@endif
+            @can('quality.manage')<a href="{{ route('quality.edit', $control) }}" class="btn btn-primary"><x-icon name="pencil" class="size-4"/> Corregir</a>@endcan
         </x-slot:actions>
     </x-page-header>
 

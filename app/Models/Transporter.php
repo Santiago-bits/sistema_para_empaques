@@ -13,7 +13,8 @@ class Transporter extends Model
     use Auditable, SoftDeletes;
 
     protected $fillable = [
-        'business_name', 'cuit', 'contact', 'phone', 'email', 'active',
+        'business_name', 'cuit', 'contact', 'phone', 'email', 'active', 'address', 'locality', 'province', 'tax_condition', 'cbu',
+        'bank_alias', 'notes',
     ];
 
     protected function casts(): array

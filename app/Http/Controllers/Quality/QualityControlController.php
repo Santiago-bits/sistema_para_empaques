@@ -14,6 +14,7 @@ use App\Services\QualityService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class QualityControlController extends Controller
@@ -109,6 +110,37 @@ class QualityControlController extends Controller
         ]);
 
         return view('quality.show', ['control' => $qualityControl]);
+    }
+
+    public function edit(QualityControl $qualityControl): View
+    {
+        return view('quality.edit', ['control' => $qualityControl->load('crate', 'pallet', 'lot')]);
+    }
+
+    /** Corrección de un control ya registrado: exige motivo (queda en la auditoría). */
+    public function update(Request $request, QualityControl $qualityControl): RedirectResponse
+    {
+        foreach (['damage_pct', 'bruise_pct', 'rot_pct', 'reject_pct'] as $key) {
+            $request->merge([$key => parse_number($request->input($key), false)]);
+        }
+        $data = $request->validate([
+            'result' => ['required', Rule::in(array_keys(QualityControl::RESULTS))],
+            'grade' => ['nullable', 'string', 'max:60'],
+            'caliber' => ['nullable', 'string', 'max:60'],
+            'ripeness' => ['nullable', 'string', 'max:60'],
+            'damage_pct' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'bruise_pct' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'rot_pct' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'reject_pct' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'defects' => ['nullable', 'string', 'max:2000'],
+            'notes' => ['nullable', 'string', 'max:2000'],
+            'controlled_at' => ['required', 'date', 'before_or_equal:now'],
+            'reason' => ['required', 'string', 'min:5', 'max:255'],
+        ], [], ['result' => 'resultado', 'controlled_at' => 'fecha del control', 'reason' => 'motivo de la corrección']);
+
+        $this->quality->updateControl($qualityControl, $data, $data['reason']);
+
+        return redirect()->route('quality.show', $qualityControl)->with('success', 'Control corregido.');
     }
 
     private function describe(string $type, Crate|Pallet|Lot $model): array

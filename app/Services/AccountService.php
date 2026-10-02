@@ -193,6 +193,60 @@ class AccountService
         });
     }
 
+    /**
+     * Corrige un movimiento cargado a mano (cobro, pago, ajuste, adelanto, saldo inicial) sin borrarlo:
+     * fecha, detalle y referencia se corrigen en el lugar; si cambia el importe se anula y se vuelve a
+     * asentar (y si era en efectivo, también se corrige la caja). Todo con motivo y en auditoría.
+     */
+    public function correct(AccountMovement $movement, array $data, string $reason, User $by): AccountMovement
+    {
+        return DB::transaction(function () use ($movement, $data, $reason, $by) {
+            $locked = AccountMovement::query()->whereKey($movement->id)->lockForUpdate()->firstOrFail();
+            if ($locked->isVoided()) {
+                throw new BusinessException('El movimiento está anulado.');
+            }
+            $origin = ['check' => 'el cheque', 'invoice' => 'el comprobante', 'lot' => 'el lote', 'load' => 'la carga'][$locked->source_type] ?? null;
+            if ($origin) {
+                throw new BusinessException('Este movimiento se generó desde '.$origin.': corregilo ahí y la cuenta se actualiza sola.');
+            }
+
+            $amount = round((float) $data['amount'], 2);
+            $current = (float) $locked->debit > 0 ? (float) $locked->debit : (float) $locked->credit;
+            $meta = [
+                'date' => Carbon::parse($data['date']),
+                'description' => mb_substr((string) $data['description'], 0, 255),
+                'reference' => isset($data['reference']) ? mb_substr((string) $data['reference'], 0, 80) : null,
+            ];
+
+            if (abs($amount - $current) < 0.005) {
+                $this->audit->withReason($reason);
+                try {
+                    $locked->update($meta);
+                } finally {
+                    $this->audit->withReason(null);
+                }
+
+                return $locked;
+            }
+
+            $isDebit = (float) $locked->debit > 0;
+            $cash = \App\Models\CashMovement::query()->where('account_movement_id', $locked->id)->whereNull('voided_at')->first();
+            $this->markVoided($locked, 'Corrección: '.$reason, $by);
+            $new = $this->post($locked->holder()->withTrashed()->firstOrFail(), $locked->type, $isDebit ? $amount : 0, $isDebit ? 0 : $amount,
+                $meta['description'], ['date' => $meta['date'], 'method' => $locked->payment_method, 'reference' => $meta['reference'], 'by' => $by]);
+
+            if ($cash) {
+                app(CashService::class)->voidMovement($cash, 'Corrección: '.$reason, $by, false);
+                app(CashService::class)->addMovement([
+                    'direction' => $cash->direction, 'category' => $cash->category, 'description' => $meta['description'],
+                    'amount' => $amount, 'account_movement_id' => $new->id,
+                ], $by);
+            }
+
+            return $new;
+        });
+    }
+
     /** Marca anulado y libera el origen para que pueda volver a imputarse corregido. */
     public function markVoided(AccountMovement $movement, string $reason, User $by): void
     {
@@ -278,6 +332,19 @@ class AccountService
             $locked->forceFill(['settled_at' => now(), 'settled_by' => $by->id])->save();
 
             return ['purchase' => $purchase, 'fee' => $fee];
+        });
+    }
+
+    /** Corrige un lote ya liquidado: anula compra y tasa anteriores y liquida con los datos nuevos. */
+    public function resettleLot(Lot $lot, User $by, string $reason): array
+    {
+        return DB::transaction(function () use ($lot, $by, $reason) {
+            AccountMovement::query()->where('source_type', 'lot')->where('source_id', $lot->id)
+                ->whereIn('type', ['purchase', 'association_fee'])->whereNull('voided_at')->lockForUpdate()->get()
+                ->each(fn (AccountMovement $m) => $this->markVoided($m, 'Corrección del lote: '.$reason, $by));
+            Lot::query()->whereKey($lot->id)->update(['settled_at' => null, 'settled_by' => null]);
+
+            return $this->settleLot($lot->fresh(), $by);
         });
     }
 

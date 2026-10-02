@@ -87,6 +87,21 @@ class CashController extends Controller
         return back()->with('success', 'Movimiento de caja anulado.');
     }
 
+    public function correctMovement(Request $request, CashMovement $movement): RedirectResponse
+    {
+        $request->merge(['amount' => parse_number($request->input('amount'))]);
+        $data = $request->validate([
+            'category' => ['required', Rule::in(array_keys(CashMovement::CATEGORIES))],
+            'description' => ['required', 'string', 'max:255'],
+            'amount' => ['required', 'numeric', 'gt:0', 'max:999999999999'],
+            'reason' => ['required', 'string', 'min:5', 'max:255'],
+        ], [], ['category' => 'concepto', 'description' => 'descripción', 'amount' => 'importe', 'reason' => 'motivo de la corrección']);
+
+        $this->cash->correct($movement, $data, $data['reason'], $request->user());
+
+        return back()->with('success', 'Movimiento de caja corregido.');
+    }
+
     public function close(Request $request): RedirectResponse
     {
         $request->merge(['counted_balance' => parse_number($request->input('counted_balance'))]);

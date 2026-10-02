@@ -73,6 +73,11 @@ class GradeDefinition extends CatalogDefinition
         return $input;
     }
 
+    public function importColumns(): array
+    {
+        return ['codigo' => 'code', 'nombre' => 'name', 'orden' => 'sort_order'];
+    }
+
     public static function options(): array
     {
         return Grade::query()->where('active', true)->orderBy('sort_order')->orderBy('name')->pluck('name', 'id')->all();

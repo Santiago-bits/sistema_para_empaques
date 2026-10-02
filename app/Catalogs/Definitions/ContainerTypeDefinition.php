@@ -82,6 +82,30 @@ class ContainerTypeDefinition extends CatalogDefinition
         return $this->cleanUpper($input, 'code');
     }
 
+    public function importColumns(): array
+    {
+        return ['codigo' => 'code', 'nombre' => 'name', 'tipo' => 'kind', 'tara_kg' => 'tare_kg', 'capacidad_kg' => 'capacity_kg'];
+    }
+
+    public function prepareImport(array $row): array
+    {
+        if (isset($row['kind']) && ! array_key_exists($row['kind'], ContainerType::KINDS)) {
+            $row['kind'] = array_search(mb_strtolower(trim((string) $row['kind'])), array_map('mb_strtolower', ContainerType::KINDS), true) ?: $row['kind'];
+        }
+        foreach (['tare_kg', 'capacity_kg'] as $key) {
+            if (isset($row[$key])) {
+                $row[$key] = parse_number($row[$key], false);
+            }
+        }
+
+        return $row;
+    }
+
+    public function exportValue(Model $record, string $field): mixed
+    {
+        return $field === 'kind' ? (ContainerType::KINDS[$record->kind] ?? $record->kind) : parent::exportValue($record, $field);
+    }
+
     public static function options(): array
     {
         return ContainerType::query()->where('active', true)->orderBy('name')->pluck('name', 'id')->all();

@@ -13,11 +13,12 @@ class Employee extends Model
 
     protected $fillable = [
         'code', 'first_name', 'last_name', 'dni', 'cuil', 'phone', 'position', 'crew_id', 'hired_on', 'daily_wage', 'notes', 'active',
+        'address', 'birth_date', 'cbu', 'bank_alias',
     ];
 
     protected function casts(): array
     {
-        return ['active' => 'boolean', 'hired_on' => 'date', 'daily_wage' => 'decimal:2'];
+        return ['active' => 'boolean', 'hired_on' => 'date', 'birth_date' => 'date', 'daily_wage' => 'decimal:2'];
     }
 
     public function crew(): BelongsTo

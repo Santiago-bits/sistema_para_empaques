@@ -819,6 +819,63 @@ class LoadService
             ->distinct()->pluck('pallet_id')->map(fn ($v) => (int) $v)->all();
     }
 
+    /** Datos que se pueden corregir con la carga ya cerrada o despachada (no cambian su contenido). */
+    public const CORRECTABLE = [
+        'truck_id', 'driver_id', 'transporter_id', 'trailer_plate', 'guide_number', 'commercial_destination', 'sales_channel',
+        'sale_condition', 'freight_amount', 'notes',
+    ];
+
+    /**
+     * Corrige transporte y datos comerciales de una carga cerrada, despachada o entregada sin reabrirla.
+     * Con motivo y auditado. Si el flete ya estaba imputado y cambia el importe o el transportista, se
+     * re-imputa; el remito emitido toma el camión y chofer corregidos.
+     */
+    public function correctDetails(Load $load, array $data, string $reason, User $by): Load
+    {
+        return DB::transaction(function () use ($load, $data, $reason, $by) {
+            $locked = Load::query()->whereKey($load->id)->lockForUpdate()->firstOrFail();
+            if (in_array($locked->status, [LoadStatus::Draft, LoadStatus::Cancelled], true)) {
+                throw new BusinessException($locked->status === LoadStatus::Draft
+                    ? 'La carga está en armado: editala normalmente.' : 'Una carga cancelada no se corrige.');
+            }
+
+            $locked->fill(Arr::only($data, self::CORRECTABLE));
+            if (! $locked->isDirty()) {
+                return $locked;
+            }
+            $freightChanged = $locked->isDirty('freight_amount') || $locked->isDirty('transporter_id');
+
+            $this->audit->withReason($reason);
+            try {
+                $locked->forceFill(['version' => $locked->version + 1])->save();
+            } finally {
+                $this->audit->withReason(null);
+            }
+
+            if ($locked->wasChanged('truck_id') || $locked->wasChanged('driver_id')) {
+                Remito::query()->where('load_id', $locked->id)->where('status', RemitoStatus::Issued->value)
+                    ->update(['truck_id' => $locked->truck_id, 'driver_id' => $locked->driver_id, 'updated_at' => now()]);
+            }
+
+            if ($freightChanged && $locked->freight_posted_at) {
+                $accounts = app(AccountService::class);
+                \App\Models\AccountMovement::query()->where('source_type', 'load')->where('source_id', $locked->id)
+                    ->where('type', 'freight')->whereNull('voided_at')->lockForUpdate()->get()
+                    ->each(fn ($m) => $accounts->markVoided($m, 'Corrección de la carga: '.$reason, $by));
+                Load::query()->whereKey($locked->id)->update(['freight_posted_at' => null]);
+                $accounts->postFreight($locked->fresh());
+            }
+
+            return $locked->fresh();
+        });
+    }
+
+    /** Tras corregir un cajón que está en una carga en armado (p. ej. su peso). */
+    public function refreshTotals(Load $load): void
+    {
+        $this->recalculateTotals($load);
+    }
+
     /** Recalcula totales con una consulta agregada (nunca sumando en PHP). */
     private function recalculateTotals(Load $load, bool $bumpVersion = true): void
     {

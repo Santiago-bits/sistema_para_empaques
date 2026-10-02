@@ -2,6 +2,22 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versionado semántico.
 
+## [1.5.0] - 2026-10-02
+
+### Agregado
+- **Todo se puede corregir sin borrar ni rehacer** (con motivo y en auditoría): controles de calidad, rechazos,
+  cajones/pesos del romaneo (también dentro de una carga en armado), datos de transporte y comerciales de cargas
+  cerradas o despachadas (el flete se re-imputa solo), lotes ya liquidados (se re-liquidan solos), cheques y
+  movimientos de caja y de cuentas corrientes. Las facturas autorizadas por ARCA se corrigen con nota de crédito (ley).
+- **Exportar a Excel/CSV** cada catálogo con los mismos encabezados de la importación, e **importar** agregando nuevos
+  y **actualizando los existentes** (sólo las columnas que trae el archivo).
+- Importación de clientes, productores, propietarios, proveedores, transportistas, camiones, choferes, embaladores,
+  empleados, cuadrillas, destinos, variedades, tamaños, selecciones y envases.
+- Datos completos: chofer (CUIL, dirección, nacimiento, categoría de licencia, contacto de emergencia), camión (año,
+  chasis, seguro, VTV/RTO, habilitación SENASA), transportista y proveedor (dirección, IVA, CBU, alias), productor
+  (RENSPA, IVA, CBU), embalador y empleado (CUIL, teléfono, dirección) y galpón (razón social, IIBB, inicio de actividades).
+- Alertas de vencimiento de seguro, VTV y habilitación SENASA de los camiones.
+
 ## [1.4.0] - 2026-10-02
 
 ### Agregado

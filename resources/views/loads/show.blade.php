@@ -3,6 +3,11 @@
     <x-page-header :title="'Carga '.$load->number" :subtitle="fdate($load->date).' · '.($load->client?->business_name ?? 'Sin cliente').' · '.($load->destination?->name ?? 'Sin destino')" :back="route('loads.index')">
         <x-slot:actions>
             <x-status :status="$status" class="text-sm"/>
+            @if (in_array($status->value, ['closed', 'dispatched', 'delivered'], true))
+                @can('loads.update')
+                    <a href="{{ route('loads.correct', $load) }}" class="btn btn-secondary"><x-icon name="pencil" class="size-4"/> Corregir datos</a>
+                @endcan
+            @endif
             @if ($status->value === 'draft')
                 @can('loads.cancel')
                     <button type="button" class="btn btn-ghost text-red-600" @click="$dispatch('open-modal', 'cancel-load')">Cancelar carga</button>

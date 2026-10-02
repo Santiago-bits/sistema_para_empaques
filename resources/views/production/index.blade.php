@@ -48,6 +48,11 @@
                     <td>{{ $record->user?->full_name }}</td>
                     <td class="text-right">
                         @if (! $record->voided_at)
+                            @can('crates.update')
+                                @if ($record->crate)
+                                    <a href="{{ route('crates.edit', $record->crate) }}" class="mr-3 text-sm link" title="Corregir peso, variedad, tamaño o embalador">Corregir</a>
+                                @endif
+                            @endcan
                             @can('production.void')
                                 <button type="button" class="text-sm text-red-600 hover:underline"
                                         @click="$dispatch('void-record', {{ \Illuminate\Support\Js::from(['url' => route('production.void', $record), 'crate' => $record->crate?->code]) }})">Anular</button>

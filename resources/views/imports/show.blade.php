@@ -4,7 +4,8 @@
 
     <div class="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
         <x-stat label="Registros encontrados" :value="num($batch->total_rows)" icon="list"/>
-        <x-stat label="Correctos" :value="num($batch->valid_rows)" icon="check" color="brand"/>
+        <x-stat label="Correctos" :value="num($batch->valid_rows)" icon="check" color="brand"
+                :hint="$batch->mode === 'upsert' ? num($batch->valid_rows - $batch->updated_rows).' nuevos · '.num($batch->updated_rows).' a actualizar' : null"/>
         <x-stat label="Con errores" :value="num($batch->error_rows)" icon="alert" :color="$batch->error_rows ? 'red' : 'stone'"/>
     </div>
 
@@ -12,7 +13,11 @@
         <div class="panel mb-6 flex flex-wrap items-center justify-between gap-3 p-4">
             <p class="text-sm">
                 @if ($batch->valid_rows > 0)
-                    Se importarán <strong>{{ num($batch->valid_rows) }}</strong> registro(s).
+                    @if ($batch->mode === 'upsert')
+                        Se agregarán <strong>{{ num($batch->valid_rows - $batch->updated_rows) }}</strong> y se actualizarán <strong>{{ num($batch->updated_rows) }}</strong> registro(s) existentes (sólo las columnas que trae el archivo).
+                    @else
+                        Se importarán <strong>{{ num($batch->valid_rows) }}</strong> registro(s).
+                    @endif
                     @if ($batch->error_rows) Las {{ num($batch->error_rows) }} fila(s) con errores se omitirán. @endif
                 @else
                     No hay filas válidas para importar. Corregí el archivo y volvé a subirlo.

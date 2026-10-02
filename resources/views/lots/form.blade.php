@@ -26,9 +26,12 @@
                 <x-input name="price_per_kg" inputmode="decimal" label="Precio por kilo ($)" :value="$lot->price_per_kg !== null ? num($lot->price_per_kg, 2) : null"
                          hint="Al liquidar el lote, kilos × precio pasan a la cuenta corriente del productor."/>
                 @if ($lot->settled_at)
-                    <p class="self-end rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">Liquidado el {{ fdate($lot->settled_at) }}: kilos y precio no se pueden cambiar.</p>
+                    <p class="self-end rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">Liquidado el {{ fdate($lot->settled_at) }}. Si corregís kilos, precio o productor, se vuelve a liquidar solo.</p>
                 @endif
             </div>
+            @if ($lot->settled_at)
+                <div class="mt-4"><x-input name="reason" label="Motivo de la corrección (obligatorio si cambiás kilos, precio o productor)" maxlength="255"/></div>
+            @endif
             <div class="mt-4">
                 <x-textarea name="notes" label="Observaciones" :value="$lot->notes"/>
             </div>

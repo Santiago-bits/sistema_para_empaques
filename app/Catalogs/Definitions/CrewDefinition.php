@@ -87,6 +87,25 @@ class CrewDefinition extends CatalogDefinition
         return $this->cleanUpper($input, 'code');
     }
 
+    public function importColumns(): array
+    {
+        return ['codigo' => 'code', 'nombre' => 'name', 'tipo' => 'kind', 'encargado' => 'leader'];
+    }
+
+    public function prepareImport(array $row): array
+    {
+        if (isset($row['kind']) && ! array_key_exists($row['kind'], Crew::KINDS)) {
+            $row['kind'] = array_search(mb_strtolower(trim((string) $row['kind'])), array_map('mb_strtolower', Crew::KINDS), true) ?: $row['kind'];
+        }
+
+        return $row;
+    }
+
+    public function exportValue(Model $record, string $field): mixed
+    {
+        return $field === 'kind' ? (Crew::KINDS[$record->kind] ?? $record->kind) : parent::exportValue($record, $field);
+    }
+
     public static function options(): array
     {
         return Crew::query()->where('active', true)->orderBy('name')->pluck('name', 'id')->all();

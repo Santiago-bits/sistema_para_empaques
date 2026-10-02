@@ -36,6 +36,7 @@ class LotRequest extends FormRequest
             'field' => ['nullable', 'string', 'max:255'],
             'quantity' => ['nullable', 'integer', 'min:0', 'max:1000000'],
             'container_type_id' => ['nullable', 'integer', Rule::exists('container_types', 'id')->whereNull('deleted_at')],
+            'reason' => ['nullable', 'string', 'max:255'],
             'kg_received' => ['nullable', 'numeric', 'min:0', 'max:99999999'],
             'price_per_kg' => ['nullable', 'numeric', 'min:0', 'max:99999999'],
             'notes' => ['nullable', 'string', 'max:2000'],

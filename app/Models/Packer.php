@@ -15,7 +15,7 @@ class Packer extends Model
     use Auditable, HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'code', 'first_name', 'last_name', 'dni', 'shift_id', 'hired_on', 'active', 'notes',
+        'code', 'first_name', 'last_name', 'dni', 'shift_id', 'hired_on', 'active', 'notes', 'cuil', 'phone', 'address', 'birth_date',
     ];
 
     protected function casts(): array
@@ -23,6 +23,7 @@ class Packer extends Model
         return [
             'active' => 'boolean',
             'hired_on' => 'date',
+            'birth_date' => 'date',
         ];
     }
 

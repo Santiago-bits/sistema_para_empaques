@@ -60,6 +60,10 @@ class PackerDefinition extends CatalogDefinition
             Field::text('first_name', 'Nombre')->required(),
             Field::text('last_name', 'Apellido')->required(),
             Field::text('dni', 'DNI')->attrs(['inputmode' => 'numeric']),
+            Field::text('cuil', 'CUIL')->attrs(['inputmode' => 'numeric']),
+            Field::date('birth_date', 'Fecha de nacimiento'),
+            Field::text('phone', 'Teléfono'),
+            Field::text('address', 'Dirección'),
             Field::select('shift_id', 'Turno habitual', fn () => self::shiftOptions())->placeholder('Sin turno fijo')
                 ->display(fn (Model $r) => $r->shift?->name),
             Field::date('hired_on', 'Fecha de ingreso'),
@@ -92,6 +96,10 @@ class PackerDefinition extends CatalogDefinition
             'first_name' => ['required', 'string', 'max:80'],
             'last_name' => ['required', 'string', 'max:80'],
             'dni' => ['nullable', 'digits_between:7,9', $this->unique('dni', $record)],
+            'cuil' => ['nullable', 'digits:11'],
+            'birth_date' => ['nullable', 'date', 'before:today'],
+            'phone' => ['nullable', 'string', 'max:50'],
+            'address' => ['nullable', 'string', 'max:255'],
             'shift_id' => ['nullable', 'integer', 'exists:shifts,id'],
             'hired_on' => ['nullable', 'date'],
             'notes' => ['nullable', 'string', 'max:2000'],
@@ -112,8 +120,10 @@ class PackerDefinition extends CatalogDefinition
     public function prepare(array $input): array
     {
         $input = $this->cleanUpper($input, 'code');
-        if (isset($input['dni']) && is_scalar($input['dni'])) {
-            $input['dni'] = preg_replace('/\D/', '', (string) $input['dni']) ?: null;
+        foreach (['dni', 'cuil'] as $key) {
+            if (isset($input[$key]) && is_scalar($input[$key])) {
+                $input[$key] = preg_replace('/\D/', '', (string) $input[$key]) ?: null;
+            }
         }
 
         return $input;
@@ -144,9 +154,15 @@ class PackerDefinition extends CatalogDefinition
     public function importColumns(): array
     {
         return [
-            'codigo' => 'code', 'nombre' => 'first_name', 'apellido' => 'last_name', 'dni' => 'dni',
-            'turno' => 'shift_id', 'fecha_ingreso' => 'hired_on',
+            'codigo' => 'code', 'nombre' => 'first_name', 'apellido' => 'last_name', 'dni' => 'dni', 'cuil' => 'cuil',
+            'fecha_nacimiento' => 'birth_date', 'telefono' => 'phone', 'direccion' => 'address',
+            'turno' => 'shift_id', 'fecha_ingreso' => 'hired_on', 'observaciones' => 'notes',
         ];
+    }
+
+    public function exportValue(Model $record, string $field): mixed
+    {
+        return $field === 'shift_id' ? $record->shift?->code : parent::exportValue($record, $field);
     }
 
     public function importKeys(): array

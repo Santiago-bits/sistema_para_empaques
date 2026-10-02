@@ -86,6 +86,25 @@
                             <td class="num text-emerald-700 dark:text-emerald-400">{{ $m->direction === 'in' ? money($m->amount) : '' }}</td>
                             <td class="num text-red-700 dark:text-red-400">{{ $m->direction === 'out' ? money($m->amount) : '' }}</td>
                             <td class="text-right">
+                                @if (! $m->voided_at && ! $m->account_movement_id)
+                                    @can('cash.manage')
+                                        <div x-data="{ open: false }" class="mb-1 inline-block text-left" @keydown.escape.stop="open = false">
+                                            <button type="button" class="link text-sm" @click="open = ! open">Corregir</button>
+                                            <form x-cloak x-show="open" method="POST" action="{{ route('cash.movements.correct', $m) }}" class="mt-2 grid min-w-64 gap-2 rounded-lg border border-stone-200 bg-white p-2 dark:border-stone-700 dark:bg-stone-900">
+                                                @csrf @method('PUT')
+                                                <select name="category" class="form-input py-1.5 text-sm" aria-label="Concepto">
+                                                    @foreach (($m->direction === 'in' ? $inCategories : $outCategories) as $key => $label)
+                                                        <option value="{{ $key }}" @selected($m->category === $key)>{{ $label }}</option>
+                                                    @endforeach
+                                                </select>
+                                                <input name="description" required maxlength="255" class="form-input py-1.5 text-sm" value="{{ $m->description }}" aria-label="Descripción">
+                                                <input name="amount" inputmode="decimal" required class="form-input py-1.5 text-sm" value="{{ num($m->amount, 2) }}" aria-label="Importe">
+                                                <input name="reason" required minlength="5" maxlength="255" class="form-input py-1.5 text-sm" placeholder="Motivo de la corrección" aria-label="Motivo">
+                                                <div class="flex justify-end gap-2"><button type="button" class="btn btn-ghost btn-sm" @click="open = false">Cancelar</button><button class="btn btn-primary btn-sm">Guardar</button></div>
+                                            </form>
+                                        </div>
+                                    @endcan
+                                @endif
                                 @if (! $m->voided_at)
                                     @can('accounts.void')
                                         <x-void-button :action="route('cash.movements.void', $m)" title="¿Anular este movimiento de caja?"/>

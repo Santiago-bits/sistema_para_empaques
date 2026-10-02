@@ -62,9 +62,13 @@ class ImportService
         return array_keys($this->definition($type)->importColumns());
     }
 
-    public function upload(string $type, UploadedFile $file, User $user): ImportBatch
+    /** Modos: «create» sólo agrega nuevos (los existentes se informan como duplicados); «upsert» además actualiza los existentes. */
+    public const MODES = ['create' => 'Sólo agregar nuevos', 'upsert' => 'Agregar nuevos y actualizar los existentes'];
+
+    public function upload(string $type, UploadedFile $file, User $user, string $mode = 'create'): ImportBatch
     {
         $definition = $this->definition($type);
+        $mode = array_key_exists($mode, self::MODES) ? $mode : 'create';
         // Sólo extensiones conocidas: nunca se guarda un archivo con la extensión que mande el navegador.
         $extension = strtolower($file->getClientOriginalExtension() ?: 'csv');
         if (! in_array($extension, ['csv', 'txt', 'xlsx'], true)) {
@@ -73,7 +77,7 @@ class ImportService
         $path = $file->storeAs('imports', now()->format('Ymd_His').'_'.Str::random(8).'.'.$extension, self::DISK);
 
         try {
-            $result = $this->analyze($definition, $path);
+            $result = $this->analyze($definition, $path, $mode);
         } catch (\Throwable $e) {
             Storage::disk(self::DISK)->delete($path);
             throw $e instanceof BusinessException ? $e : new BusinessException('No se pudo leer el archivo. Verificá que sea un CSV o XLSX válido.');
@@ -81,11 +85,13 @@ class ImportService
 
         return ImportBatch::query()->create([
             'type' => $type,
+            'mode' => $mode,
             'filename' => Str::limit($file->getClientOriginalName(), 250, ''),
             'path' => $path,
             'status' => 'validated',
             'total_rows' => $result['total'],
             'valid_rows' => count($result['valid']),
+            'updated_rows' => count(array_filter($result['valid'], fn ($r) => isset($r['id']))),
             'error_rows' => $result['error_rows'],
             'errors' => array_slice($result['errors'], 0, self::MAX_STORED_ERRORS),
             'user_id' => $user->id,
@@ -105,15 +111,23 @@ class ImportService
             }
 
             $definition = $this->definition($locked->type);
-            $result = $this->analyze($definition, $locked->path);
+            $result = $this->analyze($definition, $locked->path, $locked->mode ?: 'create');
             $model = $definition->modelClass();
             $now = now();
 
-            foreach (array_chunk($result['valid'], self::CHUNK) as $chunk) {
+            $inserts = array_values(array_filter($result['valid'], fn ($r) => ! isset($r['id'])));
+            $updates = array_values(array_filter($result['valid'], fn ($r) => isset($r['id'])));
+
+            foreach (array_chunk($inserts, self::CHUNK) as $chunk) {
                 $model::query()->insert(array_map(
                     fn (array $row) => $row['data'] + ['created_at' => $now, 'updated_at' => $now],
                     $chunk
                 ));
+            }
+            foreach ($updates as $row) {
+                if ($row['data'] !== []) {
+                    $model::query()->whereKey($row['id'])->update($row['data'] + ['updated_at' => $now]);
+                }
             }
 
             $imported = count($result['valid']);
@@ -122,13 +136,14 @@ class ImportService
                 'imported_at' => $now,
                 'total_rows' => $result['total'],
                 'valid_rows' => $imported,
+                'updated_rows' => count($updates),
                 'error_rows' => $result['error_rows'],
                 'errors' => array_slice($result['errors'], 0, self::MAX_STORED_ERRORS),
             ]);
 
             $this->audit->log('import', null, null,
-                ['import_batch_id' => $locked->id, 'type' => $locked->type, 'imported' => $imported, 'skipped' => $result['error_rows']],
-                'Importó '.$imported.' registro(s) de '.mb_strtolower($definition->title()).' desde '.$locked->filename);
+                ['import_batch_id' => $locked->id, 'type' => $locked->type, 'created' => count($inserts), 'updated' => count($updates), 'skipped' => $result['error_rows']],
+                'Importó '.count($inserts).' nuevo(s) y actualizó '.count($updates).' registro(s) de '.mb_strtolower($definition->title()).' desde '.$locked->filename);
 
             return $imported;
         });
@@ -178,20 +193,27 @@ class ImportService
      *
      * @return array{total: int, error_rows: int, valid: list<array{row: int, data: array}>, errors: list<array{row: int, field: string, message: string}>}
      */
-    public function analyze(CatalogDefinition $definition, string $path): array
+    public function analyze(CatalogDefinition $definition, string $path, string $mode = 'create'): array
     {
+        $importColumns = $definition->importColumns();
+        if ($definition->hasActive() && ! in_array('active', $importColumns, true)) {
+            $importColumns['activo'] = 'active';
+        }
         $columns = [];
-        foreach ($definition->importColumns() as $header => $field) {
+        foreach ($importColumns as $header => $field) {
             $columns[$this->normalizeHeader($header)] = $field;
             $columns[$this->normalizeHeader($field)] = $field;
         }
-        $headerByField = array_flip($definition->importColumns());
+        $headerByField = array_flip($importColumns);
         $dateFields = collect($definition->fields())->where('type', 'date')->pluck('name')->all();
-        $rules = $definition->rules(null);
         $attributes = $definition->attributes();
         $keys = $definition->importKeys();
+        $relations = $definition->importRelations();
+        $fillable = (new ($definition->modelClass()))->getFillable();
+        $upsert = $mode === 'upsert';
 
         $map = null;
+        $present = [];
         $seen = [];
         $total = 0;
         $valid = [];
@@ -211,6 +233,13 @@ class ImportService
                     throw new BusinessException('El archivo no tiene los encabezados esperados. Descargá la plantilla y respetá la primera fila: '
                         .implode(', ', array_keys($definition->importColumns())).'.');
                 }
+                // Campos que trae el archivo (en una actualización sólo se tocan ésos).
+                $present = array_values($map);
+                foreach ($relations as $virtual => $real) {
+                    if (in_array($virtual, $present, true)) {
+                        $present[] = $real;
+                    }
+                }
                 continue;
             }
 
@@ -218,7 +247,7 @@ class ImportService
                 throw new BusinessException('El archivo supera el máximo de '.num(self::MAX_ROWS).' filas por importación. Dividilo en partes.');
             }
 
-            $row = array_fill_keys(array_values($definition->importColumns()), null);
+            $row = array_fill_keys(array_values($importColumns), null);
             foreach ($map as $index => $field) {
                 $row[$field] = $this->cellValue($cells[$index] ?? null);
             }
@@ -227,16 +256,29 @@ class ImportService
                     $row[$field] = sprintf('%04d-%02d-%02d', $m[3], $m[2], $m[1]);
                 }
             }
+            if (array_key_exists('active', $row)) {
+                $flag = mb_strtolower(trim((string) $row['active']));
+                $row['active'] = $flag === '' ? null : (in_array($flag, ['1', 'si', 'sí', 's', 'true', 'x', 'activo', 'activa'], true) ? 1 : 0);
+            }
 
             $data = $definition->prepare($definition->prepareImport($row));
+            $existing = $upsert ? $definition->findForImport($data) : null;
+            $rules = $definition->rules($existing);
+            if (array_key_exists('active', $data) && $data['active'] === null) {
+                unset($data['active']);
+            }
             $rowErrors = [];
 
+            // Al actualizar se validan sólo las columnas que trae el archivo (una planilla puede traer sólo CUIT + teléfono).
+            if ($existing) {
+                $data = array_intersect_key($data, array_flip($present));
+            }
             $validator = Validator::make($data, array_intersect_key($rules, $data), [], $attributes);
             if ($validator->fails()) {
                 $failed = $validator->failed();
                 foreach ($validator->errors()->messages() as $field => $messages) {
                     $message = isset($failed[$field]['Unique'])
-                        ? 'Ya existe en el sistema un registro con ese '.($attributes[$field] ?? $field).' (duplicado).'
+                        ? 'Ya existe en el sistema un registro con ese '.($attributes[$field] ?? $field).($upsert ? ' (y no coincide con el resto de los datos).' : ' (duplicado). Para actualizarlo, importá con «Agregar nuevos y actualizar los existentes».')
                         : $messages[0];
                     $rowErrors[] = ['row' => $number, 'field' => $headerByField[$field] ?? $field, 'message' => $message];
                 }
@@ -263,8 +305,14 @@ class ImportService
                 continue;
             }
 
-            $clean = array_intersect_key($validator->validated(), $row);
-            if ($definition->hasActive()) {
+            $clean = array_intersect_key($validator->validated(), array_flip($fillable));
+            if ($existing) {
+                // Actualización: sólo las columnas que vinieron en el archivo.
+                $valid[] = ['row' => $number, 'id' => $existing->getKey(), 'data' => array_intersect_key($clean, array_flip($present))];
+
+                continue;
+            }
+            if ($definition->hasActive() && ! array_key_exists('active', $clean)) {
                 $clean['active'] = true;
             }
             $valid[] = ['row' => $number, 'data' => $clean];

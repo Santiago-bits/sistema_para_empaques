@@ -90,6 +90,28 @@ class RejectController extends Controller
     }
 
     /** @return array{0: Carbon, 1: Carbon} */
+    public function edit(\App\Models\Reject $reject): View
+    {
+        return view('rejects.edit', ['reject' => $reject->load('crate', 'lot', 'reason')] + $this->catalogs());
+    }
+
+    /** Corrección de un rechazo ya registrado (peso, motivo, fecha) con motivo del cambio. */
+    public function update(Request $request, \App\Models\Reject $reject): RedirectResponse
+    {
+        $request->merge(['weight' => parse_number($request->input('weight'))]);
+        $data = $request->validate([
+            'reason_id' => ['required', \Illuminate\Validation\Rule::exists('reasons', 'id')->where('type', 'reject')->where('active', true)],
+            'weight' => ['required', 'numeric', 'min:0.01', 'max:99999'],
+            'rejected_at' => ['required', 'date', 'before_or_equal:now'],
+            'notes' => ['nullable', 'string', 'max:2000'],
+            'reason' => ['required', 'string', 'min:5', 'max:255'],
+        ], [], ['reason_id' => 'motivo de rechazo', 'weight' => 'peso', 'rejected_at' => 'fecha', 'reason' => 'motivo de la corrección']);
+
+        $this->quality->updateReject($reject, $data, $data['reason']);
+
+        return redirect()->route('rejects.index')->with('success', 'Rechazo corregido.');
+    }
+
     private function period(Request $request): array
     {
         $from = $request->filled('from') ? Carbon::parse($request->input('from'))->startOfDay() : now()->subDays(29)->startOfDay();
