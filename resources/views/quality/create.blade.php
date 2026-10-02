@@ -1,5 +1,5 @@
 <x-layouts.app title="Control de calidad">
-    <x-page-header title="Control de calidad" subtitle="Escaneá un cajón, pallet o lote, cargá el resultado y confirmá con Enter"
+    <x-page-header title="Control de calidad" subtitle="Escaneá un cajón, pallet o lote · F2 aprobado · F3 rechazado · F4 observado · Ctrl+Enter registra"
                    :back="route('quality.index')"/>
 
     @php
@@ -15,6 +15,10 @@
                            class="form-input py-3 font-mono text-2xl" placeholder="Escanear código…" aria-label="Código">
                     <button type="submit" class="btn btn-secondary btn-lg" :disabled="loading"><x-icon name="search" class="size-5"/> Buscar</button>
                 </form>
+                {{-- Resultado de la última operación junto al campo (visible sin desplazarse en tablet/celular). --}}
+                <p x-show="message" x-cloak class="mt-3 rounded-lg px-3 py-2 text-sm font-medium" role="status" aria-live="polite"
+                   :class="messageType === 'error' ? 'bg-red-50 text-red-900 dark:bg-red-950/40 dark:text-red-200' : 'bg-emerald-50 text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200'"
+                   x-text="message"></p>
                 <template x-if="target">
                     <div class="mt-4 rounded-lg border border-stone-200 bg-stone-50 p-4 dark:border-stone-700 dark:bg-stone-800/50">
                         <div class="flex flex-wrap items-center gap-2">
@@ -85,7 +89,7 @@
                         <div x-show="form.register_reject" class="mt-3 grid gap-4 md:grid-cols-2">
                             <div>
                                 <label class="form-label" for="qc-reason">Motivo <span class="text-red-500">*</span></label>
-                                <select id="qc-reason" x-model="form.reason_id" class="form-input">
+                                <select id="qc-reason" x-ref="reason" x-model="form.reason_id" class="form-input">
                                     <option value="">Seleccionar…</option>
                                     @foreach ($reasons as $id => $name)
                                         <option value="{{ $id }}">{{ $name }}</option>
@@ -175,6 +179,10 @@
                     },
                     setResult(result) {
                         this.form.result = result;
+                        // Rechazado: el motivo es obligatorio, el cursor va directo ahí (se muestra en el próximo ciclo).
+                        if (result === 'rejected' && this.form.register_reject) {
+                            setTimeout(() => this.$refs.reason && this.$refs.reason.focus(), 30);
+                        }
                     },
                     notify(type, text) {
                         this.messageType = type;
