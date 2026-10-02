@@ -11,6 +11,9 @@ use Illuminate\Support\Facades\Schedule;
 | (ver docs/INSTALACION.md). Todas evitan superponerse si una corrida se demora.
 */
 
+// Cola de trabajos (exportaciones grandes, avisos por WhatsApp): sin servicio aparte en Windows/XAMPP.
+Schedule::command('queue:work --stop-when-empty --max-time=50 --tries=3')->everyMinute()->withoutOverlapping(5);
+
 // Alertas: stock bajo, cargas pendientes, temperatura, vencimientos, mantenimiento, etc.
 Schedule::command('galpon:check-alerts')->everyFiveMinutes()->withoutOverlapping(10);
 
