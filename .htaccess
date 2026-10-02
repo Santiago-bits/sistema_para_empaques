@@ -1,0 +1,31 @@
+# NO BORRAR — necesario en Hostinger (deploy por Git dentro de public_html).
+# El proyecto entero queda dentro de la carpeta web: este archivo manda todas las peticiones a public/
+# (la única carpeta que debe ser accesible) y bloquea los archivos sensibles por si algo falla.
+# En una instalación donde la web apunta directo a public/ (PC del galpón, VPS) este archivo no se usa.
+
+Options -Indexes
+
+# Nunca servir archivos ocultos (.env, .git, .htaccess…).
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # El encabezado Authorization (tokens de la API y del Panel General) tiene que llegar a Laravel.
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # Archivos del proyecto que jamás deben verse desde internet.
+    RewriteRule ^(composer\.(json|lock)|package(-lock)?\.json|artisan|phpunit\.xml|vite\.config\.js|README\.md|CHANGELOG\.md|CLAUDE\.md)$ - [F,L,NC]
+    RewriteRule ^(app|bootstrap|config|database|docs|lang|node_modules|resources|routes|scripts|tests|vendor)(/.*)?$ - [F,L,NC]
+
+    # Todo lo demás entra por public/ (ahí está index.php y la interfaz compilada).
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+# Sin mod_rewrite no hay forma segura de servir el sistema desde esta carpeta.
+<IfModule !mod_rewrite.c>
+    Require all denied
+</IfModule>

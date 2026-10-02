@@ -22,8 +22,8 @@ Esquema:
 > `"@php artisan …"` a los scripts de `composer.json`: el deploy se corta.
 
 > **Si en Hostinger ya había una versión anterior del sistema** (la de códigos QR de septiembre): esa base de datos
-> tiene otras tablas. **No** apuntes esta versión a esa base: creá una **base nueva** en hPanel (paso 3 de la
-> sección 2) y poné sus datos en `.env`. La base vieja queda intacta por si necesitás algo de ella.
+> tiene otras tablas y en `bootstrap/cache` quedan cachés viejas. Usá una **base nueva** (sección 2, paso 3) y corré
+> `scripts/despues-del-deploy.sh`: borra esas cachés. La base vieja queda intacta por si necesitás algo de ella.
 
 ---
 
@@ -60,39 +60,30 @@ git push origin main
 
 ---
 
-## 2. Instalar el Panel General en Hostinger (una sola vez)
+## 2. Instalar en Hostinger con el deploy por Git de hPanel (una sola vez)
 
-Necesitás un plan con **acceso SSH** (Premium, Business o Cloud; en hPanel: Avanzado → Acceso SSH). Si usás un
-VPS de Hostinger, seguí docs/INSTALACION.md como en cualquier Linux.
+Es la forma más simple: Hostinger baja el código de GitHub **dentro de `public_html`** cada vez que tocás
+«Implementar» (o en cada push, si activás la implementación automática). El archivo `.htaccess` de la raíz del
+proyecto manda todo a la carpeta `public/` y bloquea los archivos sensibles: **no lo borres**.
 
-1. **Dominio o subdominio**: hPanel → Sitios web → agregar `panel.tu-dominio.com` (o usar el dominio principal).
-2. **PHP 8.2 o 8.3**: hPanel → Avanzado → Configuración de PHP. Verificá que estén activas `pdo_mysql`,
-   `mbstring`, `openssl`, `zip`, `fileinfo`, `curl` (vienen activas por defecto).
-3. **Base de datos**: hPanel → Bases de datos → MySQL → crear base y usuario (anotá nombre, usuario y contraseña;
-   el host suele ser `localhost`).
-4. **SSL**: hPanel → Seguridad → SSL → instalar el certificado gratuito para el dominio.
-5. **Conectarte por SSH** (los datos están en hPanel → Acceso SSH):
+1. **PHP 8.2 o 8.3**: hPanel → Avanzado → Configuración de PHP (las extensiones necesarias vienen activas).
+2. **SSL**: hPanel → Seguridad → SSL → instalar el certificado gratuito.
+3. **Base de datos NUEVA**: hPanel → Bases de datos → MySQL → crear base y usuario. Si en el hosting había una
+   versión anterior del sistema, **no reutilices esa base** (tiene otras tablas): dejala como respaldo.
+4. **Git**: hPanel → Avanzado → Git → repositorio `https://github.com/Santiago-bits/sistema_para_empaques.git`,
+   rama `main`, carpeta de instalación vacía (= `public_html`). Tocá **Implementar**.
+5. **Primera configuración por SSH** (hPanel → Avanzado → Acceso SSH):
    ```bash
-   ssh -p 65002 u123456789@IP-DEL-SERVIDOR
-   ```
-6. **Bajar el sistema** al lado de la carpeta pública (nunca dentro de `public_html`):
-   ```bash
-   cd ~/domains/panel.tu-dominio.com
-   git clone https://github.com/Santiago-bits/sistema_para_empaques.git sistema
-   cd sistema
-   php -v        # debe decir 8.2 o más; si no: usar /opt/alt/php82/usr/bin/php en lugar de php
-   composer install --no-dev --optimize-autoloader
+   cd ~/domains/TU-DOMINIO/public_html
    cp .env.example .env
-   php artisan key:generate
+   nano .env
    ```
-   Si el repositorio es privado, GitHub te pide un token: creálo en GitHub → Settings → Developer settings →
-   Personal access tokens, con permiso de solo lectura del repositorio.
-7. **Configurar `.env`** (`nano .env`):
+   Completar:
    ```ini
    APP_NAME="Panel General"
    APP_ENV=production
    APP_DEBUG=false
-   APP_URL=https://panel.tu-dominio.com
+   APP_URL=https://TU-DOMINIO
    DB_HOST=localhost
    DB_DATABASE=u123456789_panel
    DB_USERNAME=u123456789_panel
@@ -101,48 +92,42 @@ VPS de Hostinger, seguí docs/INSTALACION.md como en cualquier Linux.
    GALPON_CENTRAL_MODE=true
    MAIL_MAILER=log
    ```
-8. **Tablas, enlaces y cachés**:
+   y después:
    ```bash
-   php artisan migrate --force --seed
-   php artisan storage:link
-   php artisan config:cache && php artisan route:cache && php artisan view:cache
+   php artisan key:generate
+   bash scripts/despues-del-deploy.sh
    ```
-9. **Apuntar la web a la carpeta `public`**: el dominio sirve `public_html`; reemplazala por un enlace a
-   `sistema/public` (si `public_html` tenía algo, se guarda como copia):
-   ```bash
-   cd ~/domains/panel.tu-dominio.com
-   mv public_html public_html_anterior
-   ln -s sistema/public public_html
+   (Si `php -v` dice una versión menor a 8.2: `PHP=/opt/alt/php82/usr/bin/php bash scripts/despues-del-deploy.sh`
+   y usá esa misma ruta en lugar de `php`.)
+6. **Tareas programadas**: hPanel → Avanzado → Cron Jobs → «cada minuto»:
    ```
-10. **Tareas programadas**: hPanel → Avanzado → Cron Jobs → «cada minuto» con el comando (ajustá tu usuario):
-    ```
-    /usr/bin/php /home/u123456789/domains/panel.tu-dominio.com/sistema/artisan schedule:run
-    ```
-11. **Primer ingreso**: abrí `https://panel.tu-dominio.com`, creá el Super Administrador y vas a ver
-    **Panel general → Clientes y uso** en el menú.
-12. **Verificar**: `php artisan galpon:deploy-check` debe terminar en «Instalación correcta».
+   /usr/bin/php /home/u123456789/domains/TU-DOMINIO/public_html/artisan schedule:run
+   ```
+7. **Primer ingreso**: abrí `https://TU-DOMINIO`, creá el Super Administrador y vas a ver **Panel general**.
+
+### Alternativa (más prolija, sin el botón de hPanel)
+
+El código en una carpeta `sistema/` al lado de `public_html` y `public_html` como enlace a `sistema/public`
+(`ln -s sistema/public public_html`). Se actualiza por SSH con `bash scripts/actualizar-servidor.sh`. Sirve
+igual; elegí **una** de las dos formas y no las mezcles.
 
 ---
 
 ## 3. Pasar tus cambios al hosting
 
-**Si usás la implementación automática de Git de Hostinger** (hPanel → Avanzado → Git): con cada push a `main`,
-Hostinger baja el código y ejecuta `composer install`. Eso **no** aplica las migraciones ni regenera las cachés:
-después de cada deploy entrá por SSH y ejecutá el script de abajo (si el código ya está bajado, sólo hace el resto).
+1. En tu PC: probá el cambio (`scripts\iniciar-galpon.bat` / `scripts\iniciar-panel.bat`) y subilo:
+   ```bash
+   git push origin main
+   ```
+2. En hPanel → Git: **Implementar** (o automático). Hostinger baja el código y corre `composer install`.
+3. Por SSH, una vez:
+   ```bash
+   cd ~/domains/TU-DOMINIO/public_html && bash scripts/despues-del-deploy.sh
+   ```
+   Aplica migraciones nuevas, datos base y regenera cachés. Aunque te olvides de este paso, el sistema detecta
+   las cachés de la versión anterior y las descarta solo; lo que no puede hacer solo es crear tablas nuevas.
 
-Después de hacer `git push` desde tu PC, por SSH:
-
-```bash
-cd ~/domains/panel.tu-dominio.com/sistema
-bash scripts/actualizar-servidor.sh
-```
-
-El script pone el sitio en mantenimiento unos segundos, baja el código de GitHub, instala dependencias, hace un
-backup (si el plan lo permite), aplica las migraciones nuevas, regenera las cachés y vuelve a abrir el sitio.
-Si el `php` de la consola es viejo: `PHP=/opt/alt/php82/usr/bin/php bash scripts/actualizar-servidor.sh`.
-
-**Empaques clientes**: en cada galpón se actualiza igual (docs/INSTALACION.md, paso 11). Conviene actualizar
-primero el Panel General y después los empaques.
+Conviene actualizar primero el Panel General y después los empaques (docs/INSTALACION.md, paso 11).
 
 ---
 

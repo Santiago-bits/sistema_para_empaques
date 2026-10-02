@@ -20,6 +20,24 @@ use Illuminate\Session\TokenMismatchException;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
+/*
+| Cachés viejas después de un deploy: el deploy por Git de Hostinger conserva bootstrap/cache (está en
+| .gitignore) y Laravel seguiría usando las rutas, la configuración y la lista de paquetes de la versión
+| anterior. Si alguna caché es más vieja que el código desplegado, se borra y Laravel la rearma sola.
+| Cuesta unos pocos «stat» por petición.
+*/
+(static function (string $base): void {
+    $code = 0;
+    foreach (['composer.json', 'composer.lock', 'config/galpon.php', 'routes/web.php', 'bootstrap/app.php'] as $file) {
+        $code = max($code, (int) @filemtime($base.'/'.$file));
+    }
+    foreach (glob($base.'/bootstrap/cache/*.php') ?: [] as $cache) {
+        if ($code > 0 && (int) @filemtime($cache) < $code) {
+            @unlink($cache);
+        }
+    }
+})(dirname(__DIR__));
+
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
