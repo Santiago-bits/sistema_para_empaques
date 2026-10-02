@@ -65,7 +65,7 @@
     </div>
 
     <x-table>
-        <thead><tr><th>Fecha</th><th>Cajón</th><th>Lote</th><th>Variedad</th><th>Tamaño</th><th>Embalador</th><th>Motivo</th><th class="num">Kg</th><th>Responsable</th></tr></thead>
+        <thead><tr><th>Fecha</th><th>Cajón</th><th>Lote</th><th>Variedad</th><th>Tamaño</th><th>Embalador</th><th>Motivo</th><th class="num">Kg</th><th>Responsable</th><th></th></tr></thead>
         <tbody>
             @forelse ($rejects as $reject)
                 <tr>
@@ -78,9 +78,10 @@
                     <td>{{ $reject->reason?->name }}</td>
                     <td class="num">{{ num($reject->weight, 2) }}</td>
                     <td>{{ $reject->user?->full_name }}</td>
+                    <td class="text-right">@can('quality.manage')<a href="{{ route('rejects.edit', $reject) }}" class="link">Corregir</a>@endcan</td>
                 </tr>
             @empty
-                <x-empty colspan="9"/>
+                <x-empty colspan="10"/>
             @endforelse
         </tbody>
         <x-slot:footer>{{ $rejects->links() }}</x-slot:footer>

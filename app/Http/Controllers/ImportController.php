@@ -39,9 +39,10 @@ class ImportController extends Controller
         $data = $request->validate([
             'type' => ['required', Rule::in(array_keys($this->imports->types()))],
             'file' => ['required', 'file', 'max:10240', 'mimes:csv,txt,xlsx'],
-        ], [], ['type' => 'tipo', 'file' => 'archivo']);
+            'mode' => ['nullable', Rule::in(array_keys(\App\Services\ImportService::MODES))],
+        ], [], ['type' => 'tipo', 'file' => 'archivo', 'mode' => 'modo']);
 
-        $batch = $this->imports->upload($data['type'], $request->file('file'), $request->user());
+        $batch = $this->imports->upload($data['type'], $request->file('file'), $request->user(), $data['mode'] ?? 'create');
 
         return redirect()->route('imports.show', $batch)->with('info', 'Archivo validado. Revisá el resultado antes de confirmar.');
     }

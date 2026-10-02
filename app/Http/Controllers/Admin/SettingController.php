@@ -66,10 +66,17 @@ class SettingController extends Controller
             'address' => ['nullable', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:50'],
             'email' => ['nullable', 'email', 'max:255'],
+            'legal_name' => ['nullable', 'string', 'max:160'],
+            'locality' => ['nullable', 'string', 'max:120'],
+            'province' => ['nullable', 'string', 'max:60'],
+            'postal_code' => ['nullable', 'string', 'max:12'],
+            'iibb' => ['nullable', 'string', 'max:30'],
+            'activity_start' => ['nullable', 'date'],
+            'website' => ['nullable', 'string', 'max:160'],
             'primary_color' => ['nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'logo' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:1024'],
         ]);
-        foreach (['name', 'cuit', 'address', 'phone', 'email'] as $key) {
+        foreach (['name', 'cuit', 'address', 'phone', 'email', 'legal_name', 'locality', 'province', 'postal_code', 'iibb', 'activity_start', 'website'] as $key) {
             $this->settings->set("company.$key", $data[$key] ?? '');
         }
         $this->settings->set('ui.primary_color', $data['primary_color'] ?? '#16a34a');

@@ -58,9 +58,9 @@ class LotService
         });
     }
 
-    public function update(Lot $lot, array $data): Lot
+    public function update(Lot $lot, array $data, ?string $reason = null): Lot
     {
-        return DB::transaction(function () use ($lot, $data) {
+        return DB::transaction(function () use ($lot, $data, $reason) {
             $fresh = Lot::query()->lockForUpdate()->findOrFail($lot->id);
             if ($fresh->status === 'voided') {
                 throw new BusinessException('No se puede modificar un lote anulado.');
@@ -68,16 +68,30 @@ class LotService
             if (blank($data['code'] ?? null)) {
                 unset($data['code']);
             }
-            // Ya liquidado al productor: kilos y precio quedan fijos (para corregir, anular la liquidación).
+            // Ya liquidado al productor: si cambian kilos, precio o productor se re-liquida solo
+            // (se anula la liquidación anterior y se asienta la nueva), con motivo obligatorio.
+            $resettle = false;
             if ($fresh->settled_at) {
                 foreach (['kg_received', 'price_per_kg', 'producer_id'] as $key) {
-                    if (array_key_exists($key, $data) && (string) ($data[$key] ?? '') !== (string) ($fresh->getRawOriginal($key) ?? '')
-                        && (float) ($data[$key] ?? 0) !== (float) ($fresh->getRawOriginal($key) ?? 0)) {
-                        throw new BusinessException('El lote ya fue liquidado al productor: para cambiar kilos, precio o productor, anulá la liquidación desde su cuenta corriente.');
+                    if (array_key_exists($key, $data) && (float) ($data[$key] ?? 0) !== (float) ($fresh->getRawOriginal($key) ?? 0)) {
+                        $resettle = true;
                     }
                 }
+                if ($resettle && trim((string) $reason) === '') {
+                    throw new BusinessException('El lote ya fue liquidado al productor: indicá el motivo de la corrección y se vuelve a liquidar solo.');
+                }
             }
-            $fresh->update($data);
+            if ($resettle) {
+                $this->audit->withReason($reason);
+            }
+            try {
+                $fresh->update($data);
+            } finally {
+                $this->audit->withReason(null);
+            }
+            if ($resettle) {
+                app(AccountService::class)->resettleLot($fresh->refresh(), auth()->user(), (string) $reason);
+            }
 
             return $fresh;
         });

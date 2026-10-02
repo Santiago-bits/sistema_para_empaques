@@ -155,6 +155,27 @@ class AlertChecker
                 $active[] = $fingerprint;
             });
 
+        // Camiones: seguro, VTV / RTO y habilitación SENASA.
+        $truckDocs = ['insurance_expires_on' => 'Seguro', 'vtv_expires_on' => 'VTV / RTO', 'senasa_expires_on' => 'Habilitación SENASA'];
+        foreach ($truckDocs as $column => $label) {
+            \App\Models\Truck::query()->where('active', true)->whereNotNull($column)
+                ->whereDate($column, '<=', $today->copy()->addDays($days))
+                ->lazyById(200)
+                ->each(function (\App\Models\Truck $truck) use (&$active, $today, $column, $label) {
+                    $fingerprint = 'document_expiring:truck:'.$column.':'.$truck->id;
+                    $expired = $truck->{$column}->lt($today);
+                    $this->alerts->raise(
+                        'document_expiring',
+                        $label.' '.($expired ? 'vencido' : 'por vencer').': camión '.$truck->plate,
+                        $label.' del camión '.$truck->plate.' '.($expired ? 'venció el ' : 'vence el ').fdate($truck->{$column}).'.',
+                        $truck,
+                        $expired ? 'critical' : 'warning',
+                        $fingerprint,
+                    );
+                    $active[] = $fingerprint;
+                });
+        }
+
         return $active;
     }
 

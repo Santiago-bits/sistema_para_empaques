@@ -109,6 +109,58 @@ class CheckService
         });
     }
 
+    /**
+     * Corrige los datos de un cheque cargado mal (banco, número, fechas, librador, importe). El importe sólo
+     * cambia mientras el cheque está en cartera o emitido; el cobro/pago asociado se re-asienta solo.
+     */
+    public function update(Check $check, array $data, string $reason, User $by): Check
+    {
+        return DB::transaction(function () use ($check, $data, $reason, $by) {
+            $locked = Check::query()->whereKey($check->id)->lockForUpdate()->firstOrFail();
+            $amount = round((float) ($data['amount'] ?? $locked->amount), 2);
+            $amountChanged = abs($amount - (float) $locked->amount) >= 0.005;
+            if ($amountChanged && ! in_array($locked->status, ['in_portfolio', 'issued'], true)) {
+                throw new BusinessException('El importe sólo se puede corregir con el cheque en cartera o emitido.');
+            }
+            if ($amount <= 0) {
+                throw new BusinessException('El importe del cheque debe ser mayor a cero.');
+            }
+
+            $this->audit->withReason($reason);
+            try {
+                $locked->update([
+                    'bank' => trim((string) $data['bank']),
+                    'number' => trim((string) $data['number']),
+                    'issuer_name' => $data['issuer_name'] ?? null,
+                    'issuer_cuit' => isset($data['issuer_cuit']) ? (preg_replace('/\D/', '', (string) $data['issuer_cuit']) ?: null) : null,
+                    'issued_on' => $data['issued_on'],
+                    'payment_date' => $data['payment_date'],
+                    'electronic' => (bool) ($data['electronic'] ?? false),
+                    'notes' => $data['notes'] ?? null,
+                    'amount' => $amount,
+                    'version' => $locked->version + 1,
+                ]);
+            } catch (QueryException) {
+                throw new BusinessException('Ya existe otro cheque de ese banco con ese número.');
+            } finally {
+                $this->audit->withReason(null);
+            }
+
+            if ($amountChanged) {
+                AccountMovement::query()->where('source_type', 'check')->where('source_id', $locked->id)
+                    ->whereIn('type', ['collection', 'payment', 'advance'])->whereNull('voided_at')->lockForUpdate()->get()
+                    ->each(function (AccountMovement $m) use ($locked, $amount, $reason, $by) {
+                        $isDebit = (float) $m->debit > 0;
+                        $this->accounts->markVoided($m, 'Corrección del cheque: '.$reason, $by);
+                        $this->accounts->post($m->holder()->withTrashed()->firstOrFail(), $m->type, $isDebit ? $amount : 0, $isDebit ? 0 : $amount,
+                            $m->description, ['date' => $m->date, 'method' => 'check', 'reference' => $locked->bank.' N° '.$locked->number, 'source' => $locked, 'by' => $by]);
+                    });
+            }
+
+            return $locked->refresh();
+        });
+    }
+
     private function insert(array $data, User $by): Check
     {
         if (round((float) ($data['amount'] ?? 0), 2) <= 0) {

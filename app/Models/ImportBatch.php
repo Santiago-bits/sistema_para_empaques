@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class ImportBatch extends Model
 {
     protected $fillable = [
-        'type', 'filename', 'path', 'status', 'total_rows', 'valid_rows', 'error_rows', 'errors', 'user_id',
+        'type', 'mode', 'filename', 'path', 'status', 'total_rows', 'valid_rows', 'updated_rows', 'error_rows', 'errors', 'user_id',
         'imported_at',
     ];
 

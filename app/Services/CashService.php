@@ -123,6 +123,45 @@ class CashService
         });
     }
 
+    /**
+     * Corrige un movimiento de caja cargado a mano (concepto, descripción o importe) mientras la caja
+     * sigue abierta. Si vino de una cuenta corriente, se corrige desde la cuenta.
+     */
+    public function correct(CashMovement $movement, array $data, string $reason, User $by): CashMovement
+    {
+        return DB::transaction(function () use ($movement, $data, $reason, $by) {
+            $locked = CashMovement::query()->whereKey($movement->id)->lockForUpdate()->firstOrFail();
+            if ($locked->voided_at) {
+                throw new BusinessException('El movimiento está anulado.');
+            }
+            if ($locked->account_movement_id) {
+                throw new BusinessException('Este movimiento viene de una cuenta corriente: corregilo desde la cuenta y la caja se actualiza sola.');
+            }
+            $session = CashSession::query()->whereKey($locked->cash_session_id)->lockForUpdate()->firstOrFail();
+            if (! $session->isOpen()) {
+                throw new BusinessException('La caja de ese movimiento ya se cerró: registrá un movimiento de ajuste en la caja actual.');
+            }
+
+            $amount = round((float) $data['amount'], 2);
+            if (abs($amount - (float) $locked->amount) < 0.005) {
+                $this->audit->withReason($reason);
+                try {
+                    $locked->update(['category' => $data['category'], 'description' => mb_substr((string) $data['description'], 0, 255)]);
+                } finally {
+                    $this->audit->withReason(null);
+                }
+
+                return $locked;
+            }
+
+            $this->voidMovement($locked, 'Corrección: '.$reason, $by, false);
+
+            return $this->addMovement([
+                'direction' => $locked->direction, 'category' => $data['category'], 'description' => $data['description'], 'amount' => $amount,
+            ], $by);
+        });
+    }
+
     /** Cierre con arqueo: se compara lo contado con lo esperado y la diferencia queda registrada. */
     public function close(CashSession $session, float $counted, ?string $notes, User $by): CashSession
     {

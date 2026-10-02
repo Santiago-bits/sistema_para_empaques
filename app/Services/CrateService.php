@@ -66,9 +66,17 @@ class CrateService
         return $modes;
     }
 
+    /**
+     * Un cajón ya despachado, facturado o anulado no se modifica. Si está en una carga que todavía se está
+     * armando, sí se puede corregir (los totales de la carga se recalculan).
+     */
     public function isLocked(Crate $crate): bool
     {
-        return in_array($crate->status, self::LOCKED_STATUSES, true) || $crate->current_load_id !== null;
+        if ($crate->current_load_id !== null) {
+            return \App\Models\Load::query()->whereKey($crate->current_load_id)->toBase()->value('status') !== \App\Enums\LoadStatus::Draft->value;
+        }
+
+        return in_array($crate->status, self::LOCKED_STATUSES, true);
     }
 
     public function create(array $data, User $user): Crate
@@ -146,6 +154,12 @@ class CrateService
 
             if ($criticalChanges !== []) {
                 $this->syncProductionRecord($locked);
+            }
+            if ($locked->current_load_id && in_array('weight', $criticalChanges, true)) {
+                $load = \App\Models\Load::query()->whereKey($locked->current_load_id)->lockForUpdate()->first();
+                if ($load) {
+                    app(LoadService::class)->refreshTotals($load);
+                }
             }
 
             return $locked;

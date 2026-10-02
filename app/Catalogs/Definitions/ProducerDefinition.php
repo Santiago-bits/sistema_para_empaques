@@ -42,6 +42,10 @@ class ProducerDefinition extends CatalogDefinition
             Field::text('address', 'Dirección'),
             Field::text('locality', 'Localidad'),
             Field::text('province', 'Provincia'),
+            Field::text('renspa', 'RENSPA')->placeholder('00.000.0.00000/00')->hint('Registro Nacional Sanitario de Productores Agropecuarios.'),
+            Field::select('tax_condition', 'Condición frente al IVA', \App\Models\Client::TAX_CONDITIONS)->placeholder('—'),
+            Field::text('cbu', 'CBU')->attrs(['inputmode' => 'numeric'])->hint('22 dígitos: para pagarle la fruta por transferencia.'),
+            Field::text('bank_alias', 'Alias bancario'),
             Field::textarea('notes', 'Observaciones'),
             Field::checkbox('active', 'Activo'),
         ];
@@ -70,6 +74,10 @@ class ProducerDefinition extends CatalogDefinition
             'address' => ['nullable', 'string', 'max:255'],
             'locality' => ['nullable', 'string', 'max:100'],
             'province' => ['nullable', 'string', 'max:100'],
+            'renspa' => ['nullable', 'string', 'max:30'],
+            'tax_condition' => ['nullable', 'in:'.implode(',', array_keys(\App\Models\Client::TAX_CONDITIONS))],
+            'cbu' => ['nullable', 'digits:22'],
+            'bank_alias' => ['nullable', 'string', 'max:60'],
             'notes' => ['nullable', 'string', 'max:2000'],
             'active' => ['boolean'],
         ];
@@ -82,14 +90,15 @@ class ProducerDefinition extends CatalogDefinition
 
     public function prepare(array $input): array
     {
-        return $this->cleanCuit($this->cleanUpper($input, 'code'));
+        return $this->cleanBank($this->cleanCuit($this->cleanUpper($input, 'code')));
     }
 
     public function importColumns(): array
     {
         return [
-            'codigo' => 'code', 'nombre' => 'name', 'cuit' => 'cuit', 'telefono' => 'phone', 'email' => 'email',
-            'direccion' => 'address', 'localidad' => 'locality', 'provincia' => 'province', 'observaciones' => 'notes',
+            'codigo' => 'code', 'nombre' => 'name', 'cuit' => 'cuit', 'condicion_iva' => 'tax_condition', 'renspa' => 'renspa',
+            'telefono' => 'phone', 'email' => 'email', 'direccion' => 'address', 'localidad' => 'locality', 'provincia' => 'province',
+            'cbu' => 'cbu', 'alias' => 'bank_alias', 'observaciones' => 'notes',
         ];
     }
 }

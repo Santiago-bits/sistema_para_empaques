@@ -12,7 +12,8 @@ class Producer extends Model
     use Auditable, SoftDeletes;
 
     protected $fillable = [
-        'code', 'name', 'cuit', 'phone', 'email', 'address', 'locality', 'province', 'notes', 'active',
+        'code', 'name', 'cuit', 'phone', 'email', 'address', 'locality', 'province', 'notes', 'active', 'renspa', 'tax_condition', 'cbu',
+        'bank_alias',
     ];
 
     protected function casts(): array

@@ -11,7 +11,10 @@
 <x-layouts.app :title="'Cheque '.$check->bank.' N° '.$check->number">
     <x-page-header :title="'Cheque '.$check->bank.' N° '.$check->number" :subtitle="\App\Models\Check::KINDS[$check->kind].($check->electronic ? ' · e-cheq' : '')"
                    :back="route('checks.index')">
-        <x-slot:actions><x-badge :color="$check->statusColor()" class="text-sm">{{ $check->statusLabel() }}</x-badge></x-slot:actions>
+        <x-slot:actions>
+            <x-badge :color="$check->statusColor()" class="text-sm">{{ $check->statusLabel() }}</x-badge>
+            @can('checks.manage')<a href="{{ route('checks.edit', $check) }}" class="btn btn-secondary"><x-icon name="pencil" class="size-4"/> Corregir datos</a>@endcan
+        </x-slot:actions>
     </x-page-header>
 
     <div class="grid gap-6 lg:grid-cols-3">

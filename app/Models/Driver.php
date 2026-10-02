@@ -15,7 +15,7 @@ class Driver extends Model
 
     protected $fillable = [
         'first_name', 'last_name', 'dni', 'license_number', 'license_expires_on', 'transporter_id', 'phone',
-        'active',
+        'active', 'cuil', 'email', 'address', 'locality', 'birth_date', 'license_category', 'emergency_contact', 'emergency_phone', 'notes',
     ];
 
     protected function casts(): array
@@ -23,6 +23,7 @@ class Driver extends Model
         return [
             'active' => 'boolean',
             'license_expires_on' => 'date',
+            'birth_date' => 'date',
         ];
     }
 

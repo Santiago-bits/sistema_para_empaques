@@ -20,6 +20,7 @@ Route::middleware(['module:treasury', 'can:treasury.view'])->group(function () {
         Route::post('caja/abrir', [CashController::class, 'open'])->name('cash.open');
         Route::post('caja/movimientos', [CashController::class, 'storeMovement'])->middleware('throttle:60,1')->name('cash.movements.store');
         Route::post('caja/cerrar', [CashController::class, 'close'])->name('cash.close');
+        Route::put('caja/movimientos/{movement}', [CashController::class, 'correctMovement'])->whereNumber('movement')->name('cash.movements.correct');
     });
     Route::post('caja/movimientos/{movement}/anular', [CashController::class, 'voidMovement'])->whereNumber('movement')
         ->middleware('can:accounts.void')->name('cash.movements.void');
@@ -27,6 +28,8 @@ Route::middleware(['module:treasury', 'can:treasury.view'])->group(function () {
     // Cuentas corrientes
     Route::get('cuentas-corrientes', [AccountController::class, 'index'])->name('accounts.index');
     Route::post('cuentas-corrientes/imputar', [AccountController::class, 'sync'])->middleware('can:accounts.manage')->name('accounts.sync');
+    Route::put('cuentas-corrientes/movimientos/{movement}', [AccountController::class, 'correct'])->whereNumber('movement')
+        ->middleware('can:accounts.manage')->name('accounts.movements.correct');
     Route::post('cuentas-corrientes/movimientos/{movement}/anular', [AccountController::class, 'void'])->whereNumber('movement')
         ->middleware('can:accounts.void')->name('accounts.movements.void');
     Route::prefix('cuentas-corrientes/{type}/{holder}')->whereIn('type', ['client', 'producer', 'transporter', 'provider', 'employee'])
@@ -45,6 +48,8 @@ Route::middleware(['module:treasury', 'can:treasury.view'])->group(function () {
         Route::get('cheques/nuevo', [CheckController::class, 'create'])->name('checks.create');
         Route::post('cheques', [CheckController::class, 'store'])->name('checks.store');
         Route::post('cheques/{check}/estado', [CheckController::class, 'transition'])->whereNumber('check')->name('checks.transition');
+        Route::get('cheques/{check}/editar', [CheckController::class, 'edit'])->whereNumber('check')->name('checks.edit');
+        Route::put('cheques/{check}', [CheckController::class, 'update'])->whereNumber('check')->name('checks.update');
     });
 
     // Cotización del dólar

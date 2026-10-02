@@ -60,6 +60,7 @@ class ClientDefinition extends CatalogDefinition
             Field::text('province', 'Provincia'),
             Field::text('phone', 'Teléfono'),
             Field::email('email', 'Email'),
+            Field::textarea('notes', 'Observaciones'),
             Field::checkbox('active', 'Activo'),
         ];
     }
@@ -94,6 +95,7 @@ class ClientDefinition extends CatalogDefinition
             'province' => ['nullable', 'string', 'max:100'],
             'phone' => ['nullable', 'string', 'max:50'],
             'email' => ['nullable', 'email', 'max:255'],
+            'notes' => ['nullable', 'string', 'max:2000'],
             'active' => ['boolean'],
         ];
     }
@@ -127,7 +129,7 @@ class ClientDefinition extends CatalogDefinition
         return [
             'razon_social' => 'business_name', 'nombre_fantasia' => 'name', 'cuit' => 'cuit', 'dni' => 'dni',
             'condicion_iva' => 'tax_condition', 'direccion' => 'address', 'localidad' => 'locality',
-            'provincia' => 'province', 'telefono' => 'phone', 'email' => 'email',
+            'provincia' => 'province', 'telefono' => 'phone', 'email' => 'email', 'observaciones' => 'notes',
         ];
     }
 

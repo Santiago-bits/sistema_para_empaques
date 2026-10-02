@@ -94,6 +94,24 @@ class LoadController extends Controller
         return redirect()->route('loads.show', $load)->with('success', 'Carga actualizada.');
     }
 
+    /** Corregir transporte y datos comerciales de una carga ya cerrada o despachada (sin reabrirla). */
+    public function correct(Load $load): View|RedirectResponse
+    {
+        if ($load->status->isEditable()) {
+            return redirect()->route('loads.edit', $load);
+        }
+
+        return view('loads.correct', ['load' => $load] + $this->options());
+    }
+
+    public function saveCorrection(LoadRequest $request, Load $load): RedirectResponse
+    {
+        $request->validate(['reason' => ['required', 'string', 'min:5', 'max:255']], [], ['reason' => 'motivo de la corrección']);
+        $this->loads->correctDetails($load, $request->validated(), (string) $request->input('reason'), $request->user());
+
+        return redirect()->route('loads.show', $load)->with('success', 'Datos de la carga corregidos.');
+    }
+
     /** Pantalla de armado: filtros de cajones disponibles + contenido actual. */
     public function builder(Load $load): View|RedirectResponse
     {

@@ -140,6 +140,22 @@
                     <td class="num">{{ (float) $row->credit ? money($row->credit) : '' }}</td>
                     <td class="num font-medium">{{ $row->isVoided() ? '' : money($row->running_balance) }}</td>
                     <td class="text-right">
+                        @if (! $row->isVoided() && ! in_array($row->source_type, ['check', 'invoice', 'lot', 'load'], true))
+                            @can('accounts.manage')
+                                <div x-data="{ open: false }" class="mb-1 inline-block text-left" @keydown.escape.stop="open = false">
+                                    <button type="button" class="link text-sm" @click="open = ! open">Corregir</button>
+                                    <form x-cloak x-show="open" method="POST" action="{{ route('accounts.movements.correct', $row) }}" class="mt-2 grid min-w-72 gap-2 rounded-lg border border-stone-200 bg-white p-2 text-left dark:border-stone-700 dark:bg-stone-900">
+                                        @csrf @method('PUT')
+                                        <input name="amount" inputmode="decimal" required class="form-input py-1.5 text-sm" value="{{ num((float) $row->debit ?: (float) $row->credit, 2) }}" aria-label="Importe">
+                                        <input name="date" type="date" required class="form-input py-1.5 text-sm" value="{{ $row->date->toDateString() }}" max="{{ today()->toDateString() }}" aria-label="Fecha">
+                                        <input name="description" required maxlength="255" class="form-input py-1.5 text-sm" value="{{ $row->description }}" aria-label="Detalle">
+                                        <input name="reference" maxlength="80" class="form-input py-1.5 text-sm" value="{{ $row->reference }}" placeholder="Referencia" aria-label="Referencia">
+                                        <input name="reason" required minlength="5" maxlength="255" class="form-input py-1.5 text-sm" placeholder="Motivo de la corrección" aria-label="Motivo">
+                                        <div class="flex justify-end gap-2"><button type="button" class="btn btn-ghost btn-sm" @click="open = false">Cancelar</button><button class="btn btn-primary btn-sm">Guardar</button></div>
+                                    </form>
+                                </div>
+                            @endcan
+                        @endif
                         @if (! $row->isVoided() && $row->source_type !== 'check')
                             @can('accounts.void')
                                 <x-void-button :action="route('accounts.movements.void', $row)" title="¿Anular este movimiento?"/>

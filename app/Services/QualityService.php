@@ -127,6 +127,68 @@ class QualityService
         });
     }
 
+    /**
+     * Corrige un control ya registrado (con motivo, queda en auditoría con valor anterior y nuevo).
+     * Si el control es de un cajón y cambia el resultado, el estado de calidad del cajón se actualiza.
+     */
+    public function updateControl(QualityControl $control, array $data, string $reason): QualityControl
+    {
+        if (! array_key_exists($data['result'] ?? '', QualityControl::RESULTS)) {
+            throw new BusinessException('Resultado de control inválido.');
+        }
+
+        return DB::transaction(function () use ($control, $data, $reason) {
+            $locked = QualityControl::query()->whereKey($control->id)->lockForUpdate()->firstOrFail();
+            $previous = $locked->result;
+            $attributes = array_intersect_key($this->controlAttributes($data, []), array_flip([
+                'result', 'grade', 'caliber', 'ripeness', 'damage_pct', 'bruise_pct', 'rot_pct', 'reject_pct', 'defects', 'notes', 'controlled_at',
+            ]));
+
+            $this->audit->withReason($reason);
+            try {
+                $locked->update($attributes);
+            } finally {
+                $this->audit->withReason(null);
+            }
+
+            if ($previous !== $locked->result && $locked->crate_id) {
+                $crate = Crate::query()->whereKey($locked->crate_id)->lockForUpdate()->first();
+                if ($crate) {
+                    $this->applyResultToCrate($crate, $locked->result, $locked);
+                }
+            }
+
+            return $locked->refresh();
+        });
+    }
+
+    /** Corrige un rechazo (peso, motivo, fecha, observaciones) con motivo del cambio. */
+    public function updateReject(Reject $reject, array $data, string $reason): Reject
+    {
+        $rejectReason = $this->rejectReason($data['reason_id'] ?? null);
+        $weight = (float) ($data['weight'] ?? 0);
+        if ($weight <= 0) {
+            throw new BusinessException('Indicá el peso rechazado (kg).');
+        }
+
+        return DB::transaction(function () use ($reject, $data, $reason, $rejectReason, $weight) {
+            $locked = Reject::query()->whereKey($reject->id)->lockForUpdate()->firstOrFail();
+            $this->audit->withReason($reason);
+            try {
+                $locked->update([
+                    'reason_id' => $rejectReason->id,
+                    'weight' => round($weight, 2),
+                    'rejected_at' => $this->date($data['rejected_at'] ?? $locked->rejected_at),
+                    'notes' => $data['notes'] ?? null,
+                ]);
+            } finally {
+                $this->audit->withReason(null);
+            }
+
+            return $locked;
+        });
+    }
+
     private function recordForCrate(int $crateId, array $data, ?Reason $reason): array
     {
         return DB::transaction(function () use ($crateId, $data, $reason) {

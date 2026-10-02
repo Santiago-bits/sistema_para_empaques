@@ -73,6 +73,48 @@ class DestinationDefinition extends CatalogDefinition
         ];
     }
 
+    public function importColumns(): array
+    {
+        return ['nombre' => 'name', 'cliente' => 'client', 'direccion' => 'address', 'localidad' => 'locality', 'provincia' => 'province'];
+    }
+
+    public function importKeys(): array
+    {
+        return [];
+    }
+
+    public function importRelations(): array
+    {
+        return ['client' => 'client_id'];
+    }
+
+    /** El cliente se indica por CUIT o razón social. Un destino se reconoce por nombre + cliente. */
+    public function prepareImport(array $row): array
+    {
+        if (array_key_exists('client', $row)) {
+            $text = trim((string) $row['client']);
+            $digits = preg_replace('/\D/', '', $text);
+            $row['client_id'] = $text === '' ? null : (
+                (strlen($digits) === 11 ? \App\Models\Client::query()->where('cuit', $digits)->value('id') : null)
+                ?? \App\Models\Client::query()->whereRaw('LOWER(business_name) = ?', [mb_strtolower($text)])->value('id') ?? -1
+            );
+            unset($row['client']);
+        }
+
+        return $row;
+    }
+
+    public function findForImport(array $data): ?Model
+    {
+        return empty($data['name']) ? null : \App\Models\Destination::query()->where('name', $data['name'])
+            ->where('client_id', $data['client_id'] ?? null)->first();
+    }
+
+    public function exportValue(Model $record, string $field): mixed
+    {
+        return $field === 'client' ? $record->client?->business_name : parent::exportValue($record, $field);
+    }
+
     public static function clientOptions(): array
     {
         return Client::query()->where('active', true)->orderBy('business_name')->pluck('business_name', 'id')->all();

@@ -12,7 +12,8 @@ class Provider extends Model
     use Auditable, SoftDeletes;
 
     protected $fillable = [
-        'name', 'cuit', 'contact', 'phone', 'email', 'address', 'products', 'active',
+        'name', 'cuit', 'contact', 'phone', 'email', 'address', 'products', 'active', 'locality', 'province', 'tax_condition', 'cbu',
+        'bank_alias', 'notes',
     ];
 
     protected function casts(): array

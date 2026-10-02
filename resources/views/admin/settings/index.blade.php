@@ -18,10 +18,17 @@
                     @case('company')
                         <div class="grid gap-4 md:grid-cols-2">
                             <x-input name="name" label="Nombre del galpón" :value="$s['company.name']" required/>
+                            <x-input name="legal_name" label="Razón social" :value="$s['company.legal_name']"/>
                             <x-input name="cuit" label="CUIT" :value="$s['company.cuit']"/>
+                            <x-input name="iibb" label="Ingresos Brutos N°" :value="$s['company.iibb']"/>
+                            <x-input name="activity_start" type="date" label="Inicio de actividades" :value="$s['company.activity_start']"/>
                             <x-input name="address" label="Dirección" :value="$s['company.address']"/>
+                            <x-input name="locality" label="Localidad" :value="$s['company.locality']"/>
+                            <x-input name="province" label="Provincia" :value="$s['company.province']"/>
+                            <x-input name="postal_code" label="Código postal" :value="$s['company.postal_code']"/>
                             <x-input name="phone" label="Teléfono" :value="$s['company.phone']"/>
                             <x-input name="email" type="email" label="Email" :value="$s['company.email']"/>
+                            <x-input name="website" label="Sitio web" :value="$s['company.website']"/>
                             <x-input name="primary_color" type="color" label="Color principal" :value="$s['ui.primary_color']" class="h-10 p-1"/>
                             <x-field label="Logo" name="logo" hint="PNG/JPG, máximo 1 MB.">
                                 <input type="file" name="logo" accept="image/*" class="form-input">

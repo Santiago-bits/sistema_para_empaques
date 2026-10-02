@@ -51,7 +51,11 @@ class EmployeeDefinition extends CatalogDefinition
             Field::text('last_name', 'Apellido')->required(),
             Field::text('dni', 'DNI')->attrs(['inputmode' => 'numeric']),
             Field::text('cuil', 'CUIL')->attrs(['inputmode' => 'numeric'])->hint('11 dígitos, con o sin guiones.'),
+            Field::date('birth_date', 'Fecha de nacimiento'),
             Field::text('phone', 'Teléfono'),
+            Field::text('address', 'Dirección'),
+            Field::text('cbu', 'CBU')->attrs(['inputmode' => 'numeric'])->hint('Para pagar sueldos por transferencia.'),
+            Field::text('bank_alias', 'Alias bancario'),
             Field::text('position', 'Puesto')->placeholder('Embalador, clasificador, autoelevadorista…'),
             Field::select('crew_id', 'Cuadrilla', fn () => CrewDefinition::options())->placeholder('Sin cuadrilla')
                 ->display(fn (Model $r) => $r->crew?->name),
@@ -88,7 +92,11 @@ class EmployeeDefinition extends CatalogDefinition
             'last_name' => ['required', 'string', 'max:80'],
             'dni' => ['nullable', 'digits_between:7,9', $this->unique('dni', $record)],
             'cuil' => ['nullable', 'digits:11'],
+            'birth_date' => ['nullable', 'date', 'before:today'],
             'phone' => ['nullable', 'string', 'max:50'],
+            'address' => ['nullable', 'string', 'max:255'],
+            'cbu' => ['nullable', 'digits:22'],
+            'bank_alias' => ['nullable', 'string', 'max:60'],
             'position' => ['nullable', 'string', 'max:80'],
             'crew_id' => ['nullable', 'integer', 'exists:crews,id'],
             'hired_on' => ['nullable', 'date'],
@@ -110,7 +118,7 @@ class EmployeeDefinition extends CatalogDefinition
 
     public function prepare(array $input): array
     {
-        $input = $this->cleanUpper($input, 'code');
+        $input = $this->cleanBank($this->cleanUpper($input, 'code'));
         foreach (['dni', 'cuil'] as $key) {
             if (isset($input[$key]) && is_scalar($input[$key])) {
                 $input[$key] = preg_replace('/\D/', '', (string) $input[$key]) ?: null;
@@ -118,5 +126,46 @@ class EmployeeDefinition extends CatalogDefinition
         }
 
         return $input;
+    }
+
+    public function importColumns(): array
+    {
+        return [
+            'legajo' => 'code', 'nombre' => 'first_name', 'apellido' => 'last_name', 'dni' => 'dni', 'cuil' => 'cuil',
+            'fecha_nacimiento' => 'birth_date', 'telefono' => 'phone', 'direccion' => 'address', 'puesto' => 'position',
+            'cuadrilla' => 'crew', 'fecha_ingreso' => 'hired_on', 'jornal' => 'daily_wage', 'cbu' => 'cbu', 'alias' => 'bank_alias',
+            'observaciones' => 'notes',
+        ];
+    }
+
+    public function importKeys(): array
+    {
+        return ['code', 'dni'];
+    }
+
+    public function importRelations(): array
+    {
+        return ['crew' => 'crew_id'];
+    }
+
+    /** La cuadrilla se indica por código o nombre; el jornal acepta «28.000,50». */
+    public function prepareImport(array $row): array
+    {
+        if (array_key_exists('crew', $row)) {
+            $crew = trim((string) $row['crew']);
+            $row['crew_id'] = $crew === '' ? null
+                : (\App\Models\Crew::query()->where('code', $crew)->orWhereRaw('LOWER(name) = ?', [mb_strtolower($crew)])->value('id') ?? -1);
+            unset($row['crew']);
+        }
+        if (isset($row['daily_wage'])) {
+            $row['daily_wage'] = parse_number($row['daily_wage']);
+        }
+
+        return $row;
+    }
+
+    public function exportValue(Model $record, string $field): mixed
+    {
+        return $field === 'crew' ? $record->crew?->name : parent::exportValue($record, $field);
     }
 }

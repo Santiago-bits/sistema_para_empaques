@@ -51,7 +51,7 @@ class LotController extends Controller
 
     public function store(LotRequest $request): RedirectResponse
     {
-        $lot = $this->lots->create($request->validated());
+        $lot = $this->lots->create($request->safe()->except('reason'));
 
         return redirect()->route('lots.show', $lot)->with('success', "Lote {$lot->code} creado.");
     }
@@ -87,7 +87,7 @@ class LotController extends Controller
 
     public function update(LotRequest $request, Lot $lot): RedirectResponse
     {
-        $this->lots->update($lot, $request->validated());
+        $this->lots->update($lot, $request->safe()->except('reason'), $request->validated('reason'));
 
         return redirect()->route('lots.show', $lot)->with('success', 'Lote actualizado.');
     }

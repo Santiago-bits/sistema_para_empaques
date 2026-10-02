@@ -283,6 +283,20 @@ abstract class CatalogDefinition
         return $input;
     }
 
+    /** CBU sólo con dígitos; condición de IVA aceptada por clave («RI») o por nombre («Responsable Inscripto»). */
+    protected function cleanBank(array $input): array
+    {
+        if (isset($input['cbu']) && is_scalar($input['cbu'])) {
+            $input['cbu'] = preg_replace('/\D/', '', (string) $input['cbu']) ?: null;
+        }
+        if (isset($input['tax_condition']) && is_string($input['tax_condition']) && ! array_key_exists($input['tax_condition'], \App\Models\Client::TAX_CONDITIONS)) {
+            $match = array_search(mb_strtolower(trim($input['tax_condition'])), array_map('mb_strtolower', \App\Models\Client::TAX_CONDITIONS), true);
+            $input['tax_condition'] = $match !== false ? $match : mb_strtoupper(trim($input['tax_condition']));
+        }
+
+        return $input;
+    }
+
     protected function cleanCuit(array $input, string $key = 'cuit'): array
     {
         if (array_key_exists($key, $input)) {
@@ -357,5 +371,46 @@ abstract class CatalogDefinition
     public function prepareImport(array $row): array
     {
         return $row;
+    }
+
+    /**
+     * Columnas de importación que no son campos de la tabla sino referencias legibles que prepareImport()
+     * convierte a un id: campo virtual => campo real (p. ej. 'transporter' => 'transporter_id').
+     *
+     * @return array<string, string>
+     */
+    public function importRelations(): array
+    {
+        return [];
+    }
+
+    /** Valor de un campo para exportar, en el mismo formato que acepta la importación (ida y vuelta con Excel). */
+    public function exportValue(Model $record, string $field): mixed
+    {
+        $value = $record->getAttribute($field);
+        if ($value instanceof \DateTimeInterface) {
+            return $value->format('d/m/Y');
+        }
+        if (is_bool($value)) {
+            return $value ? 'Sí' : 'No';
+        }
+
+        return $value;
+    }
+
+    /** Busca el registro existente que corresponde a una fila importada (por sus claves: código, CUIT, DNI…). */
+    public function findForImport(array $data): ?Model
+    {
+        foreach ($this->importKeys() as $key) {
+            $value = $data[$key] ?? null;
+            if ($value !== null && $value !== '') {
+                $found = $this->model::query()->where($key, $value)->first();
+                if ($found) {
+                    return $found;
+                }
+            }
+        }
+
+        return null;
     }
 }

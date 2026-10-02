@@ -16,6 +16,8 @@ Route::prefix('cargas')->name('loads.')->middleware('module:loads')->controller(
     Route::get('{load}', 'show')->middleware('can:loads.view')->name('show');
     Route::get('{load}/editar', 'edit')->middleware('can:loads.update')->name('edit');
     Route::put('{load}', 'update')->middleware('can:loads.update')->name('update');
+    Route::get('{load}/corregir', 'correct')->middleware('can:loads.update')->name('correct');
+    Route::put('{load}/corregir', 'saveCorrection')->middleware('can:loads.update')->name('correct.save');
 
     Route::middleware('can:loads.update')->group(function () {
         Route::get('{load}/armado', 'builder')->name('builder');

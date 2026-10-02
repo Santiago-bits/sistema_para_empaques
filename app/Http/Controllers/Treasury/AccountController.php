@@ -120,6 +120,22 @@ class AccountController extends Controller
         return back()->with('success', 'Movimiento anulado. El saldo se recalculó.');
     }
 
+    public function correct(Request $request, AccountMovement $movement): RedirectResponse
+    {
+        $request->merge(['amount' => parse_number($request->input('amount'))]);
+        $data = $request->validate([
+            'amount' => ['required', 'numeric', 'gt:0', 'max:999999999999'],
+            'date' => ['required', 'date', 'before_or_equal:today'],
+            'description' => ['required', 'string', 'max:255'],
+            'reference' => ['nullable', 'string', 'max:80'],
+            'reason' => ['required', 'string', 'min:5', 'max:255'],
+        ], [], ['amount' => 'importe', 'date' => 'fecha', 'description' => 'detalle', 'reference' => 'referencia', 'reason' => 'motivo de la corrección']);
+
+        $this->accounts->correct($movement, $data, $data['reason'], $request->user());
+
+        return back()->with('success', 'Movimiento corregido. El saldo se recalculó.');
+    }
+
     public function sync(): RedirectResponse
     {
         $result = $this->accounts->syncPending();

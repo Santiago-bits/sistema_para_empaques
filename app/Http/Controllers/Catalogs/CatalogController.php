@@ -36,7 +36,7 @@ class CatalogController extends Controller
         return view('catalogs.hub', ['groups' => $groups]);
     }
 
-    public function index(Request $request): View
+    public function index(Request $request): View|\Symfony\Component\HttpFoundation\Response
     {
         $definition = $this->definition($request);
 
@@ -51,6 +51,10 @@ class CatalogController extends Controller
             }
         }
         $definition->applyOrder($query);
+
+        if (in_array($request->query('format'), ['xlsx', 'csv'], true) && $definition->importColumns() !== []) {
+            return $this->export($request, $definition, $query, (string) $request->query('format'));
+        }
 
         return view('catalogs.index', [
             'definition' => $definition,
@@ -123,6 +127,36 @@ class CatalogController extends Controller
         $this->catalogs->delete($definition, $definition->find($request->route('record')));
 
         return redirect()->to($definition->route('index'))->with('success', 'Registro eliminado.');
+    }
+
+    /**
+     * Exporta el catálogo (respetando búsqueda y filtros) con los MISMOS encabezados que la importación:
+     * se puede abrir en Excel, corregir y volver a importar con «actualizar los existentes».
+     */
+    private function export(Request $request, CatalogDefinition $definition, $query, string $format): \Symfony\Component\HttpFoundation\Response
+    {
+        $columns = $definition->importColumns();
+        if ($definition->hasActive() && ! in_array('active', $columns, true)) {
+            $columns['activo'] = 'active';
+        }
+        $spec = [];
+        foreach ($columns as $header => $field) {
+            $spec[$header] = ['label' => $header, 'type' => 'text'];
+        }
+
+        $dataset = new \App\Services\Reports\ReportDataset($definition->key(), $definition->title(), $spec,
+            fn () => (clone $query)->lazyById(500)->map(function ($record) use ($definition, $columns) {
+                $row = [];
+                foreach ($columns as $header => $field) {
+                    $value = $definition->exportValue($record, $field);
+                    $row[$header] = $value === null ? null : (string) $value;
+                }
+
+                return $row;
+            }));
+
+        return app(\App\Services\ExportService::class)->download($dataset, $format,
+            \App\Services\Reports\ReportFilters::between(today(), today()), $request->user());
     }
 
     /** La clave del catálogo llega como default de la ruta (no por posición). */

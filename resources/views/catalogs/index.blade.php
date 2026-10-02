@@ -10,13 +10,16 @@
                     <a href="{{ $action['url'] }}" class="btn btn-secondary"><x-icon :name="$action['icon']" class="size-4"/> {{ $action['label'] }}</a>
                 @endcan
             @endforeach
+            @if ($definition->importColumns() !== [] && Route::has('imports.create') && auth()->user()->can('imports.manage'))
+                <a href="{{ route('imports.create', ['type' => $definition->key()]) }}" class="btn btn-secondary"><x-icon name="upload" class="size-4"/> Importar</a>
+            @endif
             @if ($canManage)
                 <a href="{{ $definition->route('create') }}" class="btn btn-primary"><x-icon name="plus" class="size-4"/> {{ $definition->newLabel() }}</a>
             @endif
         </x-slot:actions>
     </x-page-header>
 
-    <x-filters>
+    <x-filters :exports="$definition->importColumns() !== [] ? [['label' => 'Excel', 'format' => 'xlsx', 'route' => $definition->route('index')], ['label' => 'CSV', 'format' => 'csv', 'route' => $definition->route('index')]] : []">
         <x-input name="q" label="Buscar" :value="request('q')" placeholder="Buscar…"/>
         @foreach ($definition->filters() as $filter)
             <x-select :name="$filter->name" :label="$filter->label" :options="$filter->options()" :value="request($filter->name)" placeholder="Todos"/>

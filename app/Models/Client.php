@@ -21,7 +21,7 @@ class Client extends Model
 
     protected $fillable = [
         'business_name', 'name', 'cuit', 'dni', 'address', 'locality', 'province', 'phone', 'email',
-        'tax_condition', 'active',
+        'tax_condition', 'active', 'notes',
     ];
 
     protected function casts(): array
