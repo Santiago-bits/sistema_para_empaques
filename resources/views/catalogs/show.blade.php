@@ -18,6 +18,9 @@
                 <a href="{{ $definition->route('edit', $record->getKey()) }}" class="btn btn-primary"><x-icon name="pencil" class="size-4"/> Editar</a>
             @endif
             {{ $extraActions ?? '' }}
+            @if (array_key_exists($record->getMorphClass(), \App\Models\AccountMovement::HOLDERS) && auth()->user()->can('treasury.view') && Route::has('accounts.show'))
+                <a href="{{ route('accounts.show', [$record->getMorphClass(), $record->getKey()]) }}" class="btn btn-secondary"><x-icon name="book" class="size-4"/> Cuenta corriente</a>
+            @endif
         </x-slot:actions>
     </x-page-header>
 

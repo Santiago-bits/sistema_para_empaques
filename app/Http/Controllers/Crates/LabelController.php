@@ -113,7 +113,11 @@ class LabelController extends Controller
             'pallet_id' => ['nullable', 'integer', Rule::exists('pallets', 'id')->whereNull('deleted_at')],
             'lot_id' => ['nullable', 'integer', Rule::exists('lots', 'id')->whereNull('deleted_at')],
             'variety_id' => ['nullable', 'integer', Rule::exists('varieties', 'id')],
-        ], [], ['quantity' => 'cantidad', 'pallet_id' => 'pallet', 'lot_id' => 'lote', 'variety_id' => 'variedad']);
+            'size_id' => ['nullable', 'integer', Rule::exists('sizes', 'id')],
+            'grade_id' => ['nullable', 'integer', Rule::exists('grades', 'id')],
+            'container_type_id' => ['nullable', 'integer', Rule::exists('container_types', 'id')->whereNull('deleted_at')],
+        ], [], ['quantity' => 'cantidad', 'pallet_id' => 'pallet', 'lot_id' => 'lote', 'variety_id' => 'variedad',
+            'size_id' => 'calibre', 'grade_id' => 'selección', 'container_type_id' => 'envase']);
 
         $created = $crates->createBatch((int) $data['quantity'], $data, $request->user());
 

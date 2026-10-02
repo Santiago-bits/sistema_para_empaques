@@ -19,13 +19,17 @@ class Lot extends Model
 
     protected $fillable = [
         'warehouse_id', 'season_id', 'code', 'date', 'producer_id', 'owner_id', 'variety_id', 'origin',
-        'field', 'quantity', 'status', 'notes', 'created_by',
+        'field', 'quantity', 'status', 'notes', 'created_by', 'container_type_id', 'kg_received', 'price_per_kg',
+        'settled_at', 'settled_by',
     ];
 
     protected function casts(): array
     {
         return [
             'date' => 'date',
+            'kg_received' => 'decimal:2',
+            'price_per_kg' => 'decimal:4',
+            'settled_at' => 'datetime',
         ];
     }
 
@@ -67,5 +71,18 @@ class Lot extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function containerType(): BelongsTo
+    {
+        return $this->belongsTo(ContainerType::class);
+    }
+
+    /** Importe de compra al productor (kilos × precio), sin descontar la tasa de asociación. */
+    public function purchaseAmount(): ?float
+    {
+        return $this->kg_received !== null && $this->price_per_kg !== null
+            ? round((float) $this->kg_received * (float) $this->price_per_kg, 2)
+            : null;
     }
 }

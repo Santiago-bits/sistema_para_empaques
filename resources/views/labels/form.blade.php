@@ -25,6 +25,9 @@
                             <x-select name="pallet_id" label="Pallet" :options="$pallets" placeholder="—"/>
                             <x-select name="lot_id" label="Lote" :options="$lots" placeholder="—"/>
                             <x-select name="variety_id" label="Variedad" :options="$varieties" placeholder="—"/>
+                            <x-select name="size_id" label="Calibre / tamaño" :options="\App\Models\Size::query()->where('active', true)->orderBy('name')->pluck('name', 'id')->all()" placeholder="—"/>
+                            <x-select name="grade_id" label="Selección" :options="\App\Catalogs\Definitions\GradeDefinition::options()" placeholder="—"/>
+                            <x-select name="container_type_id" label="Envase" :options="\App\Catalogs\Definitions\ContainerTypeDefinition::options()" placeholder="—"/>
                         </div>
                         <button class="btn btn-primary"><x-icon name="plus" class="size-4"/> Generar y abrir etiquetas</button>
                     </form>

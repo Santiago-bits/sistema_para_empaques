@@ -21,10 +21,20 @@ class Load extends Model
     /** Bloqueo optimista: se incrementa en cada cambio de estado o edición crítica. */
     protected $attributes = ['version' => 0];
 
+    public const COMMERCIAL_DESTINATIONS = ['domestic' => 'Mercado interno', 'export' => 'Exportación', 'industry' => 'Industria'];
+
+    public const SALES_CHANNELS = [
+        'market' => 'Mercado concentrador', 'supermarket' => 'Supermercado', 'distributor' => 'Distribuidor',
+        'export' => 'Exportación', 'industry' => 'Industria', 'direct' => 'Venta directa',
+    ];
+
+    public const SALE_CONDITIONS = ['cash' => 'Contado', 'account' => 'Cuenta corriente', 'consignment' => 'Consignación'];
+
     protected $fillable = [
         'warehouse_id', 'number', 'date', 'truck_id', 'driver_id', 'transporter_id', 'destination_id',
         'client_id', 'owner_id', 'status', 'planned_crates', 'total_crates', 'total_kg', 'notes',
-        'closed_at', 'closed_by', 'dispatched_at', 'dispatched_by', 'created_by',
+        'closed_at', 'closed_by', 'dispatched_at', 'dispatched_by', 'created_by', 'trailer_plate', 'guide_number',
+        'commercial_destination', 'sales_channel', 'sale_condition', 'freight_amount', 'freight_posted_at',
     ];
 
     protected function casts(): array
@@ -35,6 +45,8 @@ class Load extends Model
             'total_kg' => 'decimal:2',
             'closed_at' => 'datetime',
             'dispatched_at' => 'datetime',
+            'freight_amount' => 'decimal:2',
+            'freight_posted_at' => 'datetime',
         ];
     }
 

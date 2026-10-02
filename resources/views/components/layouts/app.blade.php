@@ -106,6 +106,16 @@
                     <span class="hidden rounded-md bg-accent-500/15 px-2 py-1 text-xs font-semibold text-accent-600 sm:inline dark:text-accent-400">{{ $envLabel }}</span>
                 @endif
 
+                @if ($usdRate ?? null)
+                    <a href="{{ auth()->user()->can('treasury.view') ? route('exchange.index') : '#' }}"
+                       class="hidden items-center gap-1.5 rounded-md px-2 py-1 text-xs hover:bg-stone-100 sm:flex dark:hover:bg-stone-800"
+                       title="Cotización del dólar (vendedor) del {{ fdate($usdRate->date) }}">
+                        <span class="font-semibold text-emerald-700 dark:text-emerald-400">US$</span>
+                        <span class="font-semibold tabular-nums">{{ money($usdRate->sell) }}</span>
+                        @unless ($usdRate->date->isToday())<span class="text-amber-600 dark:text-amber-400" aria-label="No es de hoy">•</span>@endunless
+                    </a>
+                @endif
+
                 {{-- Tema --}}
                 <div x-data="{ open: false }" class="relative">
                     <button type="button" class="btn btn-ghost p-2" @click="open = !open" aria-label="Tema">

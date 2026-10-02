@@ -56,7 +56,16 @@ return [
             ['label' => 'Facturación', 'route' => 'invoices.index', 'icon' => 'receipt', 'permission' => 'billing.view', 'module' => 'billing'],
             ['label' => 'ARCA', 'route' => 'arca.index', 'icon' => 'bank', 'permission' => 'arca.manage', 'module' => 'arca'],
             ['label' => 'Costos', 'route' => 'costs.index', 'icon' => 'currency', 'permission' => 'costs.view', 'module' => 'costs'],
-            ['label' => 'Catálogos', 'route' => 'catalogs.index', 'icon' => 'book', 'permission' => ['catalogs.view', 'packers.view'], 'module' => 'catalogs'],
+            ['label' => 'Catálogos', 'route' => 'catalogs.index', 'icon' => 'book', 'permission' => ['catalogs.view', 'packers.view', 'staff.view'], 'module' => 'catalogs'],
+        ],
+    ],
+    [
+        'title' => 'Tesorería',
+        'items' => [
+            ['label' => 'Caja', 'route' => 'cash.index', 'icon' => 'currency', 'permission' => 'treasury.view', 'module' => 'treasury'],
+            ['label' => 'Cuentas corrientes', 'route' => 'accounts.index', 'icon' => 'users', 'permission' => 'treasury.view', 'module' => 'treasury'],
+            ['label' => 'Cheques', 'route' => 'checks.index', 'icon' => 'receipt', 'permission' => 'treasury.view', 'module' => 'treasury'],
+            ['label' => 'Cotización del dólar', 'route' => 'exchange.index', 'icon' => 'chart-line', 'permission' => 'treasury.view', 'module' => 'treasury'],
         ],
     ],
     [

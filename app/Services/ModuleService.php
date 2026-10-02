@@ -34,6 +34,7 @@ class ModuleService
         'incidents' => ['Incidentes', 'Registro y seguimiento de incidentes', true, false],
         'maintenance' => ['Mantenimiento', 'Maquinaria y mantenimientos', false, false],
         'cold_rooms' => ['Cámaras frigoríficas', 'Temperatura y humedad', false, false],
+        'treasury' => ['Tesorería', 'Caja, cuentas corrientes, cheques y cotización del dólar', true, false],
         'costs' => ['Costos', 'Costos y rentabilidad', false, false],
         'client_portal' => ['Portal de clientes', 'Acceso de propietarios/clientes a su información', false, false],
         'whatsapp' => ['WhatsApp', 'Notificaciones por WhatsApp (integración futura)', false, false],

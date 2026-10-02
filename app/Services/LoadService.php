@@ -50,7 +50,8 @@ class LoadService
     /** Campos de cabecera editables mientras la carga está en armado. */
     public const EDITABLE = [
         'date', 'truck_id', 'driver_id', 'transporter_id', 'destination_id', 'client_id', 'owner_id',
-        'planned_crates', 'notes',
+        'planned_crates', 'notes', 'trailer_plate', 'guide_number', 'commercial_destination', 'sales_channel',
+        'sale_condition', 'freight_amount',
     ];
 
     public function __construct(

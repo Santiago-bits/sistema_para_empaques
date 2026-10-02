@@ -31,8 +31,12 @@
                     </div>
                 </div>
                 <x-input name="issued_on" type="date" label="Fecha de emisión" :value="$invoice->issued_on" required/>
-                <x-select name="currency" label="Moneda" :options="['ARS' => 'Pesos (ARS)', 'USD' => 'Dólares (USD)']" :value="$invoice->currency" x-model="currency"/>
-                <div x-show="currency === 'USD'"><x-input name="exchange_rate" label="Cotización" :value="$invoice->exchange_rate" inputmode="decimal"/></div>
+                @php $usdNow = \App\Models\ExchangeRate::current(); @endphp
+                {{-- Al pasar a dólares se propone la cotización vigente (si todavía no se cargó una). --}}
+                <x-select name="currency" label="Moneda" :options="['ARS' => 'Pesos (ARS)', 'USD' => 'Dólares (USD)']" :value="$invoice->currency" x-model="currency"
+                          x-on:change="if ($event.target.value === 'USD' && {{ \Illuminate\Support\Js::from($usdNow ? num($usdNow->sell, 2) : null) }}) { const f = document.querySelector('[name=exchange_rate]'); if (f && (! f.value || parseFloat(f.value.replace(/\./g, '').replace(',', '.')) <= 1)) f.value = {{ \Illuminate\Support\Js::from($usdNow ? num($usdNow->sell, 2) : null) }}; }"/>
+                <div x-show="currency === 'USD'"><x-input name="exchange_rate" label="Cotización" :value="$invoice->exchange_rate" inputmode="decimal"
+                     :hint="$usdNow ? 'Vigente: '.money($usdNow->sell).' del '.fdate($usdNow->date).'.' : null"/></div>
             </div>
         </x-panel>
 

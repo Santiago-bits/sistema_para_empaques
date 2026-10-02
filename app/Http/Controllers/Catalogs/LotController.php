@@ -58,7 +58,7 @@ class LotController extends Controller
 
     public function show(Lot $lot): View
     {
-        $lot->load(['producer', 'owner', 'variety', 'season', 'stateHistories.user', 'creator']);
+        $lot->load(['producer', 'owner', 'variety', 'season', 'stateHistories.user', 'creator', 'containerType']);
 
         return view('lots.show', [
             'lot' => $lot,

@@ -29,6 +29,10 @@ class InvoiceRequest extends FormRequest
                 return $i;
             })->values()->all();
         $this->merge(['items' => $items]);
+        if ($this->filled('exchange_rate')) {
+            // Cotización con formato argentino: «1.234,50».
+            $this->merge(['exchange_rate' => parse_number($this->input('exchange_rate'))]);
+        }
     }
 
     public function rules(): array

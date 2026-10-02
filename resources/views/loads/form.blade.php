@@ -30,6 +30,16 @@
                 <x-select name="truck_id" label="Camión" :options="$trucks" :value="$load->truck_id" placeholder="—"/>
                 <x-select name="driver_id" label="Chofer" :options="$drivers" :value="$load->driver_id" placeholder="—"/>
                 <x-input name="planned_crates" type="number" min="1" label="Cajones previstos" :value="$load->planned_crates" hint="Opcional: muestra el avance del armado."/>
+                <x-input name="trailer_plate" label="Patente del acoplado" :value="$load->trailer_plate" class="uppercase" maxlength="12" placeholder="AA123BB"/>
+                <x-input name="guide_number" label="N° de guía" :value="$load->guide_number" maxlength="40" hint="Guía de tránsito / DTV."/>
+            </div>
+            <h3 class="mt-6 mb-2 text-sm font-semibold text-stone-700 dark:text-stone-300">Datos comerciales</h3>
+            <div class="grid gap-4 md:grid-cols-4">
+                <x-select name="commercial_destination" label="Destino comercial" :options="\App\Models\Load::COMMERCIAL_DESTINATIONS" :value="$load->commercial_destination" placeholder="—"/>
+                <x-select name="sales_channel" label="Canal de comercialización" :options="\App\Models\Load::SALES_CHANNELS" :value="$load->sales_channel" placeholder="—"/>
+                <x-select name="sale_condition" label="Condición de venta" :options="\App\Models\Load::SALE_CONDITIONS" :value="$load->sale_condition" placeholder="—"/>
+                <x-input name="freight_amount" inputmode="decimal" label="Flete ($)" :value="$load->freight_amount !== null ? num($load->freight_amount, 2) : null"
+                         hint="Al despachar, se le acredita al transportista en su cuenta corriente."/>
             </div>
             <div class="mt-4"><x-textarea name="notes" label="Observaciones" :value="$load->notes"/></div>
         </x-panel>

@@ -68,6 +68,15 @@ class LotService
             if (blank($data['code'] ?? null)) {
                 unset($data['code']);
             }
+            // Ya liquidado al productor: kilos y precio quedan fijos (para corregir, anular la liquidación).
+            if ($fresh->settled_at) {
+                foreach (['kg_received', 'price_per_kg', 'producer_id'] as $key) {
+                    if (array_key_exists($key, $data) && (string) ($data[$key] ?? '') !== (string) ($fresh->getRawOriginal($key) ?? '')
+                        && (float) ($data[$key] ?? 0) !== (float) ($fresh->getRawOriginal($key) ?? 0)) {
+                        throw new BusinessException('El lote ya fue liquidado al productor: para cambiar kilos, precio o productor, anulá la liquidación desde su cuenta corriente.');
+                    }
+                }
+            }
             $fresh->update($data);
 
             return $fresh;

@@ -36,10 +36,46 @@
                     'Origen' => $lot->origin,
                     'Campo' => $lot->field,
                     'Cantidad declarada' => num($lot->quantity),
+                    'Envase' => $lot->containerType?->name,
                     'Creado por' => $lot->creator?->full_name,
                     'Observaciones' => $lot->notes,
                 ]"/>
             </x-panel>
+
+            @if (module_enabled('treasury') && (auth()->user()->can('treasury.view') || auth()->user()->can('lots.settle')))
+                @php
+                    $purchase = $lot->purchaseAmount();
+                    $feePerKg = (float) setting('treasury.association_fee_per_kg', 0);
+                    $fee = $lot->kg_received !== null && $feePerKg > 0 ? round((float) $lot->kg_received * $feePerKg, 2) : 0;
+                @endphp
+                <x-panel title="Compra de fruta al productor">
+                    @if ($purchase === null)
+                        <p class="text-sm text-stone-500">Cargá los kilos recibidos y el precio por kilo (Editar) para liquidar el lote al productor.</p>
+                    @else
+                        <x-dl :items="[
+                            'Kilos recibidos' => kg($lot->kg_received),
+                            'Precio por kilo' => money($lot->price_per_kg),
+                            'Importe de compra' => money($purchase),
+                            'Tasa de asociación' => $fee > 0 ? '− '.money($fee).' ('.money($feePerKg).' por kg)' : null,
+                            'Neto a favor del productor' => money($purchase - $fee),
+                            'Estado' => $lot->settled_at ? 'Liquidado el '.fdate($lot->settled_at, true) : 'Sin liquidar',
+                        ]"/>
+                        <div class="mt-4 flex flex-wrap gap-2">
+                            @if (! $lot->settled_at && $lot->status !== 'voided')
+                                @can('lots.settle')
+                                    <form method="POST" action="{{ route('lots.settle', $lot) }}" x-data x-confirm="¿Liquidar {{ money($purchase - $fee) }} a favor de {{ $lot->producer?->name }}?">
+                                        @csrf
+                                        <button class="btn btn-primary"><x-icon name="currency" class="size-4"/> Liquidar al productor</button>
+                                    </form>
+                                @endcan
+                            @endif
+                            @if ($lot->producer && auth()->user()->can('treasury.view'))
+                                <a href="{{ route('accounts.show', ['producer', $lot->producer_id]) }}" class="btn btn-secondary"><x-icon name="book" class="size-4"/> Cuenta del productor</a>
+                            @endif
+                        </div>
+                    @endif
+                </x-panel>
+            @endif
 
             <x-panel title="Pallets" :padding="false">
                 <table class="table">

@@ -55,6 +55,18 @@ class SettingsService
         'arca.point_of_sale' => [1, 'int', 'arca'],
         'arca.cuit' => ['', 'string', 'arca'],
         'arca.emitter_condition' => ['RI', 'string', 'arca'], // RI = Responsable Inscripto (A/B), MT = Monotributo (C)
+        // Etiqueta de la caja (datos oficiales del empaque, como la etiqueta impresa del envase).
+        'label.show_company' => [true, 'bool', 'label'],
+        'label.show_regulatory' => [false, 'bool', 'label'],
+        'label.senasa_number' => ['', 'string', 'label'],
+        'label.provincial_registry' => ['', 'string', 'label'],
+        'label.renspa' => ['', 'string', 'label'],
+        'label.decree' => ['Decreto-Ley 9.244/63', 'string', 'label'],
+        'label.origin_legend' => ['Producción Argentina', 'string', 'label'],
+        'label.nominal_kg' => [0, 'float', 'label'],
+        'treasury.association_fee_per_kg' => [0, 'float', 'treasury'],
+        'treasury.post_test_invoices' => [false, 'bool', 'treasury'],
+        'treasury.check_warning_days' => [7, 'int', 'treasury'],
         'backup.retention_days' => [30, 'int', 'backup'],
         'backup.daily' => [true, 'bool', 'backup'],
         'backup.weekly' => [true, 'bool', 'backup'],

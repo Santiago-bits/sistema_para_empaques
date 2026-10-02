@@ -35,18 +35,24 @@ class LabelService
 
     public function crateLabel(Crate $crate): array
     {
-        $crate->loadMissing('lot', 'variety', 'size', 'pallet', 'producer');
+        $crate->loadMissing('lot', 'variety', 'size', 'grade', 'containerType', 'pallet', 'producer', 'packer');
+        $nominal = (float) setting('label.nominal_kg', 0);
+        $weight = $crate->weight !== null ? kg($crate->weight) : ($nominal > 0 ? 'aprox. '.kg($nominal, 0) : null);
 
         return [
             'code' => $crate->code,
             'title' => 'Cajón',
             'lines' => array_values(array_filter([
-                ['Lote', $crate->lot?->code],
                 ['Variedad', $crate->variety?->name],
-                ['Tamaño', $crate->size?->name],
-                ['Peso', $crate->weight !== null ? kg($crate->weight) : null],
+                ['Calibre', $crate->size?->name],
+                ['Selección', $crate->grade?->name],
+                ['Kg', $weight],
+                ['Envase', $crate->containerType?->name],
+                ['Lote', $crate->lot?->code],
                 ['Pallet', $crate->pallet?->code],
                 ['Productor', $crate->producer?->name],
+                ['Empacador N°', $crate->packer?->code],
+                ['Empaque', ($crate->processed_at ?? $crate->created_at)?->format('d/m/Y')],
             ], fn ($line) => $line[1] !== null && $line[1] !== '')),
             'barcode_svg' => $this->barcodeSvg($crate->barcode ?: $crate->code),
             'qr_svg' => $this->qrSvg($this->qrPayload('CJ', $crate->code)),
@@ -71,6 +77,39 @@ class LabelService
             'barcode_svg' => $this->barcodeSvg($pallet->barcode ?: $pallet->code),
             'qr_svg' => $this->qrSvg($this->qrPayload('PAL', $pallet->code)),
         ];
+    }
+
+    /** Encabezado de la etiqueta: empaque, CUIT y dirección (Configuración → Etiquetas). */
+    public function companyLine(): ?string
+    {
+        if (! setting('label.show_company', true)) {
+            return null;
+        }
+        $parts = array_filter([
+            setting('company.name'),
+            setting('company.cuit') ? 'CUIT '.setting('company.cuit') : null,
+            setting('company.address'),
+        ]);
+
+        return $parts ? implode(' · ', $parts) : null;
+    }
+
+    /** Pie con los datos oficiales del envase: SENASA, registro provincial, RENSPA, norma y origen. */
+    public function regulatoryLine(): ?string
+    {
+        if (! setting('label.show_regulatory', false)) {
+            return null;
+        }
+        $senasa = trim((string) setting('label.senasa_number'));
+        $parts = array_filter([
+            setting('label.origin_legend'),
+            $senasa !== '' ? 'SENASA '.(preg_match('/^[A-Za-z]-/', $senasa) ? $senasa : 'E-'.$senasa) : null,
+            setting('label.provincial_registry') ? 'Reg. Prov. Empaque N° '.setting('label.provincial_registry') : null,
+            setting('label.renspa') ? 'RENSPA '.setting('label.renspa') : null,
+            setting('label.decree'),
+        ]);
+
+        return $parts ? implode(' · ', $parts) : null;
     }
 
     /** El QR lleva la URL de trazabilidad: escaneado con un celular abre la ficha (requiere login). */

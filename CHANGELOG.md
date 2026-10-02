@@ -2,6 +2,28 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versionado semántico.
 
+## [1.2.0] - 2026-10-02
+
+### Agregado
+- **Tesorería** (módulo nuevo): caja de efectivo con saldo anterior, ingresos, egresos, anulación con motivo y
+  cierre con arqueo; **cuentas corrientes** de clientes, productores, transportistas, proveedores y empleados
+  (cobros y pagos en efectivo, transferencia o cheque, ajustes, saldo inicial, resumen imprimible y Excel,
+  consulta de saldos); **cheques** de terceros y propios (cartera, por vencer, por cobrar, depósito, cobro,
+  endoso, rechazo con reimputación automática, e-cheq); **cotización del dólar** visible arriba en todas las
+  pantallas y propuesta al facturar en dólares.
+- Facturas autorizadas y notas de crédito se imputan solas en la cuenta del cliente; los fletes de cargas
+  despachadas, en la del transportista. Botón «Imputar pendientes» para lo anterior.
+- Compra de fruta: kilos recibidos y precio por kilo en el lote, liquidación al productor con tasa de asociación.
+- Catálogos: selecciones (Extra, Elegido, Comercial), tipos de envase, cuadrillas y empleados.
+- Cargas: acoplado, N° de guía, destino comercial, canal de comercialización, condición de venta y flete.
+- Etiqueta de la caja con datos oficiales: empaque y CUIT, SENASA, Reg. Provincial de Empaque, RENSPA,
+  Decreto-Ley 9.244/63, «Producción Argentina», calibre, selección, envase, kg aprox. y N° de empacador.
+- Permisos nuevos (treasury.*, cash.manage, accounts.*, checks.manage, exchange.manage, lots.settle, staff.*);
+  al actualizar, los roles del sistema reciben los permisos nuevos que les corresponden.
+
+### Corregido
+- La cotización de una factura en dólares aceptaba sólo punto decimal: ahora acepta «1.234,50».
+
 ## [1.1.0] - 2026-10-02
 
 ### Agregado

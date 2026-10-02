@@ -32,6 +32,8 @@ class BrowserLabelPrinter implements LabelPrinter
             'height' => $height,
             'title' => $options['title'] ?? 'Etiquetas',
             'back' => $options['back'] ?? null,
+            'companyLine' => app(\App\Services\LabelService::class)->companyLine(),
+            'regulatoryLine' => app(\App\Services\LabelService::class)->regulatoryLine(),
         ]);
     }
 }

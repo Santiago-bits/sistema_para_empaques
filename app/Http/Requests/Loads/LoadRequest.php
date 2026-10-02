@@ -12,6 +12,15 @@ class LoadRequest extends FormRequest
         return $this->user()->can($this->route('load') ? 'loads.update' : 'loads.create');
     }
 
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'freight_amount' => parse_number($this->input('freight_amount')),
+            'trailer_plate' => $this->filled('trailer_plate')
+                ? \App\Catalogs\Definitions\TruckDefinition::normalizePlate((string) $this->input('trailer_plate')) : null,
+        ]);
+    }
+
     public function rules(): array
     {
         $active = fn (string $table) => Rule::exists($table, 'id')->whereNull('deleted_at');
@@ -26,6 +35,12 @@ class LoadRequest extends FormRequest
             'owner_id' => ['nullable', 'integer', $active('owners')],
             'planned_crates' => ['nullable', 'integer', 'min:1', 'max:100000'],
             'notes' => ['nullable', 'string', 'max:2000'],
+            'trailer_plate' => ['nullable', 'string', 'max:12', 'regex:'.\App\Catalogs\Definitions\TruckDefinition::PLATE_REGEX],
+            'guide_number' => ['nullable', 'string', 'max:40'],
+            'commercial_destination' => ['nullable', Rule::in(array_keys(\App\Models\Load::COMMERCIAL_DESTINATIONS))],
+            'sales_channel' => ['nullable', Rule::in(array_keys(\App\Models\Load::SALES_CHANNELS))],
+            'sale_condition' => ['nullable', Rule::in(array_keys(\App\Models\Load::SALE_CONDITIONS))],
+            'freight_amount' => ['nullable', 'numeric', 'min:0', 'max:999999999999'],
         ];
     }
 
@@ -47,6 +62,8 @@ class LoadRequest extends FormRequest
         return [
             'date' => 'fecha', 'truck_id' => 'camión', 'driver_id' => 'chofer', 'transporter_id' => 'transportista',
             'destination_id' => 'destino', 'client_id' => 'cliente', 'owner_id' => 'propietario', 'planned_crates' => 'cajones previstos',
+            'trailer_plate' => 'patente del acoplado', 'guide_number' => 'N° de guía', 'commercial_destination' => 'destino comercial',
+            'sales_channel' => 'canal de comercialización', 'sale_condition' => 'condición de venta', 'freight_amount' => 'flete',
         ];
     }
 }
