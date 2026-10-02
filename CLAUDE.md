@@ -92,6 +92,20 @@ Clases CSS: `btn btn-primary|btn-secondary|btn-danger|btn-warning|btn-ghost btn-
 - Probar: permisos (403 sin permiso), módulo desactivado (404), validaciones, concurrencia (dos intentos sobre el
   mismo registro → sólo uno gana), idempotencia, auditoría.
 
+## Hosting compartido (Hostinger) — NO romper
+
+El Panel General corre en Hostinger, que tiene **`proc_open` deshabilitado**. Por eso:
+
+1. **`composer.json` no debe ejecutar `@php artisan …`** en `post-autoload-dump`, `post-update-cmd` ni en ningún
+   script que corra con `composer install`. Sólo `Illuminate\Foundation\ComposerScripts::postAutoloadDump`.
+   Si vuelve a aparecer `"@php artisan package:discover --ansi"`, el deploy de Hostinger falla.
+   (Se quitó en b03ed6e, volvió por error en 22120d7 y se quitó otra vez.) El manifiesto de paquetes se
+   regenera solo o con `php artisan package:discover` desde la consola (`scripts/actualizar-servidor.sh`).
+2. **Tareas programadas**: en `routes/console.php` usar `Schedule::call(fn () => Artisan::call('…'))`
+   (helper `$artisan`), **nunca** `Schedule::command(...)`, que abre un proceso nuevo.
+3. Todo lo que use `Symfony\Component\Process` (backups con mysqldump) debe fallar con un mensaje claro y no
+   romper nada si `proc_open` no está disponible.
+
 ## Git
 
 Ramas: `main` (estable), `develop`, `feature/*`, `bugfix/*`. Commits convencionales en español:

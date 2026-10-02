@@ -17,6 +17,14 @@ Esquema:
 - **Los datos del hosting nunca se pisan** con los de tu PC: clientes, reportes y tickets del Panel General
   quedan en Hostinger.
 
+> **Restricción de Hostinger**: `proc_open` está deshabilitado. El sistema ya está preparado (el `composer.json`
+> no ejecuta `php artisan` al instalar y las tareas programadas corren dentro del mismo proceso). No agregues
+> `"@php artisan …"` a los scripts de `composer.json`: el deploy se corta.
+
+> **Si en Hostinger ya había una versión anterior del sistema** (la de códigos QR de septiembre): esa base de datos
+> tiene otras tablas. **No** apuntes esta versión a esa base: creá una **base nueva** en hPanel (paso 3 de la
+> sección 2) y poné sus datos en `.env`. La base vieja queda intacta por si necesitás algo de ella.
+
 ---
 
 ## 1. Trabajar en tu PC
@@ -117,6 +125,10 @@ VPS de Hostinger, seguí docs/INSTALACION.md como en cualquier Linux.
 ---
 
 ## 3. Pasar tus cambios al hosting
+
+**Si usás la implementación automática de Git de Hostinger** (hPanel → Avanzado → Git): con cada push a `main`,
+Hostinger baja el código y ejecuta `composer install`. Eso **no** aplica las migraciones ni regenera las cachés:
+después de cada deploy entrá por SSH y ejecutá el script de abajo (si el código ya está bajado, sólo hace el resto).
 
 Después de hacer `git push` desde tu PC, por SSH:
 

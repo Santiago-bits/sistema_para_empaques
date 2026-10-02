@@ -18,7 +18,11 @@ git fetch origin "$BRANCH"
 git merge --ff-only "origin/$BRANCH"
 
 echo "==> Dependencias de PHP"
+# composer.json NO ejecuta «php artisan …» al instalar (Hostinger bloquea proc_open): el listado de paquetes
+# se regenera acá, desde la consola, que sí puede ejecutar artisan.
 $COMPOSER install --no-dev --optimize-autoloader --no-interaction
+rm -f bootstrap/cache/packages.php bootstrap/cache/services.php
+$PHP artisan package:discover
 
 echo "==> Backup antes de migrar (si el hosting lo permite)"
 $PHP artisan galpon:backup --type=manual || echo "   (sin backup por comando: usá los backups del panel de Hostinger)"
