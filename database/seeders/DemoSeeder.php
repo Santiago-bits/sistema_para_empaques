@@ -70,6 +70,7 @@ class DemoSeeder extends Seeder
                 $this->operations();
                 $this->admin();
                 $this->logistics();
+                $this->treasury();
             });
         });
 
@@ -391,6 +392,9 @@ class DemoSeeder extends Seeder
         $user = User::query()->where('username', 'admin.demo')->firstOrFail();
         Auth::setUser($user);
 
+        // Demo: las facturas en modo simulación también impactan en las cuentas corrientes.
+        app(\App\Services\SettingsService::class)->set('treasury.post_test_invoices', true);
+
         $loads = app(\App\Services\LoadService::class);
         $remitos = app(\App\Services\RemitoService::class);
         $invoices = app(\App\Services\InvoiceService::class);
@@ -405,6 +409,10 @@ class DemoSeeder extends Seeder
                 'client_id' => $destination->client_id, 'destination_id' => $destination->id,
                 'truck_id' => $trucks[$i % count($trucks)], 'driver_id' => $drivers[$i % count($drivers)],
                 'planned_crates' => $quantity, 'date' => today()->subDays(3 - $i),
+                'transporter_id' => Truck::query()->whereKey($trucks[$i % count($trucks)])->value('transporter_id'),
+                'trailer_plate' => ['AC123BD', 'AD456FG', null, 'AF789HJ'][$i], 'guide_number' => 'DTV-'.(4500 + $i),
+                'commercial_destination' => $i === 2 ? 'export' : 'domestic', 'sales_channel' => ['market', 'supermarket', 'export', 'distributor'][$i],
+                'sale_condition' => ['account', 'account', 'consignment', 'cash'][$i], 'freight_amount' => 350000 + $i * 25000,
             ], $user);
             $loads->assignCrates($load, $loads->takeAvailable($load, [], $quantity), $user);
             if ($target === 'draft') {
@@ -437,6 +445,96 @@ class DemoSeeder extends Seeder
                 $invoices->submit($invoice, $user);
             }
         }
+
+        Auth::forgetUser();
+    }
+
+    /** Tesorería, personal, envases y datos de etiqueta de ejemplo. */
+    private function treasury(): void
+    {
+        if (\App\Models\ExchangeRate::query()->exists()) {
+            return;
+        }
+
+        $user = User::query()->where('username', 'admin.demo')->firstOrFail();
+        Auth::setUser($user);
+        $settings = app(\App\Services\SettingsService::class);
+
+        foreach (range(9, 0) as $i => $daysAgo) {
+            \App\Models\ExchangeRate::query()->create([
+                'date' => today()->subDays($daysAgo), 'currency' => 'USD', 'buy' => 1040 + $i * 3, 'sell' => 1080 + $i * 3,
+                'source' => 'BNA', 'user_id' => $user->id,
+            ]);
+        }
+
+        // Etiqueta oficial del envase.
+        foreach (['label.show_regulatory' => true, 'label.senasa_number' => 'E-1234', 'label.provincial_registry' => '0456',
+            'label.renspa' => '13.012.0.00456/00', 'label.nominal_kg' => 18.0, 'treasury.association_fee_per_kg' => 2.5] as $key => $value) {
+            $settings->set($key, $value);
+        }
+
+        $box = \App\Models\ContainerType::query()->create(['code' => 'CAJ18', 'name' => 'Caja de cartón 18 kg', 'kind' => 'box', 'tare_kg' => 0.9, 'capacity_kg' => 18]);
+        \App\Models\ContainerType::query()->create(['code' => 'BIN', 'name' => 'Bin plástico', 'kind' => 'bin', 'tare_kg' => 40, 'capacity_kg' => 400]);
+        \App\Models\ContainerType::query()->create(['code' => 'JAU20', 'name' => 'Jaula cosechera 20 kg', 'kind' => 'crate', 'tare_kg' => 2, 'capacity_kg' => 20]);
+        $grades = \App\Models\Grade::query()->pluck('id', 'code');
+        DB::table('crates')->update(['container_type_id' => $box->id, 'grade_id' => $grades['ELE'] ?? null]);
+        DB::table('crates')->whereRaw('id % 4 = 0')->update(['grade_id' => $grades['EXT'] ?? null]);
+        DB::table('crates')->whereRaw('id % 7 = 0')->update(['grade_id' => $grades['COM'] ?? null]);
+
+        $packing = \App\Models\Crew::query()->create(['code' => 'CUA001', 'name' => 'Empaque turno mañana', 'kind' => 'packing', 'leader' => 'Ramón Quiroga']);
+        $harvest = \App\Models\Crew::query()->create(['code' => 'CUA002', 'name' => 'Cosecha finca norte', 'kind' => 'harvest', 'leader' => 'Elsa Ibáñez']);
+        $people = [['Juan', 'Pereyra', $packing], ['María', 'Gómez', $packing], ['Luis', 'Sosa', $packing], ['Ana', 'Díaz', $harvest], ['Pedro', 'Ruiz', $harvest], ['Carla', 'Vega', $packing]];
+        $employees = [];
+        foreach ($people as $i => [$first, $last, $crew]) {
+            $employees[] = \App\Models\Employee::query()->create([
+                'code' => sprintf('EMP%03d', $i + 1), 'first_name' => $first, 'last_name' => $last, 'dni' => (string) (30100200 + $i),
+                'position' => $crew->kind === 'harvest' ? 'Cosechador' : 'Embalador', 'crew_id' => $crew->id,
+                'hired_on' => today()->subMonths(6 + $i), 'daily_wage' => 28000,
+            ]);
+        }
+
+        $accounts = app(\App\Services\AccountService::class);
+        $cash = app(\App\Services\CashService::class);
+        $checks = app(\App\Services\CheckService::class);
+
+        // Compra de fruta: kilos y precio en los primeros lotes; dos quedan liquidados.
+        foreach (Lot::query()->orderBy('id')->limit(3)->get() as $i => $lot) {
+            $lot->update(['kg_received' => 12000 + $i * 3500, 'price_per_kg' => 180 + $i * 10, 'container_type_id' => \App\Models\ContainerType::query()->where('code', 'BIN')->value('id')]);
+            if ($i < 2) {
+                $accounts->settleLot($lot->fresh(), $user);
+            }
+        }
+
+        $cash->open(250000, 'Apertura demo', $user);
+        $cash->addMovement(['direction' => 'out', 'category' => 'expenses', 'description' => 'Cinta y precintos', 'amount' => 15000], $user);
+
+        $clients = Client::query()->orderBy('id')->get();
+        $producer = Producer::query()->orderBy('id')->first();
+        $provider = Provider::query()->orderBy('id')->first();
+        $transporter = Transporter::query()->orderBy('id')->first();
+
+        $accounts->registerPayment($clients[0], ['direction' => 'collection', 'amount' => 500000, 'method' => 'cash', 'date' => today()->toDateString()], $user);
+        $first = $accounts->registerPayment($clients[0], ['direction' => 'collection', 'amount' => 1200000, 'method' => 'check', 'date' => today()->toDateString(),
+            'check' => ['bank' => 'Banco Nación', 'number' => '00045871', 'payment_date' => today()->addDays(5)->toDateString(), 'issued_on' => today()->toDateString()]], $user);
+        if (isset($clients[1])) {
+            $accounts->registerPayment($clients[1], ['direction' => 'collection', 'amount' => 850000, 'method' => 'check', 'date' => today()->toDateString(),
+                'check' => ['bank' => 'Banco Galicia', 'number' => '12004567', 'payment_date' => today()->addDays(30)->toDateString(), 'electronic' => true]], $user);
+            $accounts->registerPayment($clients[1], ['direction' => 'collection', 'amount' => 640000, 'method' => 'check', 'date' => today()->subDays(2)->toDateString(),
+                'check' => ['bank' => 'Banco Macro', 'number' => '33001122', 'payment_date' => today()->addDays(12)->toDateString()]], $user);
+        }
+        if ($producer) {
+            $accounts->registerPayment($producer, ['direction' => 'payment', 'amount' => 200000, 'method' => 'cash', 'date' => today()->toDateString()], $user);
+            $accounts->registerPayment($producer, ['direction' => 'payment', 'amount' => 1500000, 'method' => 'transfer', 'reference' => 'TRF 889123', 'date' => today()->subDay()->toDateString()], $user);
+        }
+        if ($provider) {
+            $accounts->adjust($provider, 'opening_credit', 800000, 'Saldo inicial al pasar al sistema nuevo', today()->subDays(20)->toDateString(), $user);
+            $accounts->registerPayment($provider, ['direction' => 'payment', 'method' => 'check', 'endorse_check_id' => $first->source_id, 'date' => today()->toDateString()], $user);
+        }
+        if ($transporter) {
+            $accounts->registerPayment($transporter, ['direction' => 'payment', 'amount' => 300000, 'method' => 'check', 'date' => today()->toDateString(),
+                'check' => ['bank' => 'Banco Santander', 'number' => '90000123', 'payment_date' => today()->addDays(15)->toDateString()]], $user);
+        }
+        $accounts->registerPayment($employees[0], ['direction' => 'payment', 'type' => 'advance', 'amount' => 30000, 'method' => 'cash', 'date' => today()->toDateString()], $user);
 
         Auth::forgetUser();
     }

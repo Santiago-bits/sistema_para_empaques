@@ -232,7 +232,7 @@ class CrateService
 
     private function only(array $data): array
     {
-        $fields = ['barcode', 'pallet_id', 'lot_id', 'producer_id', 'owner_id', 'variety_id', 'size_id', 'packer_id',
+        $fields = ['barcode', 'pallet_id', 'lot_id', 'producer_id', 'owner_id', 'variety_id', 'size_id', 'grade_id', 'container_type_id', 'packer_id',
             'weight', 'location_id', 'notes'];
 
         // Los campos ocultos por configuración no se modifican desde formularios.

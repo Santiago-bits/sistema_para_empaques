@@ -24,7 +24,7 @@ class Crate extends Model
 
     protected $fillable = [
         'warehouse_id', 'season_id', 'code', 'barcode', 'pallet_id', 'lot_id', 'producer_id', 'owner_id',
-        'variety_id', 'size_id', 'packer_id', 'shift_id', 'production_line_id', 'weight', 'status',
+        'variety_id', 'size_id', 'grade_id', 'container_type_id', 'packer_id', 'shift_id', 'production_line_id', 'weight', 'status',
         'quality_status', 'location_id', 'current_load_id', 'processed_at', 'processed_by', 'notes',
         'created_by',
     ];
@@ -126,5 +126,15 @@ class Crate extends Model
     public function movements(): MorphMany
     {
         return $this->morphMany(LocationMovement::class, 'movable')->orderBy('moved_at');
+    }
+
+    public function grade(): BelongsTo
+    {
+        return $this->belongsTo(Grade::class);
+    }
+
+    public function containerType(): BelongsTo
+    {
+        return $this->belongsTo(ContainerType::class);
     }
 }

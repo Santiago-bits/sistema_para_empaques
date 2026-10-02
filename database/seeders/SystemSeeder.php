@@ -32,6 +32,7 @@ class SystemSeeder extends Seeder
             $this->sequences();
             $this->reasons();
             $this->shifts();
+            $this->grades();
             $this->season();
         });
 
@@ -46,9 +47,13 @@ class SystemSeeder extends Seeder
 
     private function permissionsAndRoles(): void
     {
+        $new = [];
         foreach (config('permissions.permissions') as $module => $permissions) {
             foreach ($permissions as $slug => $name) {
-                Permission::query()->updateOrCreate(['slug' => $slug], ['name' => $name, 'module' => $module]);
+                $permission = Permission::query()->updateOrCreate(['slug' => $slug], ['name' => $name, 'module' => $module]);
+                if ($permission->wasRecentlyCreated) {
+                    $new[$slug] = $permission->id;
+                }
             }
         }
 
@@ -64,6 +69,11 @@ class SystemSeeder extends Seeder
             if ($role->wasRecentlyCreated) {
                 $ids = Permission::query()->whereIn('slug', PermissionRegistry::expand($definition['permissions']))->pluck('id');
                 $role->permissions()->sync($ids);
+            } elseif ($new !== []) {
+                // Actualización con permisos nuevos (p. ej. un módulo agregado): se suman a los roles del
+                // sistema que los tendrían por defecto, sin tocar lo que el administrador personalizó.
+                $grant = array_intersect_key($new, array_flip(PermissionRegistry::expand($definition['permissions'])));
+                $role->permissions()->syncWithoutDetaching(array_values($grant));
             }
         }
     }
@@ -101,6 +111,16 @@ class SystemSeeder extends Seeder
             foreach ($items as $code => $name) {
                 Reason::query()->firstOrCreate(['type' => $type, 'code' => $code], ['name' => $name]);
             }
+        }
+    }
+
+    private function grades(): void
+    {
+        if (\App\Models\Grade::query()->exists()) {
+            return;
+        }
+        foreach ([['EXT', 'Extra'], ['ELE', 'Elegido'], ['COM', 'Comercial']] as $i => [$code, $name]) {
+            \App\Models\Grade::query()->create(['code' => $code, 'name' => $name, 'sort_order' => $i + 1]);
         }
     }
 

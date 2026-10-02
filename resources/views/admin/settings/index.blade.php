@@ -136,6 +136,34 @@
                         </div>
                         @break
 
+                    @case('label')
+                        <p class="mb-4 text-sm text-stone-500">Datos que se imprimen en la etiqueta de cada cajón o caja, como en el envase: inscripción SENASA, registro provincial, RENSPA y leyendas legales.</p>
+                        <div class="grid gap-4 md:grid-cols-3">
+                            <x-input name="senasa_number" label="Inscripción SENASA" :value="$s['label.senasa_number']" placeholder="E-1234" hint="Se imprime «SENASA E-…»."/>
+                            <x-input name="provincial_registry" label="Reg. Provincial de Empaque N°" :value="$s['label.provincial_registry']"/>
+                            <x-input name="renspa" label="RENSPA" :value="$s['label.renspa']" placeholder="00.000.0.00000/00"/>
+                            <x-input name="decree" label="Norma" :value="$s['label.decree']"/>
+                            <x-input name="origin_legend" label="Leyenda de origen" :value="$s['label.origin_legend']"/>
+                            <x-input name="nominal_kg" inputmode="decimal" label="Kg aprox. por envase" :value="$s['label.nominal_kg'] ?: null" hint="Si el cajón no tiene peso, se imprime «Kg aprox.» con este valor."/>
+                        </div>
+                        <div class="mt-5 grid gap-3 md:grid-cols-2">
+                            <x-checkbox name="show_company" label="Imprimir nombre, CUIT y dirección del empaque" :checked="$s['label.show_company']"/>
+                            <x-checkbox name="show_regulatory" label="Imprimir los datos oficiales (SENASA, registro, RENSPA, norma y origen)" :checked="$s['label.show_regulatory']"/>
+                        </div>
+                        @break
+
+                    @case('treasury')
+                        <div class="grid gap-4 md:grid-cols-3">
+                            <x-input name="association_fee_per_kg" inputmode="decimal" label="Tasa de asociación ($ por kg)" :value="$s['treasury.association_fee_per_kg'] ?: null"
+                                     hint="Se descuenta al productor al liquidar la compra de fruta. Vacío o 0 = no se cobra."/>
+                            <x-input name="check_warning_days" type="number" min="1" max="90" label="Avisar cheques que vencen en (días)" :value="$s['treasury.check_warning_days']" required/>
+                        </div>
+                        <div class="mt-5">
+                            <x-checkbox name="post_test_invoices" label="Imputar en cuenta corriente también los comprobantes de prueba (simulación / homologación)" :checked="$s['treasury.post_test_invoices']"
+                                        hint="Dejalo desactivado en producción: así las facturas de prueba no generan deudas falsas a los clientes."/>
+                        </div>
+                        @break
+
                     @case('arca')
                         <div class="mb-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
                             Los certificados y claves de ARCA se configuran sólo en el archivo <span class="code">.env</span> del servidor

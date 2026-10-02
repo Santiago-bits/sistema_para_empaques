@@ -22,6 +22,8 @@ class SettingController extends Controller
         'regional' => 'Regional',
         'production' => 'Producción',
         'fields' => 'Campos',
+        'label' => 'Etiquetas',
+        'treasury' => 'Tesorería',
         'numbering' => 'Numeraciones',
         'alerts' => 'Alertas',
         'security' => 'Seguridad y red',
@@ -128,6 +130,41 @@ class SettingController extends Controller
             $config['weight'] = 'required';
         }
         $this->settings->set('fields.crate', array_merge($this->settings->get('fields.crate', []), $config));
+    }
+
+    private function saveLabel(Request $request): void
+    {
+        $request->merge(['nominal_kg' => parse_number($request->input('nominal_kg'), false)]);
+        $data = $request->validate([
+            'show_company' => ['boolean'],
+            'show_regulatory' => ['boolean'],
+            'senasa_number' => ['nullable', 'string', 'max:40'],
+            'provincial_registry' => ['nullable', 'string', 'max:40'],
+            'renspa' => ['nullable', 'string', 'max:40'],
+            'decree' => ['nullable', 'string', 'max:60'],
+            'origin_legend' => ['nullable', 'string', 'max:60'],
+            'nominal_kg' => ['nullable', 'numeric', 'min:0', 'max:2000'],
+        ]);
+        foreach (['show_company', 'show_regulatory'] as $flag) {
+            $this->settings->set("label.$flag", (bool) ($data[$flag] ?? false));
+        }
+        foreach (['senasa_number', 'provincial_registry', 'renspa', 'decree', 'origin_legend'] as $key) {
+            $this->settings->set("label.$key", trim((string) ($data[$key] ?? '')));
+        }
+        $this->settings->set('label.nominal_kg', (float) ($data['nominal_kg'] ?? 0));
+    }
+
+    private function saveTreasury(Request $request): void
+    {
+        $request->merge(['association_fee_per_kg' => parse_number($request->input('association_fee_per_kg'), false)]);
+        $data = $request->validate([
+            'association_fee_per_kg' => ['nullable', 'numeric', 'min:0', 'max:100000'],
+            'post_test_invoices' => ['boolean'],
+            'check_warning_days' => ['required', 'integer', 'min:1', 'max:90'],
+        ]);
+        $this->settings->set('treasury.association_fee_per_kg', (float) ($data['association_fee_per_kg'] ?? 0));
+        $this->settings->set('treasury.post_test_invoices', (bool) ($data['post_test_invoices'] ?? false));
+        $this->settings->set('treasury.check_warning_days', (int) $data['check_warning_days']);
     }
 
     private function saveNumbering(Request $request): void

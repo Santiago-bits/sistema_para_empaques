@@ -39,6 +39,8 @@ return [
             'packers.manage' => 'Gestionar embaladores',
             'lots.view' => 'Ver lotes',
             'lots.manage' => 'Gestionar lotes',
+            'staff.view' => 'Ver empleados y cuadrillas',
+            'staff.manage' => 'Gestionar empleados y cuadrillas',
         ],
         'pallets' => [
             'pallets.view' => 'Ver pallets',
@@ -127,6 +129,15 @@ return [
             'costs.manage' => 'Gestionar costos',
             'profit.view' => 'Ver ganancias/rentabilidad',
         ],
+        'treasury' => [
+            'treasury.view' => 'Ver caja, cuentas corrientes y cheques',
+            'cash.manage' => 'Operar la caja (abrir, ingresos, egresos, cerrar)',
+            'accounts.manage' => 'Registrar cobros, pagos y ajustes en cuentas corrientes',
+            'accounts.void' => 'Anular movimientos de caja y de cuentas corrientes',
+            'checks.manage' => 'Gestionar cheques',
+            'exchange.manage' => 'Cargar la cotización del dólar',
+            'lots.settle' => 'Liquidar la compra de fruta al productor',
+        ],
         'client_portal' => [
             'portal.view' => 'Acceso al portal de cliente/propietario',
         ],
@@ -185,6 +196,8 @@ return [
                 'remitos.void', 'documents.view', 'documents.manage', 'billing.view', 'billing.manage', 'billing.void',
                 'arca.manage', 'reports.view', 'reports.export_excel', 'reports.export_pdf', 'costs.view',
                 'costs.manage', 'support.use', 'alerts.view', 'supplies.view', 'supplies.manage',
+                'lots.view', 'staff.view', 'treasury.view', 'cash.manage', 'accounts.manage', 'checks.manage',
+                'exchange.manage', 'lots.settle',
             ],
         ],
         'supervisor' => [
@@ -196,7 +209,7 @@ return [
                 'stoppages.manage', 'quality.view', 'locations.view', 'loads.view', 'loads.reopen', 'remitos.view',
                 'documents.view', 'reports.view', 'reports.export_excel', 'reports.export_pdf', 'stats.view',
                 'audit.view', 'closings.manage', 'alerts.view', 'alerts.manage', 'incidents.view', 'incidents.manage',
-                'supplies.view', 'maintenance.view', 'cold_rooms.view', 'support.use',
+                'supplies.view', 'maintenance.view', 'cold_rooms.view', 'support.use', 'staff.view', 'treasury.view',
             ],
         ],
         'client_portal' => [

@@ -103,6 +103,19 @@ kiosco sólo ven esta pantalla.
 
 Reabrir una carga cerrada pide motivo y no se permite si ya tiene remito emitido o factura autorizada.
 
+## Tesorería
+
+- **Caja**: abrila al empezar el día (propone lo contado en el último cierre). Registrá ingresos y egresos en
+  efectivo. Al cerrar, contá el efectivo: si hay diferencia, explicá el motivo. Atajo **G B**.
+- **Cuentas corrientes** (**G M**): elegí cliente, productor, transportista, proveedor o empleado. Saldo positivo
+  = nos debe; negativo = le debemos. «Registrar cobro o pago» con efectivo (entra/sale de la caja), transferencia
+  o cheque. Para pagar con un cheque de cartera, elegí «Endosar». Las facturas y los fletes se cargan solos.
+- **Cheques** (**G V**): vistas En cartera, Por vencer, Por cobrar, Emitidos, Endosados y Rechazados. Desde la
+  ficha: depositar, marcar cobrado, rechazado (el importe vuelve a la deuda de quien lo entregó) o anular.
+- **Cotización del dólar** (**G O**): cargala cada día; se ve arriba a la derecha y se propone al facturar en US$.
+- **Compra de fruta**: en el lote cargá kilos recibidos y precio por kilo y tocá «Liquidar al productor».
+- Nada se borra: los movimientos se **anulan con motivo** y quedan en la auditoría.
+
 ## Incidentes
 
 Registrá problemas (cajón faltante, error de peso, transporte, documentación, producto dañado). Podés

@@ -37,7 +37,9 @@
             <div class="grid gap-4 md:grid-cols-4">
                 @if ($show('packer_id'))<x-select name="packer_id" label="Embalador" :options="$packers" :value="$crate->packer_id" placeholder="—" :required="$req('packer_id')"/>@endif
                 @if ($show('variety_id'))<x-select name="variety_id" label="Variedad" :options="$varieties" :value="$crate->variety_id" placeholder="—" :required="$req('variety_id')"/>@endif
-                @if ($show('size_id'))<x-select name="size_id" label="Tamaño" :options="$sizes" :value="$crate->size_id" placeholder="—" :required="$req('size_id')"/>@endif
+                @if ($show('size_id'))<x-select name="size_id" label="Tamaño / calibre" :options="$sizes" :value="$crate->size_id" placeholder="—" :required="$req('size_id')"/>@endif
+                <x-select name="grade_id" label="Selección" :options="\App\Catalogs\Definitions\GradeDefinition::options()" :value="$crate->grade_id" placeholder="—"/>
+                <x-select name="container_type_id" label="Envase" :options="\App\Catalogs\Definitions\ContainerTypeDefinition::options()" :value="$crate->container_type_id" placeholder="—"/>
                 @if ($show('weight'))<x-input name="weight" label="Peso (kg)" :value="$crate->weight" inputmode="decimal" :required="$req('weight')"/>@endif
             </div>
             @if ($editing)

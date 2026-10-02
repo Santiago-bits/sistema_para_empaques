@@ -16,6 +16,8 @@ class LotRequest extends FormRequest
     {
         $this->merge([
             'code' => $this->filled('code') ? mb_strtoupper(trim((string) $this->input('code'))) : null,
+            'kg_received' => parse_number($this->input('kg_received')),
+            'price_per_kg' => parse_number($this->input('price_per_kg')),
         ]);
     }
 
@@ -33,6 +35,9 @@ class LotRequest extends FormRequest
             'origin' => ['nullable', 'string', 'max:255'],
             'field' => ['nullable', 'string', 'max:255'],
             'quantity' => ['nullable', 'integer', 'min:0', 'max:1000000'],
+            'container_type_id' => ['nullable', 'integer', Rule::exists('container_types', 'id')->whereNull('deleted_at')],
+            'kg_received' => ['nullable', 'numeric', 'min:0', 'max:99999999'],
+            'price_per_kg' => ['nullable', 'numeric', 'min:0', 'max:99999999'],
             'notes' => ['nullable', 'string', 'max:2000'],
         ];
     }
@@ -42,7 +47,8 @@ class LotRequest extends FormRequest
         return [
             'code' => 'código', 'date' => 'fecha', 'producer_id' => 'productor', 'owner_id' => 'propietario',
             'variety_id' => 'variedad', 'season_id' => 'temporada', 'origin' => 'origen', 'field' => 'campo',
-            'quantity' => 'cantidad', 'notes' => 'observaciones',
+            'quantity' => 'cantidad', 'notes' => 'observaciones', 'container_type_id' => 'envase',
+            'kg_received' => 'kilos recibidos', 'price_per_kg' => 'precio por kilo',
         ];
     }
 }

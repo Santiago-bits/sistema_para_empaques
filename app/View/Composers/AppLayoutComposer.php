@@ -25,7 +25,10 @@ class AppLayoutComposer
             'shortcuts' => Shortcuts::for($menu),
             'unreadCount' => $user->unreadNotifications()->count(),
             'openAlertsCount' => $user->can('alerts.view') ? Alert::query()->open()->count() : 0,
-            'license' => License::query()->where('installation_id', config('galpon.installation_id'))->first(),
+            // Cotización del dólar arriba en todas las pantallas (sólo para quien maneja plata).
+            'usdRate' => module_enabled('treasury') && ($user->can('treasury.view') || $user->can('billing.view'))
+                ? \App\Models\ExchangeRate::current() : null,
+            'license' =>License::query()->where('installation_id', config('galpon.installation_id'))->first(),
         ]);
     }
 }

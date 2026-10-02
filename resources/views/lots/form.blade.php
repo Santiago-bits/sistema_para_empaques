@@ -18,6 +18,16 @@
                 <x-input name="origin" label="Origen / procedencia" :value="$lot->origin"/>
                 <x-input name="field" label="Campo / cuadro" :value="$lot->field"/>
                 <x-input name="quantity" type="number" min="0" label="Cantidad (bins/cajones)" :value="$lot->quantity"/>
+                <x-select name="container_type_id" label="Envase" :options="\App\Catalogs\Definitions\ContainerTypeDefinition::options()" :value="$lot->container_type_id" placeholder="—"/>
+            </div>
+            <h3 class="mt-6 mb-2 text-sm font-semibold text-stone-700 dark:text-stone-300">Compra al productor (opcional)</h3>
+            <div class="grid gap-4 md:grid-cols-3">
+                <x-input name="kg_received" inputmode="decimal" label="Kilos recibidos" :value="$lot->kg_received !== null ? num($lot->kg_received, 2) : null" hint="Peso neto de balanza. Ej.: 12.500"/>
+                <x-input name="price_per_kg" inputmode="decimal" label="Precio por kilo ($)" :value="$lot->price_per_kg !== null ? num($lot->price_per_kg, 2) : null"
+                         hint="Al liquidar el lote, kilos × precio pasan a la cuenta corriente del productor."/>
+                @if ($lot->settled_at)
+                    <p class="self-end rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">Liquidado el {{ fdate($lot->settled_at) }}: kilos y precio no se pueden cambiar.</p>
+                @endif
             </div>
             <div class="mt-4">
                 <x-textarea name="notes" label="Observaciones" :value="$lot->notes"/>

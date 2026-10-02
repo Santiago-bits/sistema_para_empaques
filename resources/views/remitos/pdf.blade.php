@@ -59,6 +59,14 @@
                 <td><div class="label">Chofer</div>{{ $remito->driver?->full_name ?? '—' }}</td>
                 <td><div class="label">DNI chofer</div>{{ $remito->driver?->dni ?? '—' }}</td>
             </tr>
+            @php $remitoLoad = $remito->loadRecord; @endphp
+            @if ($remitoLoad && ($remitoLoad->trailer_plate || $remitoLoad->guide_number || $remitoLoad->sale_condition))
+                <tr>
+                    <td><div class="label">Acoplado</div>{{ $remitoLoad->trailer_plate ?? '—' }}</td>
+                    <td><div class="label">N° de guía</div>{{ $remitoLoad->guide_number ?? '—' }}</td>
+                    <td><div class="label">Condición de venta</div>{{ \App\Models\Load::SALE_CONDITIONS[$remitoLoad->sale_condition] ?? '—' }}</td>
+                </tr>
+            @endif
         </table>
     </div>
 

@@ -27,7 +27,7 @@ class CatalogController extends Controller
     public function hub(Request $request): View
     {
         $user = $request->user();
-        abort_unless($user->can('catalogs.view') || $user->can('packers.view') || $user->can('lots.view'), 403);
+        abort_unless($user->can('catalogs.view') || $user->can('packers.view') || $user->can('lots.view') || $user->can('staff.view'), 403);
 
         $groups = collect(CatalogRegistry::all())
             ->filter(fn (CatalogDefinition $d) => $user->can($d->viewPermission()))

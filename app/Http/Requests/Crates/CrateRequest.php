@@ -44,6 +44,8 @@ class CrateRequest extends FormRequest
             'owner_id' => ['nullable', 'integer', Rule::exists('owners', 'id')->whereNull('deleted_at')],
             'variety_id' => [$mode('variety_id'), 'integer', Rule::exists('varieties', 'id')],
             'size_id' => [$mode('size_id'), 'integer', Rule::exists('sizes', 'id')],
+            'grade_id' => ['nullable', 'integer', Rule::exists('grades', 'id')],
+            'container_type_id' => ['nullable', 'integer', Rule::exists('container_types', 'id')->whereNull('deleted_at')],
             'packer_id' => [$mode('packer_id'), 'integer', Rule::exists('packers', 'id')->whereNull('deleted_at')],
             'weight' => [$mode('weight'), 'numeric', 'gt:0', 'max:999.99'],
             'location_id' => [$mode('location_id'), 'integer', Rule::exists('warehouse_locations', 'id')],

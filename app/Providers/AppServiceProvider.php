@@ -90,6 +90,15 @@ class AppServiceProvider extends ServiceProvider
             'support_ticket' => \App\Models\SupportTicket::class,
             'license' => \App\Models\License::class,
             'cost' => \App\Models\Cost::class,
+            'grade' => \App\Models\Grade::class,
+            'container_type' => \App\Models\ContainerType::class,
+            'crew' => \App\Models\Crew::class,
+            'employee' => \App\Models\Employee::class,
+            'exchange_rate' => \App\Models\ExchangeRate::class,
+            'account_movement' => \App\Models\AccountMovement::class,
+            'check' => \App\Models\Check::class,
+            'cash_session' => \App\Models\CashSession::class,
+            'cash_movement' => \App\Models\CashMovement::class,
         ]);
 
         Model::preventSilentlyDiscardingAttributes(! $this->app->isProduction());

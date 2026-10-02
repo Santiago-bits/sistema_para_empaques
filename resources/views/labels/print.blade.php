@@ -12,7 +12,9 @@
         .toolbar button, .toolbar a { padding: 8px 14px; border: 0; border-radius: 6px; background: #16a34a; color: #fff; font-weight: 600; cursor: pointer; text-decoration: none; }
         .toolbar a { background: #57534e; }
         .labels { display: flex; flex-wrap: wrap; gap: 4mm; padding: 4mm; }
-        .label { width: {{ $width }}mm; height: {{ $height }}mm; border: 1px dashed #999; padding: 2.5mm; display: grid; grid-template-columns: 1fr auto; grid-template-rows: auto 1fr auto; gap: 1mm 2mm; overflow: hidden; page-break-after: always; }
+        .label { width: {{ $width }}mm; height: {{ $height }}mm; border: 1px dashed #999; padding: 2.5mm; display: grid; grid-template-columns: 1fr auto; grid-auto-rows: auto; align-content: space-between; gap: .8mm 2mm; overflow: hidden; page-break-after: always; }
+        .company { grid-column: 1 / 3; font-size: 6.5pt; font-weight: 700; line-height: 1.15; border-bottom: .3mm solid #000; padding-bottom: .6mm; }
+        .regulatory { grid-column: 1 / 3; font-size: 5.8pt; line-height: 1.15; text-align: center; border-top: .3mm solid #000; padding-top: .6mm; }
         .head { grid-column: 1 / 3; display: flex; justify-content: space-between; align-items: baseline; }
         .kind { font-size: 7pt; text-transform: uppercase; letter-spacing: .1em; color: #444; }
         .code { font-family: Consolas, 'Courier New', monospace; font-size: 13pt; font-weight: 700; }
@@ -37,6 +39,7 @@
     <div class="labels">
         @foreach ($labels as $label)
             <div class="label">
+                @if (! empty($companyLine))<div class="company">{{ $companyLine }}</div>@endif
                 <div class="head">
                     <span class="kind">{{ $label['title'] }}</span>
                     <span class="code">{{ $label['code'] }}</span>
@@ -48,6 +51,7 @@
                 </div>
                 <div class="qr">{!! $label['qr_svg'] !!}</div>
                 <div class="barcode">{!! $label['barcode_svg'] !!}</div>
+                @if (! empty($regulatoryLine))<div class="regulatory">{{ $regulatoryLine }}</div>@endif
             </div>
         @endforeach
     </div>
