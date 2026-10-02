@@ -136,8 +136,11 @@ class BackupService
                 'error' => null,
             ])->save();
 
-            // Verificación inmediata: el archivo se puede leer y descomprimir.
-            $this->verify($backup);
+            // Verificación inmediata: el archivo se puede leer y descomprimir. Si falla, el backup NO cuenta como válido.
+            $check = $this->verify($backup);
+            if (! $check['ok']) {
+                throw new RuntimeException('El backup no pasó la verificación: '.$check['message']);
+            }
         } catch (Throwable $e) {
             if (is_file($path)) {
                 @unlink($path);
@@ -575,7 +578,7 @@ class BackupService
 
     public function lastSuccessful(): ?Backup
     {
-        return Backup::query()->where('status', 'success')->latest('finished_at')->latest('id')->first();
+        return Backup::query()->where('status', 'success')->whereNotNull('verified_at')->latest('finished_at')->latest('id')->first();
     }
 
     /**

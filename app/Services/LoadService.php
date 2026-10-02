@@ -124,7 +124,7 @@ class LoadService
 
             foreach (array_chunk($ids, self::CHUNK) as $chunk) {
                 $current = Crate::withTrashed()->whereIn('id', $chunk)
-                    ->get(['id', 'code', 'status', 'current_load_id', 'pallet_id', 'deleted_at'])->keyBy('id');
+                    ->get(['id', 'code', 'status', 'current_load_id', 'pallet_id', 'warehouse_id', 'deleted_at'])->keyBy('id');
                 $loadNumbers = Load::query()->whereIn('id', $current->pluck('current_load_id')->filter()->unique())
                     ->pluck('number', 'id');
 
@@ -620,6 +620,9 @@ class LoadService
         }
         if (! in_array($crate->status->value, $assignable, true)) {
             return 'Estado no válido: '.$crate->status->label().'.';
+        }
+        if ($crate->warehouse_id !== null && (int) $crate->warehouse_id !== (int) $load->warehouse_id) {
+            return 'Pertenece a otro galpón.';
         }
 
         return null;

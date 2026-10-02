@@ -299,8 +299,31 @@ class LoadController extends Controller
 
     private function filters(Request $request): array
     {
-        return array_filter($request->only(['variety_id', 'size_id', 'lot_id', 'producer_id', 'owner_id', 'pallet_id', 'weight_min', 'weight_max',
-            'date_from', 'date_to', 'q', 'status']), fn ($v) => $v !== null && $v !== '');
+        // Sólo valores escalares y con el formato esperado: un filtro manipulado (array, fecha inválida)
+        // se ignora en vez de provocar un error.
+        $filters = array_filter($request->only(['variety_id', 'size_id', 'lot_id', 'producer_id', 'owner_id', 'pallet_id', 'weight_min', 'weight_max',
+            'date_from', 'date_to', 'q', 'status']), fn ($v) => is_scalar($v) && $v !== '');
+
+        foreach (['variety_id', 'size_id', 'lot_id', 'producer_id', 'owner_id', 'pallet_id'] as $key) {
+            if (isset($filters[$key]) && ! ctype_digit((string) $filters[$key])) {
+                unset($filters[$key]);
+            }
+        }
+        foreach (['weight_min', 'weight_max'] as $key) {
+            if (isset($filters[$key]) && ! is_numeric($filters[$key])) {
+                unset($filters[$key]);
+            }
+        }
+        foreach (['date_from', 'date_to'] as $key) {
+            if (isset($filters[$key]) && ! preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $filters[$key])) {
+                unset($filters[$key]);
+            }
+        }
+        if (isset($filters['q'])) {
+            $filters['q'] = addcslashes(mb_substr((string) $filters['q'], 0, 60), '%_\\');
+        }
+
+        return $filters;
     }
 
     private function options(): array
