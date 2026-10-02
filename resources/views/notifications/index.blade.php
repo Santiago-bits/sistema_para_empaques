@@ -16,14 +16,14 @@
 
     <div class="panel divide-y divide-stone-200 dark:divide-stone-800">
         @forelse ($notifications as $n)
-            <div @class(['flex items-start gap-4 p-4', 'bg-brand-50/60 dark:bg-brand-950/20' => ! $n->read_at])>
+            <div @class(['flex flex-wrap items-start gap-x-4 gap-y-2 p-4 sm:flex-nowrap', 'bg-brand-50/60 dark:bg-brand-950/20' => ! $n->read_at])>
                 <span @class(['mt-1.5 size-2.5 shrink-0 rounded-full', 'bg-brand-600' => ! $n->read_at, 'bg-transparent' => $n->read_at]) aria-hidden="true"></span>
                 <div class="min-w-0 flex-1">
                     <p class="font-medium text-stone-900 dark:text-white">{{ $n->data['title'] ?? 'Aviso' }}</p>
                     <p class="mt-0.5 text-sm text-stone-600 dark:text-stone-300">{{ $n->data['message'] ?? '' }}</p>
                     <p class="mt-1 text-xs text-stone-500 tabular-nums">{{ fdate($n->created_at, true) }} · {{ $n->created_at->diffForHumans() }}</p>
                 </div>
-                <div class="flex shrink-0 items-center gap-2">
+                <div class="flex w-full shrink-0 items-center justify-end gap-2 sm:w-auto">
                     @if (! empty($n->data['url']))
                         <form method="POST" action="{{ route('notifications.open', $n->id) }}">
                             @csrf

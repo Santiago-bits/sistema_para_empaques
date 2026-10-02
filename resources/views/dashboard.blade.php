@@ -95,14 +95,14 @@
                 </ul>
             </x-panel>
 
-            <div class="space-y-6">
+            <div class="min-w-0 space-y-6">
                 @can('alerts.view')
                     <x-panel title="Alertas abiertas" :padding="false">
                         <ul class="divide-y divide-stone-100 text-sm dark:divide-stone-800">
                             @forelse ($alerts as $alert)
                                 <li class="flex items-start gap-2 px-4 py-2">
                                     <span class="mt-1.5 size-2 shrink-0 rounded-full {{ $alert->severity === 'critical' ? 'bg-red-500' : ($alert->severity === 'warning' ? 'bg-amber-500' : 'bg-sky-500') }}"></span>
-                                    <div><p class="font-medium">{{ $alert->title }}</p><p class="text-xs text-stone-500">{{ $alert->updated_at->diffForHumans() }}</p></div>
+                                    <div class="min-w-0"><p class="font-medium [overflow-wrap:anywhere]">{{ $alert->title }}</p><p class="text-xs text-stone-500">{{ $alert->updated_at->diffForHumans() }}</p></div>
                                 </li>
                             @empty
                                 <li class="px-4 py-6 text-center text-stone-500">Sin alertas abiertas. 👍</li>
@@ -122,7 +122,7 @@
                             @foreach ($recentLoads as $load)
                                 <li class="flex items-center justify-between px-4 py-2">
                                     <a href="{{ route('loads.show', $load) }}" class="code link">{{ $load->number }}</a>
-                                    <span class="truncate px-2 text-xs text-stone-500">{{ $load->destination?->name }}</span>
+                                    <span class="min-w-0 flex-1 truncate px-2 text-xs text-stone-500">{{ $load->destination?->name }}</span>
                                     <x-status :status="$load->status"/>
                                 </li>
                             @endforeach

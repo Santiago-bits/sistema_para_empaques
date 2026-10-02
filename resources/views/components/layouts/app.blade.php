@@ -23,7 +23,8 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('head')
 </head>
-<body class="min-h-screen" x-data="{ sidebar: false, offline: false }"
+<body class="min-h-screen" x-data="{ sidebar: false, offline: false }" :class="sidebar && 'max-lg:overflow-hidden'"
+      @keydown.escape.window="sidebar = false"
       @connection-lost.window="offline = true" @connection-restored.window="offline = false">
 
 {{-- Aviso de conexión perdida: el operador no debe asumir que la operación se guardó. --}}
@@ -33,10 +34,12 @@
 
 <div class="flex min-h-screen">
     {{-- Sidebar --}}
-    <div x-cloak x-show="sidebar" class="fixed inset-0 z-30 bg-black/50 lg:hidden" @click="sidebar = false"></div>
-    <aside class="fixed inset-y-0 left-0 z-40 flex w-64 -translate-x-full flex-col bg-stone-900 transition-transform lg:translate-x-0 dark:bg-black/40 dark:ring-1 dark:ring-white/5"
-           :class="sidebar && 'translate-x-0'">
-        <a href="{{ route('home') }}" class="flex h-16 shrink-0 items-center gap-3 border-b border-white/5 px-5">
+    {{-- Fondo oscuro y desenfocado detrás del menú en celulares/tablets: no se ve el contenido de atrás. --}}
+    <div x-cloak x-show="sidebar" x-transition.opacity class="fixed inset-0 z-30 bg-stone-950/80 backdrop-blur-sm lg:hidden" @click="sidebar = false" aria-hidden="true"></div>
+    <aside class="fixed inset-y-0 left-0 z-40 flex w-72 max-w-[85vw] -translate-x-full flex-col bg-stone-900 shadow-2xl transition-transform duration-200 lg:w-64 lg:translate-x-0 lg:shadow-none dark:bg-stone-950 dark:ring-1 dark:ring-white/5"
+           :class="sidebar && 'translate-x-0'" aria-label="Menú principal">
+        <div class="flex h-16 shrink-0 items-center border-b border-white/5 pr-2">
+        <a href="{{ route('home') }}" class="flex min-w-0 flex-1 items-center gap-3 px-5">
             @if (setting('company.logo'))
                 <img src="{{ asset('storage/'.setting('company.logo')) }}" alt="" class="size-8 rounded object-contain">
             @else
@@ -49,7 +52,11 @@
                 <span class="block text-[11px] text-stone-400">Gestión de empaque</span>
             </span>
         </a>
-        <nav class="flex-1 space-y-5 overflow-y-auto px-3 py-4">
+            <button type="button" class="rounded-lg p-2 text-stone-400 hover:bg-white/10 hover:text-white lg:hidden" @click="sidebar = false" aria-label="Cerrar menú">
+                <x-icon name="x" class="size-5"/>
+            </button>
+        </div>
+        <nav class="sidebar-scroll flex-1 space-y-5 overflow-y-auto overscroll-contain px-3 py-4">
             @foreach ($menu as $section)
                 <div>
                     @if ($section['title'])
@@ -57,7 +64,7 @@
                     @endif
                     <div class="space-y-0.5">
                         @foreach ($section['items'] as $item)
-                            <a href="{{ route($item['route']) }}" @class(['nav-item', 'active' => $item['active']])>
+                            <a href="{{ route($item['route']) }}" @class(['nav-item', 'active' => $item['active']]) @click="sidebar = false" @if ($item['active']) aria-current="page" @endif>
                                 <x-icon :name="$item['icon']" class="size-[18px] shrink-0 {{ ($item['highlight'] ?? false) ? 'text-accent-400' : 'text-stone-400' }}"/>
                                 <span class="truncate">{{ $item['label'] }}</span>
                                 @if ($item['route'] === 'alerts.index' && $openAlertsCount > 0)
@@ -79,21 +86,21 @@
 
     {{-- Contenido --}}
     <div class="flex min-w-0 flex-1 flex-col lg:pl-64">
-        <header class="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-stone-200 bg-white/90 px-4 backdrop-blur sm:px-6 dark:border-stone-800 dark:bg-stone-900/90 no-print">
+        <header class="sticky top-0 z-20 flex h-16 items-center gap-2 border-b border-stone-200 bg-white/90 px-4 backdrop-blur sm:px-6 dark:border-stone-800 dark:bg-stone-900/90 no-print">
             <button type="button" class="btn btn-ghost -ml-2 p-2 lg:hidden" @click="sidebar = true" aria-label="Abrir menú">
                 <x-icon name="menu"/>
             </button>
 
             @if (Route::has('search'))
-                <form action="{{ route('search') }}" method="GET" class="relative w-full max-w-md" role="search">
+                <form action="{{ route('search') }}" method="GET" class="relative min-w-0 flex-1 sm:max-w-md" role="search">
                     <x-icon name="search" class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-stone-400"/>
-                    <input type="search" name="q" value="{{ request('q') }}" placeholder="Buscar cajón, pallet, carga, remito, CUIT, patente…"
+                    <input type="search" name="q" value="{{ request('q') }}" placeholder="Buscar código, CUIT, patente…"
                            class="form-input pl-9" autocomplete="off" x-ref="globalSearch"
                            @keydown.window.slash.prevent="if (! ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) $refs.globalSearch.focus()">
                 </form>
             @endif
 
-            <div class="ml-auto flex items-center gap-1">
+            <div class="ml-auto flex shrink-0 items-center gap-0.5 sm:gap-1">
                 @if ($envLabel)
                     <span class="hidden rounded-md bg-accent-500/15 px-2 py-1 text-xs font-semibold text-accent-600 sm:inline dark:text-accent-400">{{ $envLabel }}</span>
                 @endif
@@ -131,11 +138,11 @@
                         <span class="grid size-8 place-items-center rounded-full bg-brand-600/15 text-xs font-bold text-brand-700 dark:text-brand-300">
                             {{ mb_strtoupper(mb_substr($user->first_name, 0, 1).mb_substr($user->last_name, 0, 1)) }}
                         </span>
-                        <span class="hidden text-left sm:block">
+                        <span class="hidden text-left md:block">
                             <span class="block text-sm leading-tight font-medium">{{ $user->full_name }}</span>
                             <span class="block text-[11px] leading-tight text-stone-500">{{ $user->role?->name }}</span>
                         </span>
-                        <x-icon name="chevron-down" class="size-4 text-stone-400"/>
+                        <x-icon name="chevron-down" class="hidden size-4 text-stone-400 sm:block"/>
                     </button>
                     <div x-cloak x-show="open" @click.outside="open = false" x-transition class="absolute right-0 mt-2 w-56 panel p-1 text-sm">
                         <a href="{{ route('profile.show') }}" class="flex items-center gap-2 rounded-md px-3 py-2 hover:bg-stone-100 dark:hover:bg-stone-800">
