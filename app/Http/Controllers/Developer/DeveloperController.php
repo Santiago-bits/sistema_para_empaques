@@ -30,6 +30,10 @@ class DeveloperController extends Controller
             'modules' => $info->modules(),
             'php' => $info->phpSettings(),
             'missing' => $info->missingExtensions(),
+            // OPcache se mide en el proceso web (no en consola): sin él cada pedido recompila el sistema.
+            'opcacheOff' => PHP_SAPI !== 'cli' && ! (function_exists('opcache_get_status') && (opcache_get_status(false)['opcache_enabled'] ?? false)),
+            'devServer' => PHP_SAPI === 'cli-server',
+            'cachesOff' => ! app()->configurationIsCached() || ! app()->routesAreCached(),
             'scheduler' => $scheduler,
             'schedulerStale' => $scheduler === null || $scheduler->lt(now()->subMinutes(5)),
             'backup' => $backups->health(),

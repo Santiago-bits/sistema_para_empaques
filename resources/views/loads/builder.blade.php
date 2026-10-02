@@ -14,6 +14,19 @@
                 <label for="lb-scan" class="form-label">Escanear cajón o pallet</label>
                 <input id="lb-scan" x-ref="scan" x-model.trim="scanCode" @keydown.enter.prevent="scan()" class="form-input code py-3 text-xl"
                        placeholder="Código de cajón o pallet + Enter" autocomplete="off">
+                {{-- Resultado al lado del campo: el operario lo ve sin desplazarse (también en tablet/celular). --}}
+                <div class="mt-3 flex flex-wrap items-center justify-between gap-2 text-sm">
+                    <p class="tabular-nums text-stone-600 dark:text-stone-300">
+                        En la carga: <strong x-text="fmtInt(content.total_crates)"></strong> cajones · <strong x-text="fmt(content.total_kg, 1)"></strong> kg
+                    </p>
+                    <p x-show="queue.length" class="text-xs font-medium text-amber-700 dark:text-amber-300" x-text="'Procesando… ' + queue.length + ' en espera'"></p>
+                </div>
+                <div x-show="message" class="mt-3 rounded-lg px-4 py-3 text-sm" :class="error ? 'bg-red-50 text-red-900 dark:bg-red-950/40 dark:text-red-200' : 'bg-emerald-50 text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200'" role="status" aria-live="polite">
+                    <p class="font-medium" x-text="message"></p>
+                    <ul class="mt-1 max-h-32 list-inside list-disc overflow-y-auto text-xs" x-show="rejected.length">
+                        <template x-for="r in rejected" :key="(r.crate_id || '') + (r.code || '')"><li><span class="font-mono" x-text="r.code || ('#' + r.crate_id)"></span>: <span x-text="r.reason"></span></li></template>
+                    </ul>
+                </div>
             </div>
 
             <div class="panel p-4">
@@ -95,13 +108,6 @@
                 </div>
             </div>
 
-            <div x-show="message" class="rounded-lg px-4 py-3 text-sm" :class="error ? 'bg-red-50 text-red-900 dark:bg-red-950/40 dark:text-red-200' : 'bg-emerald-50 text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200'">
-                <p class="font-medium" x-text="message"></p>
-                <ul class="mt-1 max-h-32 list-inside list-disc overflow-y-auto text-xs" x-show="rejected.length">
-                    <template x-for="r in rejected" :key="(r.crate_id || '') + (r.code || '')"><li><span class="font-mono" x-text="r.code || ('#' + r.crate_id)"></span>: <span x-text="r.reason"></span></li></template>
-                </ul>
-            </div>
-
             <div class="panel overflow-hidden">
                 <div class="flex items-center justify-between border-b border-stone-200 p-3 dark:border-stone-800">
                     <p class="text-sm font-semibold">En la carga <span class="text-xs font-normal text-stone-500">(se actualiza sola)</span></p>
@@ -138,7 +144,7 @@
                     page: 1,
                     available: { data: [], page: 1, last_page: 1, total: 0, kg: 0 },
                     content: { crates: [], total_crates: 0, total_kg: 0, planned: null, summary: null, more: false, status: 'draft' },
-                    selected: [], toRemove: [], take: 50, scanCode: '',
+                    selected: [], toRemove: [], take: 50, scanCode: '', queue: [], processing: false,
                     busy: false, message: '', error: false, rejected: [],
                     timer: null,
 
@@ -199,13 +205,29 @@
                             this.busy = false;
                         }
                     },
-                    async scan() {
+                    // Cada lectura entra a una cola y se procesa en orden: un lector rápido nunca pierde
+                    // un código aunque el anterior todavía se esté guardando.
+                    scan() {
                         const code = this.scanCode;
                         if (!code) return;
                         this.scanCode = '';
                         this.$refs.scan.focus();
-                        if (this.busy) return;
-                        this.busy = true;
+                        this.queue.push(code);
+                        if (!this.processing) this.processQueue();
+                    },
+                    async processQueue() {
+                        this.processing = true;
+                        while (this.queue.length) {
+                            const code = this.queue[0];
+                            await this.assignCode(code);
+                            this.queue.shift();
+                        }
+                        this.processing = false;
+                        // Las listas se refrescan una vez al vaciar la cola (no bloquean los escaneos).
+                        this.loadAvailable();
+                        this.loadContent();
+                    },
+                    async assignCode(code) {
                         try {
                             let res = await window.api(config.assignUrl, { method: 'POST', body: { codes: [code] } });
                             // Si no es un cajón, se intenta como pallet completo.
@@ -217,12 +239,11 @@
                                     return;
                                 }
                             }
-                            this.notify(res.message, res.assigned === 0, res.rejected);
-                            await Promise.all([this.loadAvailable(), this.loadContent()]);
+                            const rejectedCodes = (res.rejected || []).map(r => Object.assign({ code }, r));
+                            this.notify(res.assigned > 0 ? code + ': ' + res.message : code + ': no se agregó.', res.assigned === 0, rejectedCodes);
+                            if (res.assigned > 0) this.content.total_crates = (this.content.total_crates || 0) + res.assigned;
                         } catch (e) {
-                            this.notify(e.message, true);
-                        } finally {
-                            this.busy = false;
+                            this.notify(code + ': ' + e.message, true);
                         }
                     },
                     async remove() {
