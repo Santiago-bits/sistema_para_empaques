@@ -25,7 +25,7 @@ class CrateRequest extends FormRequest
             }
         }
         if (is_string($this->input('weight'))) {
-            $this->merge(['weight' => str_replace(',', '.', $this->input('weight'))]);
+            $this->merge(['weight' => parse_number($this->input('weight'), false)]);
         }
     }
 

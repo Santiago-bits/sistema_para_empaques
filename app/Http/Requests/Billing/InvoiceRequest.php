@@ -20,9 +20,9 @@ class InvoiceRequest extends FormRequest
             ->filter(fn ($i) => is_array($i) && trim((string) ($i['description'] ?? '')) !== '')
             ->map(function ($i) {
                 foreach (['quantity', 'unit_price'] as $k) {
-                    // Formato argentino: "1.234,56" → 1234.56; "18.5" se respeta.
-                    if (isset($i[$k]) && is_string($i[$k]) && str_contains($i[$k], ',')) {
-                        $i[$k] = str_replace(',', '.', str_replace('.', '', trim($i[$k])));
+                    // Formato argentino: "1.234,56" → 1234.56 · "1.000" → 1000 · "18.5" se respeta.
+                    if (isset($i[$k])) {
+                        $i[$k] = parse_number($i[$k]);
                     }
                 }
 

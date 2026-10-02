@@ -19,6 +19,9 @@ class PalletRequest extends FormRequest
                 $this->merge([$field => trim($this->input($field)) ?: null]);
             }
         }
+        if (is_string($this->input('gross_weight'))) {
+            $this->merge(['gross_weight' => parse_number($this->input('gross_weight'))]);
+        }
     }
 
     public function rules(): array

@@ -15,7 +15,7 @@ class RejectRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         if (is_string($this->input('weight'))) {
-            $this->merge(['weight' => str_replace(',', '.', trim($this->input('weight')))]);
+            $this->merge(['weight' => parse_number($this->input('weight'))]);
         }
     }
 

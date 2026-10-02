@@ -25,7 +25,7 @@ class ScanRequest extends FormRequest
             $merge['packer_code'] = mb_strtoupper($merge['packer_code']);
         }
         if (is_string($this->input('weight'))) {
-            $merge['weight'] = str_replace(',', '.', trim($this->input('weight')));
+            $merge['weight'] = parse_number($this->input('weight'), false);
         }
         $this->merge($merge);
     }

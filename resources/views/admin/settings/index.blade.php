@@ -42,13 +42,13 @@
 
                     @case('production')
                         <div class="grid gap-4 md:grid-cols-3">
-                            <x-input name="weight_min" type="number" step="0.01" label="Peso mínimo (kg)" :value="$s['production.weight_min']" required/>
-                            <x-input name="weight_max" type="number" step="0.01" label="Peso máximo (kg)" :value="$s['production.weight_max']" required
+                            <x-input name="weight_min" inputmode="decimal" label="Peso mínimo (kg)" :value="$s['production.weight_min']" required/>
+                            <x-input name="weight_max" inputmode="decimal" label="Peso máximo (kg)" :value="$s['production.weight_max']" required
                                      hint="Fuera de rango requiere autorización de supervisor."/>
                             <x-select name="scale_driver" label="Origen del peso" :options="['manual' => 'Manual (teclado)', 'api' => 'Balanza vía API']" :value="$s['production.scale_driver']"/>
-                            <x-input name="target_daily_kg" type="number" label="Objetivo diario (kg)" :value="$s['production.target_daily_kg']" required/>
-                            <x-input name="target_weekly_kg" type="number" label="Objetivo semanal (kg)" :value="$s['production.target_weekly_kg']" required/>
-                            <x-input name="target_monthly_kg" type="number" label="Objetivo mensual (kg)" :value="$s['production.target_monthly_kg']" required/>
+                            <x-input name="target_daily_kg" inputmode="decimal" hint="Ej.: 10.000" label="Objetivo diario (kg)" :value="$s['production.target_daily_kg']" required/>
+                            <x-input name="target_weekly_kg" inputmode="decimal" hint="Ej.: 10.000" label="Objetivo semanal (kg)" :value="$s['production.target_weekly_kg']" required/>
+                            <x-input name="target_monthly_kg" inputmode="decimal" hint="Ej.: 10.000" label="Objetivo mensual (kg)" :value="$s['production.target_monthly_kg']" required/>
                         </div>
                         <div class="mt-5 grid gap-3 md:grid-cols-2">
                             <x-checkbox name="auto_create_crate" label="Crear el cajón al escanear un código nuevo" :checked="$s['production.auto_create_crate']"

@@ -22,7 +22,7 @@
                         @endforeach
                     </select>
                 </x-field>
-                <div x-data="{ type: '{{ old('voucher_type', $invoice->voucher_type) }}' }" class="space-y-4">
+                <div x-data="{ type: '{{ (int) old('voucher_type', $invoice->voucher_type) }}' }" class="space-y-4">
                     <x-select name="voucher_type" label="Tipo de comprobante" :options="$types" :value="$invoice->voucher_type" required x-model="type"
                               hint="A: cliente Resp. Inscripto · B: resto · C: si el emisor es monotributista."/>
                     <div x-show="['3', '8', '13'].includes(String(type))" x-cloak>

@@ -17,12 +17,8 @@ class MaintenanceRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         if (is_string($this->input('cost'))) {
-            // Formato argentino: 12.500,50 → 12500.50
-            $cost = trim($this->input('cost'));
-            if (str_contains($cost, ',')) {
-                $cost = str_replace(['.', ','], ['', '.'], $cost);
-            }
-            $this->merge(['cost' => $cost]);
+            // Formato argentino: 12.500,50 → 12500.50 · 12.500 → 12500
+            $this->merge(['cost' => parse_number($this->input('cost'))]);
         }
     }
 

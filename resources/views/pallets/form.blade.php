@@ -34,7 +34,7 @@
         <x-panel title="Contenido">
             <div class="grid gap-4 md:grid-cols-3">
                 <x-input name="quantity" type="number" min="0" label="Cantidad de cajones/bins" :value="$pallet->quantity"/>
-                <x-input name="gross_weight" type="number" step="0.01" min="0" label="Peso bruto (kg)" :value="$pallet->gross_weight"/>
+                <x-input name="gross_weight" inputmode="decimal" label="Peso bruto (kg)" hint="Ej.: 1.250,5" :value="$pallet->gross_weight"/>
             </div>
             <div class="mt-4">
                 <x-textarea name="notes" label="Observaciones" :value="$pallet->notes"/>

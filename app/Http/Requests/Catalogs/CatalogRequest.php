@@ -34,11 +34,16 @@ class CatalogRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
-        $fields = collect($this->definition()->fields())->pluck('name')->all();
+        $definitionFields = collect($this->definition()->fields());
+        $fields = $definitionFields->pluck('name')->all();
+        $decimals = $definitionFields->filter(fn ($f) => $f->isDecimal)->pluck('name')->all();
         $input = [];
         foreach ($fields as $field) {
             $value = $this->input($field);
             $input[$field] = is_string($value) ? (trim($value) === '' ? null : trim($value)) : $value;
+            if (in_array($field, $decimals, true)) {
+                $input[$field] = parse_number($input[$field]);
+            }
         }
         if (isset($input['email']) && is_string($input['email'])) {
             $input['email'] = mb_strtolower($input['email']);
