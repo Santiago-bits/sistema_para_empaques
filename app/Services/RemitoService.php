@@ -101,12 +101,14 @@ class RemitoService
         }
 
         return DB::transaction(function () use ($remito, $reason, $by) {
+            // Mismo orden de bloqueo que el despacho (primero la carga, después el remito): así un
+            // despacho y una anulación simultáneos no pueden dejar una carga despachada con el remito anulado.
+            $load = Load::query()->whereKey($remito->load_id)->lockForUpdate()->firstOrFail();
             $locked = Remito::query()->whereKey($remito->getKey())->lockForUpdate()->firstOrFail();
             if ($locked->status !== RemitoStatus::Issued) {
                 throw new InvalidTransitionException($locked->status->label(), RemitoStatus::Voided->label());
             }
-            $loadStatus = Load::query()->whereKey($locked->load_id)->value('status');
-            if (in_array($loadStatus, [LoadStatus::Dispatched->value, LoadStatus::Delivered->value], true)) {
+            if (in_array($load->status, [LoadStatus::Dispatched, LoadStatus::Delivered], true)) {
                 throw new BusinessException('No se puede anular el remito de una carga ya despachada.');
             }
 

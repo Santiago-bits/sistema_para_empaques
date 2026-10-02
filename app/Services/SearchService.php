@@ -66,7 +66,10 @@ class SearchService
 
         $plate = '%'.addcslashes(preg_replace('/[\s\-]/', '', $term), '%_\\').'%';
 
-        foreach ($this->sources($like, $digits, $plate) as $key => $source) {
+        // Cajones y pallets: búsqueda por prefijo del código (usa el índice; son las tablas más grandes).
+        $prefix = addcslashes(mb_strtoupper($term), '%_\\').'%';
+
+        foreach ($this->sources($like, $digits, $plate, $prefix) as $key => $source) {
             if (! $user->can($source['permission'])) {
                 continue;
             }
@@ -79,7 +82,7 @@ class SearchService
         return $results;
     }
 
-    private function sources(string $like, string $digits, string $plate): array
+    private function sources(string $like, string $digits, string $plate, string $prefix): array
     {
         $byDigits = fn (Builder $q, string $column) => strlen($digits) >= 5 ? $q->orWhere($column, 'like', '%'.$digits.'%') : $q;
 
@@ -87,13 +90,13 @@ class SearchService
             'crates' => [
                 'label' => 'Cajones', 'icon' => 'box', 'permission' => 'crates.view',
                 'query' => fn () => Crate::query()->with('variety:id,name', 'packer:id,code')
-                    ->where(fn ($q) => $q->where('code', 'like', $like)->orWhere('barcode', 'like', $like))->latest('id'),
+                    ->where(fn ($q) => $q->where('code', 'like', $prefix)->orWhere('barcode', 'like', $prefix))->latest('id'),
                 'map' => fn (Crate $c) => ['title' => $c->code, 'subtitle' => trim(($c->variety?->name ?? '').' · '.$c->status->label().($c->weight ? ' · '.kg($c->weight) : ''), ' ·'), 'url' => route('crates.show', $c)],
             ],
             'pallets' => [
                 'label' => 'Pallets', 'icon' => 'pallet', 'permission' => 'pallets.view',
                 'query' => fn () => Pallet::query()->with('producer:id,name')
-                    ->where(fn ($q) => $q->where('code', 'like', $like)->orWhere('barcode', 'like', $like))->latest('id'),
+                    ->where(fn ($q) => $q->where('code', 'like', $prefix)->orWhere('barcode', 'like', $prefix))->latest('id'),
                 'map' => fn (Pallet $p) => ['title' => $p->code, 'subtitle' => trim(($p->producer?->name ?? '').' · '.$p->status->label(), ' ·'), 'url' => route('pallets.show', $p)],
             ],
             'lots' => [

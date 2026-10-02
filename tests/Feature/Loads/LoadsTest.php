@@ -90,6 +90,28 @@ class LoadsTest extends TestCase
         $this->assertSame(5, Crate::query()->where('status', 'reserved')->count());
     }
 
+    public function test_crate_from_another_warehouse_is_rejected(): void
+    {
+        $this->actingAsRole('loads_operator');
+        $load = $this->newLoad();
+        $ids = $this->crates(1);
+        $other = \App\Models\Warehouse::query()->create(['company_id' => \App\Models\Company::query()->value('id'), 'name' => 'Galpón B', 'code' => 'B']);
+        Crate::query()->whereKey($ids[0])->update(['warehouse_id' => $other->id]);
+
+        $this->postJson(route('loads.crates.assign', $load), ['ids' => $ids])->assertOk()
+            ->assertJsonPath('assigned', 0)->assertJsonPath('rejected.0.reason', 'Pertenece a otro galpón.');
+    }
+
+    public function test_tampered_filters_do_not_break_the_builder(): void
+    {
+        $this->actingAsRole('loads_operator');
+        $load = $this->newLoad();
+        $this->crates(2);
+
+        $this->getJson(route('loads.available', $load).'?date_from[]=x&variety_id=1 OR 1=1&weight_min=abc&q=%25')->assertOk();
+        $this->postJson(route('loads.crates.assign', $load), ['take' => 5, 'filters' => ['date_to' => ['x'], 'q' => '%']])->assertOk();
+    }
+
     public function test_two_loads_competing_for_same_crate_only_one_wins(): void
     {
         $this->actingAsRole('loads_operator');

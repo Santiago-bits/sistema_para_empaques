@@ -77,7 +77,7 @@ class DailyClosingService
             $this->audit->log('daily_closing', $closing, null, ['date' => $date->toDateString()], 'Cierre diario del '.$date->format('d/m/Y'), $notes);
 
             return $closing;
-        });
+        }, 3); // reintenta ante un deadlock de InnoDB (dos cierres del mismo día a la vez)
     }
 
     public function reopen(DailyClosing $closing, string $reason, User $by): DailyClosing
