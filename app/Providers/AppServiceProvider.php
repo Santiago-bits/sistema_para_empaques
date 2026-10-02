@@ -124,6 +124,13 @@ class AppServiceProvider extends ServiceProvider
             return [Limit::perMinute(5)->by($key), Limit::perMinute(30)->by($request->ip())];
         });
 
+        // Recuperación de contraseña: frena el abuso (spam de emails / avisos) por IP y por usuario pedido.
+        RateLimiter::for('password-reset', function (Request $request) {
+            $key = mb_strtolower(trim((string) $request->input('login')));
+
+            return [Limit::perMinutes(15, 5)->by('pw|'.$key), Limit::perMinute(10)->by('pw-ip|'.$request->ip())];
+        });
+
         RateLimiter::for('api', fn (Request $request) => Limit::perMinute(240)->by($request->user()?->id ?: $request->ip()));
 
         // El modo escaneo puede registrar decenas de cajones por minuto.

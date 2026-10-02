@@ -4,6 +4,7 @@ use App\Exceptions\BusinessException;
 use App\Http\Middleware\EnsureModuleEnabled;
 use App\Http\Middleware\EnsureUserIsActive;
 use App\Http\Middleware\KioskMode;
+use App\Http\Middleware\RequirePasswordChange;
 use App\Http\Middleware\RedirectIfNotInstalled;
 use App\Http\Middleware\RestrictToLan;
 use App\Http\Middleware\SecurityHeaders;
@@ -32,6 +33,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'lan' => RestrictToLan::class,
             'active' => EnsureUserIsActive::class,
             'kiosk' => KioskMode::class,
+            'password.fresh' => RequirePasswordChange::class,
         ]);
         $middleware->web(append: [SecurityHeaders::class, RedirectIfNotInstalled::class]);
         $middleware->redirectGuestsTo(fn () => route('login'));

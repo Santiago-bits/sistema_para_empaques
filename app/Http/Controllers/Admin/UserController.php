@@ -13,6 +13,7 @@ use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\Warehouse;
+use App\Services\PasswordResetService;
 use App\Services\UserService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -85,6 +86,17 @@ class UserController extends Controller
         $this->users->update($user, $request->validated(), $request->user());
 
         return redirect()->route('admin.users.show', $user)->with('success', 'Usuario actualizado.');
+    }
+
+    /** Asigna una contraseña temporal (el usuario debe cambiarla al ingresar). Se muestra una sola vez. */
+    public function resetPassword(Request $request, User $user, PasswordResetService $resets): RedirectResponse
+    {
+        $this->authorize('update', $user);
+        $temporary = $resets->assignTemporary($user, $request->user());
+
+        return redirect()->route('admin.users.show', $user)
+            ->with('success', 'Contraseña temporal asignada. Se cerraron sus sesiones abiertas.')
+            ->with('temporary_password', $temporary);
     }
 
     public function permissions(User $user): View

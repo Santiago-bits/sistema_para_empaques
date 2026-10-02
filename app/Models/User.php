@@ -21,7 +21,7 @@ class User extends Authenticatable
     protected $fillable = [
         'first_name', 'last_name', 'username', 'dni', 'cuit', 'internal_code', 'email', 'phone',
         'role_id', 'packer_id', 'owner_id', 'client_id', 'status', 'theme', 'kiosk_mode',
-        'deactivated_at', 'notes', 'password',
+        'deactivated_at', 'notes', 'password', 'must_change_password', 'password_changed_at',
     ];
 
     protected $hidden = ['password', 'remember_token'];
@@ -35,6 +35,8 @@ class User extends Authenticatable
             'password' => 'hashed',
             'status' => UserStatus::class,
             'kiosk_mode' => 'boolean',
+            'must_change_password' => 'boolean',
+            'password_changed_at' => 'datetime',
             'last_login_at' => 'datetime',
             'deactivated_at' => 'datetime',
             'email_verified_at' => 'datetime',
@@ -117,5 +119,11 @@ class User extends Authenticatable
     public function flushPermissionCache(): void
     {
         $this->resolvedPermissions = null;
+    }
+
+    /** Email de recuperación en español con el enlace del sistema (APP_URL). */
+    public function sendPasswordResetNotification(#[\SensitiveParameter] $token): void
+    {
+        $this->notify(new \App\Notifications\ResetPasswordLink($token));
     }
 }

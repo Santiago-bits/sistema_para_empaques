@@ -24,7 +24,7 @@ class ProfileController extends Controller
             'password' => ['required', 'confirmed', Password::defaults()],
         ]);
 
-        $request->user()->update(['password' => Hash::make($data['password'])]);
+        $request->user()->forceFill(['password' => Hash::make($data['password']), 'password_changed_at' => now()])->save();
         $audit->log('password_change', $request->user(), description: 'Cambio de contraseña propia');
 
         return back()->with('success', 'Contraseña actualizada.');

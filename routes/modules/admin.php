@@ -20,6 +20,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('usuarios/{user}', [UserController::class, 'show'])->name('users.show');
         Route::get('usuarios/{user}/editar', [UserController::class, 'edit'])->middleware('can:users.manage')->name('users.edit');
         Route::put('usuarios/{user}', [UserController::class, 'update'])->middleware('can:users.manage')->name('users.update');
+        Route::post('usuarios/{user}/restablecer-contrasena', [UserController::class, 'resetPassword'])->middleware(['can:users.manage', 'throttle:10,1'])->name('users.password.reset');
         Route::get('usuarios/{user}/permisos', [UserController::class, 'permissions'])->middleware('can:roles.manage')->name('users.permissions');
         Route::put('usuarios/{user}/permisos', [UserController::class, 'updatePermissions'])->middleware('can:roles.manage')->name('users.permissions.update');
     });

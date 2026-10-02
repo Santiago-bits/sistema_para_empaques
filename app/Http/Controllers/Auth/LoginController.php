@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
-use App\Models\User;
 use App\Services\AuditService;
+use App\Support\LoginIdentifiers;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -25,13 +25,13 @@ class LoginController extends Controller
 
     public function show(): View
     {
-        return view('auth.login', ['identifiers' => $this->identifiers()]);
+        return view('auth.login', ['hint' => LoginIdentifiers::hint()]);
     }
 
     public function store(LoginRequest $request): RedirectResponse
     {
         $login = trim($request->string('login'));
-        $user = $this->findUser($login);
+        $user = LoginIdentifiers::find($login);
 
         if (! $user || ! Hash::check($request->string('password'), $user->password)) {
             $this->audit->log('login_failed', null, null, ['login' => $login], 'Intento de acceso fallido');
@@ -63,28 +63,5 @@ class LoginController extends Controller
         $request->session()->regenerateToken();
 
         return redirect()->route('login');
-    }
-
-    private function identifiers(): array
-    {
-        $allowed = ['username', 'dni', 'cuit', 'internal_code', 'email'];
-
-        return array_values(array_intersect($allowed, (array) setting('login.identifiers', ['username'])));
-    }
-
-    private function findUser(string $login): ?User
-    {
-        $identifiers = $this->identifiers() ?: ['username'];
-        $normalized = preg_replace('/[\s.\-]/', '', $login);
-
-        return User::query()
-            ->where(function ($query) use ($identifiers, $login, $normalized) {
-                foreach ($identifiers as $column) {
-                    $value = in_array($column, ['dni', 'cuit'], true) ? $normalized : $login;
-                    $query->orWhere($column, $value);
-                }
-            })
-            ->with('role')
-            ->first();
     }
 }
