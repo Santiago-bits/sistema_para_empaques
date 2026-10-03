@@ -2,7 +2,7 @@
 
 return [
     // Versión del sistema (se actualiza en cada release; ver CHANGELOG.md).
-    'version' => '1.5.0',
+    'version' => '1.6.0',
 
     // Identificador de esta instalación (para licencias y soporte).
     'installation_id' => env('GALPON_INSTALLATION_ID', 'local-dev'),
@@ -23,6 +23,10 @@ return [
 
     // Ruta a mysqldump/mysql para backups (en XAMPP: C:\xampp\mysql\bin).
     'mysql_bin_path' => env('GALPON_MYSQL_BIN', ''),
+
+    // Cómo se hacen los backups de MySQL: «auto» usa mysqldump si se puede y si no (hosting sin proc_open,
+    // como Hostinger) hace el volcado en PHP; «php» fuerza siempre el volcado en PHP.
+    'backup_driver' => env('GALPON_BACKUP_DRIVER', 'auto'),
 
     // Integración ARCA (ex AFIP). Las credenciales NUNCA van en el código: sólo en .env.
     'arca' => [

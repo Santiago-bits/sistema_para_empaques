@@ -34,6 +34,9 @@ class AppServiceProvider extends ServiceProvider
     {
         Paginator::defaultView('vendor.pagination.galpon');
 
+        $this->useFilesUntilTablesExist();
+        $this->applyTimezone();
+
         // Los enlaces absolutos (QR de remitos, emails de recuperación) usan SIEMPRE APP_URL, nunca el
         // encabezado Host del pedido: así nadie puede hacer que un email lleve a una PC ajena.
         if (filled(config('app.url'))) {
@@ -109,6 +112,51 @@ class AppServiceProvider extends ServiceProvider
         $this->registerGates();
         $this->registerRateLimiters();
         $this->registerBladeDirectives();
+    }
+
+    /**
+     * Instalación nueva con la base vacía: sesiones y caché se guardan en tablas que todavía no existen, así
+     * que hasta que el instalador las cree se usan archivos. Una vez creadas se deja una marca y no se vuelve
+     * a consultar (cero costo en el uso normal).
+     */
+    private function useFilesUntilTablesExist(): void
+    {
+        $marker = storage_path('framework/tables.ready');
+        if ($this->app->runningUnitTests() || is_file($marker)) {
+            return;
+        }
+        $needsTables = config('session.driver') === 'database' || config('cache.default') === 'database';
+        if (! $needsTables) {
+            return;
+        }
+        try {
+            $ready = \Illuminate\Support\Facades\Schema::hasTable('sessions') && \Illuminate\Support\Facades\Schema::hasTable('cache');
+        } catch (\Throwable) {
+            $ready = false;
+        }
+        if ($ready) {
+            @file_put_contents($marker, now()->toIso8601String());
+
+            return;
+        }
+        config([
+            'session.driver' => config('session.driver') === 'database' ? 'file' : config('session.driver'),
+            'cache.default' => config('cache.default') === 'database' ? 'file' : config('cache.default'),
+        ]);
+    }
+
+    /** Zona horaria elegida en Configuración → Regional (por defecto la del .env / Buenos Aires). */
+    private function applyTimezone(): void
+    {
+        try {
+            $timezone = (string) setting('regional.timezone', config('app.timezone'));
+        } catch (\Throwable) {
+            return;
+        }
+        if ($timezone !== '' && $timezone !== config('app.timezone') && in_array($timezone, \DateTimeZone::listIdentifiers(), true)) {
+            config(['app.timezone' => $timezone]);
+            date_default_timezone_set($timezone);
+        }
     }
 
     private function registerGates(): void

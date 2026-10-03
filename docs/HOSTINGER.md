@@ -143,8 +143,12 @@ php artisan galpon:deploy-check --ping     # «Respuesta del Panel General: HTTP
 
 ## 5. Backups y problemas frecuentes en Hostinger
 
-- **Backups**: Hostinger hace copias automáticas (hPanel → Archivos → Copias de seguridad). En planes compartidos
-  el backup por comando puede no estar disponible (`galpon:deploy-check` avisa «proc_open deshabilitado»).
+- **Backups**: el sistema hace sus backups igual que en el galpón (diario 02:00, semanal domingo 03:00, y manual
+  desde Sistema → Backups). Como Hostinger no permite `mysqldump`, el volcado se hace en PHP automáticamente.
+  Además conviene dejar activas las copias de Hostinger (hPanel → Archivos → Copias de seguridad).
+- **Instalación**: si el asistente dice «la base de datos ya tiene tablas de otro sistema», creá una base nueva en
+  hPanel, cambiá `DB_DATABASE`, `DB_USERNAME` y `DB_PASSWORD` en `.env` y recargá. Con la base vacía, el
+  asistente crea las tablas solo.
 - **Error 500 después de actualizar**: `php artisan config:clear` y revisar `storage/logs/laravel.log`; luego
   volver a `php artisan config:cache`.
 - **«Instalación o clave de licencia inválida» (401) en un empaque**: el `GALPON_INSTALLATION_ID` o la

@@ -189,7 +189,7 @@ class BackupService
         }
 
         match ($config['driver'] ?? null) {
-            'mysql', 'mariadb' => $this->dumpMysql($config, $target),
+            'mysql', 'mariadb' => $this->useNativeTools('mysqldump') ? $this->dumpMysql($config, $target) : $this->dumpMysqlPhp($connection, $target),
             'sqlite' => $this->isMemorySqlite($config)
                 ? $this->dumpSqliteSql($connection, $target)
                 : $this->compressFile((string) $config['database'], $target),
@@ -256,6 +256,111 @@ class BackupService
                 gzclose($gz);
             }
             @unlink($optionsFile);
+        }
+    }
+
+    /** ¿Se pueden usar mysqldump/mysql? Requiere proc_open (Hostinger lo bloquea) y el ejecutable. */
+    public function useNativeTools(string $binary): bool
+    {
+        if (config('galpon.backup_driver') === 'php' || ! self::canSpawnProcesses()) {
+            return false;
+        }
+        try {
+            $this->binary($binary);
+
+            return true;
+        } catch (RuntimeException) {
+            return false;
+        }
+    }
+
+    public static function canSpawnProcesses(): bool
+    {
+        return function_exists('proc_open')
+            && ! in_array('proc_open', array_map('trim', explode(',', (string) ini_get('disable_functions'))), true);
+    }
+
+    /**
+     * Volcado de MySQL/MariaDB hecho en PHP (sin mysqldump): para hostings sin proc_open. Una sentencia por
+     * línea en los datos (los textos quedan escapados) para poder restaurarlo leyendo línea a línea.
+     */
+    private function dumpMysqlPhp(string $connection, string $target): void
+    {
+        $pdo = DB::connection($connection)->getPdo();
+        $gz = gzopen($target, 'wb6');
+        if ($gz === false) {
+            throw new RuntimeException('No se pudo crear el archivo de backup.');
+        }
+        $buffered = $pdo->getAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY);
+
+        try {
+            gzwrite($gz, "-- Galpon MySQL dump (PHP)\n-- Generado: ".now()->toIso8601String()."\nSET NAMES utf8mb4;\nSET FOREIGN_KEY_CHECKS=0;\nSET UNIQUE_CHECKS=0;\n");
+            $pdo->exec('SET SESSION TRANSACTION ISOLATION LEVEL REPEATABLE READ');
+            $pdo->exec('START TRANSACTION WITH CONSISTENT SNAPSHOT');
+
+            $tables = $pdo->query("SHOW FULL TABLES WHERE Table_type = 'BASE TABLE'")->fetchAll(\PDO::FETCH_NUM);
+            foreach ($tables as [$table]) {
+                $quoted = '`'.str_replace('`', '``', (string) $table).'`';
+                $create = $pdo->query('SHOW CREATE TABLE '.$quoted)->fetch(\PDO::FETCH_NUM)[1];
+                gzwrite($gz, "\nDROP TABLE IF EXISTS {$quoted};\n{$create};\n");
+
+                // Sin buffer: las filas se leen de a una aunque la tabla sea grande.
+                $pdo->setAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
+                $rows = $pdo->query('SELECT * FROM '.$quoted, \PDO::FETCH_NUM);
+                $batch = [];
+                foreach ($rows as $row) {
+                    $batch[] = '('.implode(',', array_map(fn ($v) => $v === null ? 'NULL' : $pdo->quote((string) $v), $row)).')';
+                    if (count($batch) >= 200) {
+                        gzwrite($gz, 'INSERT INTO '.$quoted.' VALUES '.implode(',', $batch).";\n");
+                        $batch = [];
+                    }
+                }
+                if ($batch !== []) {
+                    gzwrite($gz, 'INSERT INTO '.$quoted.' VALUES '.implode(',', $batch).";\n");
+                }
+                $rows->closeCursor();
+                $pdo->setAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, $buffered);
+            }
+
+            $pdo->exec('COMMIT');
+            gzwrite($gz, "\nSET UNIQUE_CHECKS=1;\nSET FOREIGN_KEY_CHECKS=1;\n-- Galpon dump completed\n");
+        } finally {
+            $pdo->setAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, $buffered);
+            gzclose($gz);
+        }
+    }
+
+    /**
+     * Restaura un volcado SQL ejecutando sentencia por sentencia con PDO (sin el cliente mysql). Sirve para
+     * los volcados de dumpMysqlPhp() y de mysqldump (sin rutinas con DELIMITER, que este sistema no usa).
+     */
+    private function restoreMysqlPhp(string $connection, string $path): void
+    {
+        $pdo = DB::connection($connection)->getPdo();
+        $gz = gzopen($path, 'rb');
+        if ($gz === false) {
+            throw new RuntimeException('No se pudo abrir el backup.');
+        }
+        $statement = '';
+        try {
+            $pdo->exec('SET FOREIGN_KEY_CHECKS=0');
+            while (($line = gzgets($gz)) !== false) {
+                $trimmed = rtrim($line, "\r\n");
+                if ($statement === '' && ($trimmed === '' || str_starts_with($trimmed, '--'))) {
+                    continue;
+                }
+                $statement .= $line;
+                if (str_ends_with(rtrim($trimmed), ';')) {
+                    $pdo->exec($statement);
+                    $statement = '';
+                }
+            }
+            if (trim($statement) !== '') {
+                $pdo->exec($statement);
+            }
+        } finally {
+            $pdo->exec('SET FOREIGN_KEY_CHECKS=1');
+            gzclose($gz);
         }
     }
 
@@ -387,8 +492,12 @@ class BackupService
 
         $isMysql = str_contains($head, '-- MySQL dump') || str_contains($head, '-- MariaDB dump');
         $isSqlite = str_contains($head, '-- Galpon SQLite dump');
-        if (! $isMysql && ! $isSqlite) {
+        $isPhpDump = str_contains($head, '-- Galpon MySQL dump (PHP)');
+        if (! $isMysql && ! $isSqlite && ! $isPhpDump) {
             return ['ok' => false, 'message' => 'El encabezado del volcado SQL no es reconocible.'];
+        }
+        if ($isPhpDump && ! str_contains($tail, '-- Galpon dump completed')) {
+            return ['ok' => false, 'message' => 'El volcado está incompleto (falta la marca de finalización).'];
         }
         if ($isMysql && ! str_contains($tail, '-- Dump completed')) {
             return ['ok' => false, 'message' => 'El volcado está incompleto (falta la marca de finalización de mysqldump).'];
@@ -473,7 +582,7 @@ class BackupService
         $config = (array) config('database.connections.'.$connection, []);
 
         match ($config['driver'] ?? null) {
-            'mysql', 'mariadb' => $this->restoreMysql($config, $path),
+            'mysql', 'mariadb' => $this->useNativeTools('mysql') ? $this->restoreMysql($config, $path) : $this->restoreMysqlPhp($connection, $path),
             'sqlite' => str_ends_with($filename, '.sqlite.gz')
                 ? $this->restoreSqliteFile($config, $connection, $path)
                 : $this->restoreSqlDump($connection, $path),

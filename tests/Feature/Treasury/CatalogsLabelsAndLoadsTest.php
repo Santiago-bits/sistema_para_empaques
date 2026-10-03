@@ -94,6 +94,14 @@ class CatalogsLabelsAndLoadsTest extends TestCase
         $this->post(route('admin.settings.update', 'treasury'), ['association_fee_per_kg' => '2,75', 'check_warning_days' => 10])->assertSessionHas('success');
         $this->assertSame(2.75, (float) setting('treasury.association_fee_per_kg'));
         $this->assertFalse((bool) setting('treasury.post_test_invoices'));
+
+        // Zona horaria editable (internacionalización).
+        $this->get(route('admin.settings.index', ['tab' => 'regional']))->assertOk()->assertSee('America/Santiago', false);
+        $this->post(route('admin.settings.update', 'regional'), ['currency' => 'ARS', 'date_format' => 'd/m/Y', 'timezone' => 'America/Santiago'])
+            ->assertSessionHas('success');
+        $this->assertSame('America/Santiago', setting('regional.timezone'));
+        $this->post(route('admin.settings.update', 'regional'), ['currency' => 'ARS', 'date_format' => 'd/m/Y', 'timezone' => 'Nada/Nada'])
+            ->assertSessionHasErrors('timezone');
     }
 
     public function test_load_commercial_fields(): void

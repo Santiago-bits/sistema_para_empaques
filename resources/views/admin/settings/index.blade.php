@@ -43,7 +43,17 @@
                         <div class="grid gap-4 md:grid-cols-2">
                             <x-select name="currency" label="Moneda" :options="['ARS' => 'Peso argentino (ARS)', 'USD' => 'Dólar (USD)']" :value="$s['regional.currency']"/>
                             <x-select name="date_format" label="Formato de fecha" :options="['d/m/Y' => '30/09/2026', 'Y-m-d' => '2026-09-30']" :value="$s['regional.date_format']"/>
-                            <x-input name="tz" label="Zona horaria" :value="config('app.timezone')" disabled hint="Se configura en el archivo .env (APP_TIMEZONE)."/>
+                            <x-field label="Zona horaria" name="timezone" hint="Hora con la que se registran y muestran los datos. Cambiala sólo si el galpón está en otro país o provincia.">
+                                <select name="timezone" id="timezone" class="form-input">
+                                    @foreach (\App\Http\Controllers\InstallController::timezones() as $region => $options)
+                                        <optgroup label="{{ $region }}">
+                                            @foreach ($options as $value => $label)
+                                                <option value="{{ $value }}" @selected(old('timezone', $s['regional.timezone']) === $value && ($region === 'Frecuentes' || ! in_array($value, array_keys(\App\Http\Controllers\InstallController::timezones()['Frecuentes']), true)))>{{ $label }}</option>
+                                            @endforeach
+                                        </optgroup>
+                                    @endforeach
+                                </select>
+                            </x-field>
                         </div>
                         @break
 

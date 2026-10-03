@@ -57,8 +57,8 @@ class DeployCheckCommand extends Command
         $this->check($last !== null && $last->gt(now()->subMinutes(5)), 'Tareas programadas (cron)', $last ? 'Última: '.$last->diffForHumans() : 'Nunca corrió',
             'Hostinger: hPanel → Avanzado → Cron Jobs → cada minuto: php …/artisan schedule:run', 'warn');
         $proc = function_exists('proc_open') && ! in_array('proc_open', array_map('trim', explode(',', (string) ini_get('disable_functions'))), true);
-        $this->check($proc, 'proc_open (backups con mysqldump)', $proc ? 'Disponible' : 'Deshabilitado',
-            'En hosting compartido usá los backups del panel del hosting.', 'warn');
+        $this->check($proc, "proc_open (mysqldump)", $proc ? "Disponible" : "Deshabilitado (backups en PHP)",
+            'Normal en Hostinger: los backups se hacen en PHP sin mysqldump.', 'warn');
 
         if (config('galpon.central.mode')) {
             $this->check(true, 'Modo Panel General', 'Activado', '');
