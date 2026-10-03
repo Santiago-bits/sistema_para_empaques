@@ -145,7 +145,7 @@ class MovementController extends Controller
             'code' => $code,
             'locations' => WarehouseLocation::query()->where('warehouse_id', CurrentWarehouse::id())->orderBy('code')->get()
                 ->mapWithKeys(fn ($l) => [$l->id => $l->code.' — '.$l->name]),
-            'users' => User::query()->whereIn('id', LocationMovement::query()->select('user_id')->whereNotNull('user_id')->distinct())
+            'users' => User::query()->visibleTo()->whereIn('id', LocationMovement::query()->select('user_id')->whereNotNull('user_id')->distinct())
                 ->orderBy('last_name')->get()->mapWithKeys(fn ($u) => [$u->id => $u->full_name]),
         ]);
     }

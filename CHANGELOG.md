@@ -2,6 +2,17 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versionado semántico.
 
+## [1.8.1] - 2026-10-03
+
+### Cambiado
+- **El Super Administrador es invisible para el galpón**: el dueño del galpón y su personal no lo ven en Usuarios,
+  Roles, Actividad del personal, Quién está conectado, Historial de cambios, búsquedas ni listas para elegir
+  personas; si hace falta mostrar quién hizo algo, dice «Soporte del sistema». Él sí ve a todos.
+- Nada se desplaza hacia el costado: las tablas que no entran en el ancho se muestran como tarjetas (de a dos o
+  más en pantallas anchas, una debajo de otra en el celular), las pestañas bajan de renglón, el mapa del galpón se
+  achica para entrar y las fichas de detalle ya no se estiran por un dato largo.
+- Se quitó el casillero «Puesto fijo de escaneo» del formulario de usuario: los accesos se eligen con los sectores.
+
 ## [1.8.0] - 2026-10-03
 
 ### Agregado

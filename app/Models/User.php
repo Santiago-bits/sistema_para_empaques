@@ -75,12 +75,49 @@ class User extends Authenticatable
 
     protected function fullName(): Attribute
     {
-        return Attribute::get(fn () => trim($this->first_name.' '.$this->last_name));
+        return Attribute::get(fn () => $this->isHiddenFromViewer() ? self::HIDDEN_NAME : trim($this->first_name.' '.$this->last_name));
     }
 
     public function isSuperAdmin(): bool
     {
         return $this->role?->slug === Role::SUPER_ADMIN;
+    }
+
+    /*
+    | El Super Administrador (el dueño del sistema, no un empleado del galpón) es invisible para el resto:
+    | no aparece en listados, actividad, sesiones ni historial, y donde haga falta mostrar quién hizo algo se
+    | ve «Soporte del sistema». Sólo otro Super Administrador lo ve.
+    */
+    public const HIDDEN_NAME = 'Soporte del sistema';
+
+    /** Usuarios visibles para quien está mirando (por defecto, el usuario conectado). */
+    public function scopeVisibleTo(\Illuminate\Database\Eloquent\Builder $query, ?User $viewer = null): \Illuminate\Database\Eloquent\Builder
+    {
+        $viewer ??= auth()->user();
+        if ($viewer?->isSuperAdmin()) {
+            return $query;
+        }
+
+        return $query->where(fn ($q) => $q->whereNull('role_id')
+            ->orWhereNotIn('role_id', Role::query()->where('slug', Role::SUPER_ADMIN)->select('id')));
+    }
+
+    /** IDs que el usuario conectado no debe ver (vacío para un Super Administrador). */
+    public static function hiddenIds(?User $viewer = null): array
+    {
+        $viewer ??= auth()->user();
+        if ($viewer?->isSuperAdmin()) {
+            return [];
+        }
+
+        return static::query()->withTrashed()->whereIn('role_id', Role::query()->where('slug', Role::SUPER_ADMIN)->select('id'))->pluck('id')->all();
+    }
+
+    public function isHiddenFromViewer(): bool
+    {
+        $viewer = auth()->user();
+
+        return $viewer !== null && ! $viewer->is($this) && $this->isSuperAdmin() && ! $viewer->isSuperAdmin();
     }
 
     public function isActive(): bool

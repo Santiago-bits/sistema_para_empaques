@@ -7,6 +7,7 @@ import { theme } from './lib/theme';
 import './lib/connection';
 import { openCameraScanner, scanInto } from './lib/camera-scanner';
 import { initShortcuts } from './lib/shortcuts';
+import { labelTables } from './lib/responsive-tables';
 
 window.Alpine = Alpine;
 window.Chart = Chart;
@@ -74,6 +75,10 @@ document.addEventListener('submit', (event) => {
 });
 
 Alpine.start();
+
+// Tablas como tarjetas en el celular: nombre de columna en cada celda.
+labelTables();
+window.labelTables = labelTables;
 
 // Atajos de teclado: sólo en el layout principal (el kiosco y el login no los cargan).
 if (window.galpon?.shortcuts) initShortcuts(window.galpon.shortcuts);

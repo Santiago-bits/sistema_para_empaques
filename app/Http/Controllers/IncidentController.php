@@ -105,7 +105,7 @@ class IncidentController extends Controller
     /** @return array<int, string> */
     private function users(): array
     {
-        return User::query()->where('status', UserStatus::Active->value)->orderBy('last_name')->get()
+        return User::query()->visibleTo()->where('status', UserStatus::Active->value)->orderBy('last_name')->get()
             ->mapWithKeys(fn (User $u) => [$u->id => $u->full_name])->all();
     }
 }

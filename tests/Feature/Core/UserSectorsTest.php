@@ -111,4 +111,15 @@ class UserSectorsTest extends TestCase
         ])->assertSessionHas('error');
         $this->assertSame('admin', $admin->fresh()->role->slug);
     }
+
+    /** El casillero «Puesto fijo de escaneo» ya no está: los accesos se eligen con los sectores. */
+    public function test_user_form_has_no_kiosk_checkbox_and_editing_keeps_the_previous_value(): void
+    {
+        $this->actingAsRole('admin');
+        $this->get(route('admin.users.create'))->assertOk()->assertDontSee('kiosk_mode', false)->assertDontSee('Puesto fijo de escaneo');
+
+        $user = \App\Models\User::factory()->role('employee')->create(['username' => 'laura', 'kiosk_mode' => true]);
+        $this->put(route('admin.users.update', $user), $this->payload(['password' => '', 'password_confirmation' => '']))->assertSessionHasNoErrors();
+        $this->assertTrue($user->fresh()->kiosk_mode);
+    }
 }

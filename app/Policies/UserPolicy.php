@@ -13,6 +13,10 @@ class UserPolicy
 
     public function view(User $actor, User $user): bool
     {
+        if ($user->isSuperAdmin() && ! $actor->isSuperAdmin()) {
+            return false;
+        }
+
         return $actor->can('users.view');
     }
 

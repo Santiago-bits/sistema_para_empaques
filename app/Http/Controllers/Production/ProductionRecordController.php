@@ -42,7 +42,7 @@ class ProductionRecordController extends Controller
             'sizes' => $this->sizeOptions(false),
             'shifts' => $this->shiftOptions(),
             'lines' => $this->lineOptions(),
-            'users' => User::query()->whereIn('id', ProductionRecord::query()->select('user_id')->distinct())
+            'users' => User::query()->visibleTo()->whereIn('id', ProductionRecord::query()->select('user_id')->distinct())
                 ->orderBy('last_name')->get()->mapWithKeys(fn (User $u) => [$u->id => $u->full_name]),
         ]);
     }

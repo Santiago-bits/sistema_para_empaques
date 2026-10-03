@@ -56,7 +56,7 @@ class QualityControlController extends Controller
             'controls' => $controls,
             'results' => QualityControl::RESULTS,
             'targets' => ['crate' => 'Cajón', 'lot' => 'Lote', 'pallet' => 'Pallet'],
-            'users' => User::query()->whereIn('id', QualityControl::query()->select('user_id')->distinct())
+            'users' => User::query()->visibleTo()->whereIn('id', QualityControl::query()->select('user_id')->distinct())
                 ->orderBy('last_name')->get()->mapWithKeys(fn ($u) => [$u->id => $u->full_name]),
             'today' => $today,
         ]);

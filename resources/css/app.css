@@ -53,6 +53,12 @@
     :focus-visible {
         @apply outline-2 outline-offset-2 outline-brand-500;
     }
+
+    /* Una columna de grilla nunca se estira más que la pantalla por su contenido (tablas, textos largos):
+       así nada se desplaza hacia el costado. En la capa base: cualquier utilidad min-w-* le gana. */
+    :where(.grid) > * {
+        min-width: 0;
+    }
 }
 
 @layer components {
@@ -217,3 +223,57 @@
     .no-print { display: none !important; }
     body { background: white !important; }
 }
+
+/*
+| Tablas sin desplazamiento hacia el costado. Fuera de @layer a propósito: así le gana a utilidades como
+| whitespace-nowrap puestas en las celdas.
+| - Pantallas medianas: el texto baja de renglón para que la tabla entre en el ancho.
+| - Si igual no entra: cada fila pasa a ser una tarjeta, con el nombre de la columna al lado de cada dato
+|   (lo decide y lo arma resources/js/lib/responsive-tables.js).
+*/
+@media (max-width: 1279px) {
+    .table thead th,
+    .table tbody td {
+        white-space: normal;
+        overflow-wrap: break-word;
+    }
+}
+
+/* La tabla no entra en el ancho: se muestra como tarjetas (lo decide resources/js/lib/responsive-tables.js). */
+.table.table-cards thead { display: none; }
+.table.table-cards,
+.table.table-cards tbody,
+.table.table-cards tr,
+.table.table-cards td { display: block; width: 100%; }
+.table.table-cards tbody {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+}
+.table.table-cards tbody tr {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgb(120 113 108 / 0.2);
+    border-right: 1px solid rgb(120 113 108 / 0.2);
+}
+.table.table-cards tbody td {
+    display: grid;
+    grid-template-columns: minmax(6.5rem, 40%) 1fr;
+    gap: 0.75rem;
+    padding: 0.3rem 1rem;
+    text-align: left;
+    white-space: normal;
+}
+.table.table-cards tbody td::before {
+    content: attr(data-label);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-stone-500);
+}
+/* Sin nombre de columna (acciones) o fila de «no hay datos»: ocupa todo el ancho. */
+.table.table-cards tbody td[data-label=""],
+.table.table-cards tbody td[colspan] { display: block; }
+.table.table-cards tbody td[data-label=""]::before,
+.table.table-cards tbody td[colspan]::before { content: none; }
+.table.table-cards tbody tr:has(td[colspan]) { grid-column: 1 / -1; border-right: 0; }
+.table.table-cards tbody td.num { text-align: left; }

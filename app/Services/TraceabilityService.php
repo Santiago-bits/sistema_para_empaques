@@ -238,7 +238,7 @@ class TraceabilityService
         $labels = ['update' => 'Modificación de datos', 'soft_delete' => 'Eliminación', 'restore' => 'Restauración',
             'force_status' => 'Cambio de estado forzado', 'authorize_weight' => 'Autorización de peso', 'print_label' => 'Impresión de etiqueta'];
 
-        AuditLog::query()->with('user')->where('auditable_type', $type)->where('auditable_id', $id)
+        AuditLog::query()->visibleToViewer()->with('user')->where('auditable_type', $type)->where('auditable_id', $id)
             ->whereIn('action', array_keys($labels))->orderBy('created_at')->orderBy('id')->get()
             ->each(function (AuditLog $log) use ($events, $labels) {
                 $changes = $log->action !== 'update' ? '' : collect($log->new_values ?? [])->map(function ($new, $field) use ($log) {

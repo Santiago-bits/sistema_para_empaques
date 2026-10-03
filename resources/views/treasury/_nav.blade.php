@@ -7,7 +7,7 @@
         'exchange.index' => ['Cotización del dólar', 'chart-line', 'exchange.*'],
     ];
 @endphp
-<nav class="mb-6 flex gap-1 overflow-x-auto border-b border-stone-200 dark:border-stone-800" aria-label="Tesorería">
+<nav class="mb-6 flex flex-wrap gap-1 border-b border-stone-200 dark:border-stone-800" aria-label="Tesorería">
     @foreach ($tabs as $route => [$label, $icon, $pattern])
         <a href="{{ route($route) }}" @class([
             '-mb-px flex shrink-0 items-center gap-2 border-b-2 px-3 py-2 text-sm whitespace-nowrap',

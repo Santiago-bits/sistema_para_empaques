@@ -24,6 +24,8 @@
 Sólo para el **Super Administrador** (el dueño del sistema). Se entra desde el menú Sistema → Administración
 general o escribiendo `tu-dominio/administradorgeneral`. Para cualquier otro usuario esa dirección no existe.
 
+- **Invisible para el galpón**: el dueño del galpón y su personal no te ven en ningún lado (usuarios, actividad,
+  conectados, historial de cambios, búsquedas). Si algo lo hiciste vos, ellos ven «Soporte del sistema».
 - **Cómo entrar**: primero ingresá al sistema con tu usuario de Super Administrador (si escribís la dirección sin
   haber ingresado, te lleva al ingreso y después vuelve sola). Si te olvidaste el usuario o la contraseña del
   Super Administrador, en la pantalla de ingreso tocá «¿Sos el dueño y no recordás el usuario o la contraseña?»:

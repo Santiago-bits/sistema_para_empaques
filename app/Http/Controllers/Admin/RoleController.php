@@ -23,7 +23,9 @@ class RoleController extends Controller
     public function index(): View
     {
         return view('admin.roles.index', [
-            'roles' => Role::query()->withCount(['users', 'permissions'])->orderBy('name')->get(),
+            // El rol del Super Administrador (dueño del sistema) sólo lo ve otro Super Administrador.
+            'roles' => Role::query()->withCount(['users', 'permissions'])
+                ->when(! auth()->user()->isSuperAdmin(), fn ($q) => $q->where('slug', '!=', Role::SUPER_ADMIN))->orderBy('name')->get(),
         ]);
     }
 
