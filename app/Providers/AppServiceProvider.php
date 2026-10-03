@@ -117,12 +117,15 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Instalación nueva con la base vacía: sesiones y caché se guardan en tablas que todavía no existen, así
      * que hasta que el instalador las cree se usan archivos. Una vez creadas se deja una marca y no se vuelve
-     * a consultar (cero costo en el uso normal).
+     * a consultar (cero costo en el uso normal). La marca guarda qué base es: si se cambia de base en el .env
+     * (por ejemplo a una nueva y vacía) se vuelve a verificar.
      */
     private function useFilesUntilTablesExist(): void
     {
         $marker = storage_path('framework/tables.ready');
-        if ($this->app->runningUnitTests() || is_file($marker)) {
+        $default = (string) config('database.default');
+        $signature = sha1($default.'|'.config("database.connections.{$default}.host").'|'.config("database.connections.{$default}.database"));
+        if ($this->app->runningUnitTests() || (is_file($marker) && trim((string) @file_get_contents($marker)) === $signature)) {
             return;
         }
         $needsTables = config('session.driver') === 'database' || config('cache.default') === 'database';
@@ -135,7 +138,7 @@ class AppServiceProvider extends ServiceProvider
             $ready = false;
         }
         if ($ready) {
-            @file_put_contents($marker, now()->toIso8601String());
+            @file_put_contents($marker, $signature);
 
             return;
         }

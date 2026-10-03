@@ -23,12 +23,12 @@ use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 /*
 | Cachés viejas después de un deploy: el deploy por Git de Hostinger conserva bootstrap/cache (está en
 | .gitignore) y Laravel seguiría usando las rutas, la configuración y la lista de paquetes de la versión
-| anterior. Si alguna caché es más vieja que el código desplegado, se borra y Laravel la rearma sola.
-| Cuesta unos pocos «stat» por petición.
+| anterior. Si alguna caché es más vieja que el código desplegado (o que el .env: por ejemplo al cambiar de
+| base de datos), se borra y Laravel la rearma sola. Cuesta unos pocos «stat» por petición.
 */
 (static function (string $base): void {
     $code = 0;
-    foreach (['composer.json', 'composer.lock', 'config/galpon.php', 'routes/web.php', 'bootstrap/app.php'] as $file) {
+    foreach (['.env', 'composer.json', 'composer.lock', 'config/galpon.php', 'routes/web.php', 'bootstrap/app.php'] as $file) {
         $code = max($code, (int) @filemtime($base.'/'.$file));
     }
     foreach (glob($base.'/bootstrap/cache/*.php') ?: [] as $cache) {
