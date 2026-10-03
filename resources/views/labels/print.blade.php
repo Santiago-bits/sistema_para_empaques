@@ -32,8 +32,8 @@
 </head>
 <body>
     <div class="toolbar">
+        <x-print-back :fallback="$back"/>
         <button type="button" onclick="window.print()">Imprimir</button>
-        @if ($back)<a href="{{ $back }}">Volver</a>@endif
         <span>{{ $title }} · {{ count($labels) }} etiqueta(s) de {{ $width }}×{{ $height }} mm</span>
     </div>
     <div class="labels">

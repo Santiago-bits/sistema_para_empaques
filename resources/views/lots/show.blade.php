@@ -2,7 +2,7 @@
     <x-page-header :title="'Lote '.$lot->code" :subtitle="$lot->producer?->name.' · '.fdate($lot->date)" :back="route('lots.index')">
         <x-slot:actions>
             <x-badge :color="['open' => 'emerald', 'closed' => 'blue', 'voided' => 'zinc'][$lot->status] ?? 'stone'" class="text-sm">{{ \App\Models\Lot::STATUSES[$lot->status] ?? $lot->status }}</x-badge>
-            <a href="{{ route('lots.romaneo', $lot) }}" target="_blank" class="btn btn-secondary"><x-icon name="printer" class="size-4"/> Romaneo</a>
+            <a href="{{ route('lots.romaneo', $lot) }}" class="btn btn-secondary"><x-icon name="printer" class="size-4"/> Romaneo</a>
             @can('lots.manage')
                 @if ($lot->status === 'open')
                     <form method="POST" action="{{ route('lots.close', $lot) }}" x-data x-confirm="¿Cerrar el lote {{ $lot->code }}?">

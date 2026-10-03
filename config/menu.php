@@ -18,6 +18,22 @@ return [
         ],
     ],
     [
+        // Lo que se carga una vez y se usa todos los días: a la vista, sin buscarlo adentro de otra pantalla.
+        'title' => 'Fichas',
+        'items' => [
+            ['label' => 'Clientes', 'route' => 'catalogs.clients.index', 'icon' => 'users', 'permission' => 'catalogs.view', 'module' => 'catalogs'],
+            ['label' => 'Productos (variedades)', 'route' => 'catalogs.varieties.index', 'icon' => 'layers', 'permission' => 'catalogs.view', 'module' => 'catalogs'],
+            ['label' => 'Productores', 'route' => 'catalogs.producers.index', 'icon' => 'user-chart', 'permission' => 'catalogs.view', 'module' => 'catalogs'],
+            ['label' => 'Proveedores', 'route' => 'catalogs.providers.index', 'icon' => 'archive', 'permission' => 'catalogs.view', 'module' => 'catalogs'],
+            ['label' => 'Camioneros', 'route' => 'catalogs.drivers.index', 'icon' => 'user-chart', 'permission' => 'catalogs.view', 'module' => 'catalogs'],
+            ['label' => 'Camiones', 'route' => 'catalogs.trucks.index', 'icon' => 'truck', 'permission' => 'catalogs.view', 'module' => 'catalogs'],
+            ['label' => 'Transportistas', 'route' => 'catalogs.transporters.index', 'icon' => 'truck', 'permission' => 'catalogs.view', 'module' => 'catalogs'],
+            ['label' => 'Embaladores', 'route' => 'packers.index', 'icon' => 'users', 'permission' => 'packers.view', 'module' => 'catalogs'],
+            ['label' => 'Empleados', 'route' => 'catalogs.employees.index', 'icon' => 'user-chart', 'permission' => 'staff.view', 'module' => 'catalogs'],
+            ['label' => 'Todas las fichas…', 'route' => 'catalogs.index', 'match' => 'catalogs.index', 'icon' => 'book', 'permission' => ['catalogs.view', 'packers.view', 'staff.view'], 'module' => 'catalogs'],
+        ],
+    ],
+    [
         'title' => 'Producción',
         'items' => [
             ['label' => 'Escanear cajones', 'route' => 'production.scan', 'icon' => 'scan', 'permission' => 'production.scan', 'module' => 'production', 'highlight' => true],
@@ -56,7 +72,6 @@ return [
             ['label' => 'Facturación', 'route' => 'invoices.index', 'icon' => 'receipt', 'permission' => 'billing.view', 'module' => 'billing'],
             ['label' => 'ARCA (ex AFIP)', 'route' => 'arca.index', 'icon' => 'bank', 'permission' => 'arca.manage', 'module' => 'arca'],
             ['label' => 'Costos', 'route' => 'costs.index', 'icon' => 'currency', 'permission' => 'costs.view', 'module' => 'costs'],
-            ['label' => 'Fichas (clientes, proveedores…)', 'route' => 'catalogs.index', 'icon' => 'book', 'permission' => ['catalogs.view', 'packers.view', 'staff.view'], 'module' => 'catalogs'],
         ],
     ],
     [

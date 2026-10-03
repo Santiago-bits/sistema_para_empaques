@@ -6,7 +6,7 @@
                 Calidad: {{ \App\Models\Crate::QUALITY_STATUSES[$crate->quality_status] ?? $crate->quality_status }}
             </x-badge>
             @can('labels.print')
-                <a href="{{ route('labels.crates', ['ids' => [$crate->id]]) }}" target="_blank" class="btn btn-secondary"><x-icon name="printer" class="size-4"/> Etiqueta</a>
+                <a href="{{ route('labels.crates', ['ids' => [$crate->id]]) }}" class="btn btn-secondary"><x-icon name="printer" class="size-4"/> Etiqueta</a>
             @endcan
             @unless ($locked)
                 @can('crates.void')

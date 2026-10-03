@@ -21,6 +21,7 @@
 </head>
 <body>
     <div class="toolbar">
+        <x-print-back :fallback="route('packers.index')"/>
         <button type="button" onclick="window.print()">Imprimir</button>
         <span>{{ $packers->count() }} credencial(es)</span>
     </div>

@@ -3,8 +3,8 @@
         <x-slot:actions>
             <x-status :status="$pallet->status" class="text-sm"/>
             @can('labels.print')
-                <a href="{{ route('labels.pallets', ['ids' => [$pallet->id]]) }}" target="_blank" class="btn btn-secondary"><x-icon name="printer" class="size-4"/> Etiqueta</a>
-                <a href="{{ route('labels.crates', ['pallet_id' => $pallet->id]) }}" target="_blank" class="btn btn-secondary"><x-icon name="printer" class="size-4"/> Etiquetas de cajones</a>
+                <a href="{{ route('labels.pallets', ['ids' => [$pallet->id]]) }}" class="btn btn-secondary"><x-icon name="printer" class="size-4"/> Etiqueta</a>
+                <a href="{{ route('labels.crates', ['pallet_id' => $pallet->id]) }}" class="btn btn-secondary"><x-icon name="printer" class="size-4"/> Etiquetas de cajones</a>
             @endcan
             @can('traceability.view')
                 <a href="{{ route('traceability.index', ['code' => $pallet->code]) }}" class="btn btn-secondary"><x-icon name="route" class="size-4"/> Trazabilidad</a>
