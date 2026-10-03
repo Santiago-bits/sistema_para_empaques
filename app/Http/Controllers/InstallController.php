@@ -78,6 +78,7 @@ class InstallController extends Controller
             }
             abort_if($this->installed(), 404);
             $this->install($data, $settings);
+            $this->restoreDatabaseSession($request);
         } finally {
             flock($lock, LOCK_UN);
             fclose($lock);
@@ -241,26 +242,73 @@ class InstallController extends Controller
             return redirect()->route('install.show')->withErrors(['db_password' => 'La contraseña de la base de datos no es correcta.']);
         }
 
+        $tables = [];
         try {
-            $tables = $this->foreignTables();
             $taken = Schema::getTableListing(Schema::getCurrentSchemaListing(), false);
-            foreach ($tables as $table) {
+            foreach ($this->foreignTables() as $table) {
                 $target = $base = substr(self::ARCHIVE_PREFIX.$table, 0, 60);
                 for ($i = 2; in_array($target, $taken, true); $i++) {
                     $target = $base.'_'.$i;
                 }
                 Schema::rename($table, $target);
                 $taken[] = $target;
+                $tables[] = $table;
             }
         } catch (Throwable $e) {
             report($e);
+            $this->ensureSessionStorage($request);
 
             return redirect()->route('install.show')->withErrors(['install' => 'No se pudieron apartar las tablas ('.$this->reason($e).').']);
         }
         Log::warning('Instalador: tablas existentes renombradas con el prefijo '.self::ARCHIVE_PREFIX, ['tablas' => $tables, 'ip' => $request->ip()]);
+        $this->ensureSessionStorage($request);
 
         return redirect()->route('install.show')->with('success', 'Listo: se apartaron '.count($tables).' tabla(s) con el prefijo «'
             .self::ARCHIVE_PREFIX.'» (no se borró nada). Ya podés completar la instalación.');
+    }
+
+    /**
+     * Entre las tablas apartadas suelen estar «sessions» y «cache» del sistema anterior, que esta misma
+     * petición usa para guardar la sesión. Se crean ya las tablas del sistema (base vacía) y, si no se puede,
+     * la sesión y la caché pasan a archivos: si no, esta y todas las páginas siguientes darían error 500.
+     */
+    private function ensureSessionStorage(Request $request): void
+    {
+        @unlink(storage_path('framework/tables.ready'));
+        try {
+            if ($this->foreignTables() === []) {
+                Artisan::call('migrate', ['--force' => true]);
+            }
+            if (Schema::hasTable('sessions') && Schema::hasTable('cache')) {
+                // La sesión se leyó de la tabla vieja: en la nueva hay que insertarla, no actualizarla.
+                $handler = $request->hasSession() ? $request->session()->getHandler() : null;
+                if ($handler instanceof \Illuminate\Session\DatabaseSessionHandler) {
+                    $handler->setExists(false);
+                }
+
+                return;
+            }
+        } catch (Throwable $e) {
+            report($e);
+        }
+
+        config(['cache.default' => config('cache.default') === 'database' ? 'file' : config('cache.default')]);
+        app('cache')->setDefaultDriver(config('cache.default'));
+        if ($request->hasSession() && config('session.driver') === 'database') {
+            $request->session()->setHandler(app('session')->driver('file')->getHandler());
+        }
+    }
+
+    /**
+     * Con la base vacía esta petición arrancó guardando la sesión en archivos; la próxima ya la buscará en la
+     * tabla «sessions». Se guarda ahí desde ahora para que el administrador quede adentro al terminar.
+     */
+    private function restoreDatabaseSession(Request $request): void
+    {
+        if (config('session.fallback_from') !== 'database' || ! $request->hasSession() || ! Schema::hasTable('sessions')) {
+            return;
+        }
+        $request->session()->setHandler(app('session')->driver('database')->getHandler());
     }
 
     /** Tablas de la base configurada (sólo esa, no otras bases del mismo usuario) que no son del sistema ni ya apartadas. */

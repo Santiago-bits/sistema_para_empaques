@@ -124,7 +124,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $marker = storage_path('framework/tables.ready');
         $default = (string) config('database.default');
-        $signature = sha1($default.'|'.config("database.connections.{$default}.host").'|'.config("database.connections.{$default}.database"));
+        $signature = sha1('v2|'.$default.'|'.config("database.connections.{$default}.host").'|'.config("database.connections.{$default}.database"));
         if ($this->app->runningUnitTests() || (is_file($marker) && trim((string) @file_get_contents($marker)) === $signature)) {
             return;
         }
@@ -143,6 +143,8 @@ class AppServiceProvider extends ServiceProvider
             return;
         }
         config([
+            // El instalador vuelve a la base apenas crea las tablas (para no perder la sesión recién iniciada).
+            'session.fallback_from' => config('session.driver'),
             'session.driver' => config('session.driver') === 'database' ? 'file' : config('session.driver'),
             'cache.default' => config('cache.default') === 'database' ? 'file' : config('cache.default'),
         ]);
