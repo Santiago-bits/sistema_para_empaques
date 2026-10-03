@@ -36,6 +36,7 @@ class AppServiceProvider extends ServiceProvider
 
         $this->useFilesUntilTablesExist();
         $this->applyTimezone();
+        $this->applyCentralPanel();
 
         // Los enlaces absolutos (QR de remitos, emails de recuperación) usan SIEMPRE APP_URL, nunca el
         // encabezado Host del pedido: así nadie puede hacer que un email lleve a una PC ajena.
@@ -103,6 +104,7 @@ class AppServiceProvider extends ServiceProvider
             'cash_session' => \App\Models\CashSession::class,
             'cash_movement' => \App\Models\CashMovement::class,
             'client_ticket' => \App\Models\ClientTicket::class,
+            'license_payment' => \App\Models\LicensePayment::class,
         ]);
 
         Model::preventSilentlyDiscardingAttributes(! $this->app->isProduction());
@@ -148,6 +150,21 @@ class AppServiceProvider extends ServiceProvider
             'session.driver' => config('session.driver') === 'database' ? 'file' : config('session.driver'),
             'cache.default' => config('cache.default') === 'database' ? 'file' : config('cache.default'),
         ]);
+    }
+
+    /** Gestión de clientes (Panel General) activada desde /administradorgeneral, además de GALPON_CENTRAL_MODE. */
+    private function applyCentralPanel(): void
+    {
+        if (config('galpon.central.mode')) {
+            return;
+        }
+        try {
+            if ((bool) setting('system.central_panel', false)) {
+                config(['galpon.central.mode' => true]);
+            }
+        } catch (\Throwable) {
+            // Sin base todavía (instalación): queda desactivado.
+        }
     }
 
     /** Zona horaria elegida en Configuración → Regional (por defecto la del .env / Buenos Aires). */

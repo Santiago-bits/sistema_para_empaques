@@ -79,6 +79,8 @@ class SettingsService
         'backup.weekly' => [true, 'bool', 'backup'],
         'whatsapp.enabled' => [false, 'bool', 'integrations'],
         'system.installed' => [false, 'bool', 'system'],
+        // Gestión de clientes (Panel General) activada desde la administración general, sin tocar el .env.
+        'system.central_panel' => [false, 'bool', 'system'],
         'system.environment_label' => ['', 'string', 'system'],
     ];
 
