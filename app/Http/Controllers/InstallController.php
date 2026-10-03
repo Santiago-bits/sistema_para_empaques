@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
@@ -30,6 +31,9 @@ class InstallController extends Controller
 {
     /** Primera migración del sistema: si hay tablas pero no está registrada, la base es de otro sistema. */
     private const FIRST_MIGRATION = '2026_01_01_000100_create_core_tables';
+
+    /** Prefijo con el que se apartan las tablas de otro sistema (sin borrarlas). */
+    private const ARCHIVE_PREFIX = 'viejo_';
 
     public function show(): View|RedirectResponse
     {
@@ -79,7 +83,6 @@ class InstallController extends Controller
             fclose($lock);
         }
 
-        @file_put_contents(storage_path('framework/tables.ready'), now()->toIso8601String());
         $request->session()->regenerate();
 
         return redirect()->route('home')->with('success', 'Instalación completada. ¡Bienvenido!');
@@ -181,7 +184,7 @@ class InstallController extends Controller
     /**
      * Estado de la base SIN exponer datos de conexión.
      *
-     * @return array{ok: bool, needs_tables: bool, message: ?string}
+     * @return array{ok: bool, needs_tables: bool, message: ?string, foreign?: int}
      */
     private function databaseStatus(): array
     {
@@ -193,17 +196,16 @@ class InstallController extends Controller
         }
 
         try {
-            $hasUsers = Schema::hasTable('users');
             $ours = Schema::hasTable('migrations') && DB::table('migrations')->where('migration', self::FIRST_MIGRATION)->exists();
-            $tables = count(Schema::getTables());
+            $tables = $ours ? [] : $this->foreignTables();
         } catch (Throwable $e) {
             return ['ok' => false, 'needs_tables' => false, 'message' => 'No se pudo leer la base de datos ('.$this->reason($e).').'];
         }
 
-        if (($hasUsers || $tables > 1) && ! $ours) {
-            return ['ok' => false, 'needs_tables' => false,
-                'message' => 'La base de datos ya tiene tablas de otro sistema (o de una versión anterior). Para no borrar nada, el instalador no la toca. '
-                    .'Hay que usar una base de datos nueva y vacía (en Hostinger: hPanel → Bases de datos → crear una nueva y ponerla en la configuración del servidor).'];
+        if ($tables !== []) {
+            return ['ok' => false, 'needs_tables' => false, 'foreign' => count($tables),
+                'message' => 'La base de datos configurada ya tiene '.count($tables).' tabla(s) de otro sistema (o de una versión anterior). '
+                    .'Para no borrar nada, el instalador no las usa.'];
         }
 
         // Tablas propias creadas: sólo faltan las migraciones nuevas, o nada.
@@ -220,6 +222,56 @@ class InstallController extends Controller
         }
 
         return ['ok' => true, 'needs_tables' => $pending, 'message' => null];
+    }
+
+    /**
+     * Base con tablas de otro sistema: las renombra con el prefijo «viejo_» (no borra nada, se pueden
+     * recuperar renombrándolas de nuevo) y deja la base lista para instalar. Pide la contraseña de la base
+     * como prueba de que quien instala es el dueño del servidor (la página es pública hasta instalar).
+     */
+    public function archive(Request $request): RedirectResponse
+    {
+        abort_if($this->installed(), 404);
+        $request->validate(['db_password' => ['nullable', 'string', 'max:255'], 'confirm' => ['accepted']], [
+            'confirm.accepted' => 'Marcá la casilla para confirmar que querés apartar las tablas existentes.',
+        ]);
+
+        $expected = (string) config('database.connections.'.config('database.default').'.password');
+        if (! hash_equals($expected, (string) $request->input('db_password', ''))) {
+            return redirect()->route('install.show')->withErrors(['db_password' => 'La contraseña de la base de datos no es correcta.']);
+        }
+
+        try {
+            $tables = $this->foreignTables();
+            $taken = Schema::getTableListing(Schema::getCurrentSchemaListing(), false);
+            foreach ($tables as $table) {
+                $target = $base = substr(self::ARCHIVE_PREFIX.$table, 0, 60);
+                for ($i = 2; in_array($target, $taken, true); $i++) {
+                    $target = $base.'_'.$i;
+                }
+                Schema::rename($table, $target);
+                $taken[] = $target;
+            }
+        } catch (Throwable $e) {
+            report($e);
+
+            return redirect()->route('install.show')->withErrors(['install' => 'No se pudieron apartar las tablas ('.$this->reason($e).').']);
+        }
+        Log::warning('Instalador: tablas existentes renombradas con el prefijo '.self::ARCHIVE_PREFIX, ['tablas' => $tables, 'ip' => $request->ip()]);
+
+        return redirect()->route('install.show')->with('success', 'Listo: se apartaron '.count($tables).' tabla(s) con el prefijo «'
+            .self::ARCHIVE_PREFIX.'» (no se borró nada). Ya podés completar la instalación.');
+    }
+
+    /** Tablas de la base configurada (sólo esa, no otras bases del mismo usuario) que no son del sistema ni ya apartadas. */
+    private function foreignTables(): array
+    {
+        return array_values(array_filter(
+            Schema::getTableListing(Schema::getCurrentSchemaListing(), false),
+            fn (string $table) => ! str_starts_with($table, self::ARCHIVE_PREFIX) && $table !== 'sqlite_sequence'
+                // Una tabla de migraciones vacía (intento anterior que no llegó a crear nada) no molesta.
+                && ! ($table === 'migrations' && DB::table('migrations')->doesntExist()),
+        ));
     }
 
     /** Motivo legible de un error de base de datos (sin datos de conexión). */

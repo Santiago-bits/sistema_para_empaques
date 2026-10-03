@@ -23,6 +23,30 @@
             <div class="mb-6 rounded-lg border border-red-300 bg-red-50 p-4 text-sm text-red-900 dark:border-red-900 dark:bg-red-950/40 dark:text-red-200" role="alert">
                 <p class="font-semibold">No se puede instalar todavía</p>
                 <p class="mt-1">{{ $database['message'] }}</p>
+
+                @if (! empty($database['foreign']))
+                    <p class="mt-4 font-semibold">Cómo seguir (elegí una opción)</p>
+                    <ol class="mt-1 list-inside list-decimal space-y-1">
+                        <li><strong>Base nueva (lo más prolijo):</strong> en hPanel → Bases de datos creá una base vacía, poné sus datos en el
+                            archivo de configuración del servidor y recargá esta página.</li>
+                        <li><strong>Usar esta misma base:</strong> el instalador renombra las tablas existentes agregándoles «viejo_» adelante.
+                            No se borra nada (se pueden recuperar), pero si otro sistema usa esta base va a dejar de funcionar.</li>
+                    </ol>
+
+                    <form method="POST" action="{{ route('install.archive') }}" class="mt-4 grid gap-3 rounded-lg border border-red-200 bg-white/60 p-4 text-stone-800 md:grid-cols-[1fr_auto] md:items-end dark:border-red-900 dark:bg-stone-950/40 dark:text-stone-200">
+                        @csrf
+                        <div>
+                            <label for="db_password" class="block text-sm font-medium">Contraseña de la base de datos</label>
+                            <input type="password" name="db_password" id="db_password" class="form-input mt-1 w-full" autocomplete="off">
+                            <p class="mt-1 text-xs text-stone-500">La misma que se puso al crear la base en hPanel. Se pide para confirmar que sos el dueño del servidor.</p>
+                            <label class="mt-3 flex items-start gap-2 text-sm">
+                                <input type="checkbox" name="confirm" value="1" class="mt-0.5 size-4 rounded border-stone-300 text-red-600" required>
+                                <span>Entiendo que las {{ $database['foreign'] }} tabla(s) existentes se renombran con «viejo_» y no las usa ningún otro sistema.</span>
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-danger">Apartar tablas y continuar</button>
+                    </form>
+                @endif
             </div>
         @endif
 

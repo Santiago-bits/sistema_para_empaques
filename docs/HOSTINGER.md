@@ -146,9 +146,12 @@ php artisan galpon:deploy-check --ping     # «Respuesta del Panel General: HTTP
 - **Backups**: el sistema hace sus backups igual que en el galpón (diario 02:00, semanal domingo 03:00, y manual
   desde Sistema → Backups). Como Hostinger no permite `mysqldump`, el volcado se hace en PHP automáticamente.
   Además conviene dejar activas las copias de Hostinger (hPanel → Archivos → Copias de seguridad).
-- **Instalación**: si el asistente dice «la base de datos ya tiene tablas de otro sistema», creá una base nueva en
-  hPanel, cambiá `DB_DATABASE`, `DB_USERNAME` y `DB_PASSWORD` en `.env` y recargá. Con la base vacía, el
-  asistente crea las tablas solo.
+- **Instalación**: si el asistente dice «la base de datos ya tiene tablas de otro sistema», hay dos opciones:
+  1. Crear una base nueva en hPanel, cambiar `DB_DATABASE`, `DB_USERNAME` y `DB_PASSWORD` en `.env` y recargar
+     (el cambio del `.env` descarta solo la configuración en caché). Con la base vacía, el asistente crea las tablas.
+  2. Usar la misma base: en el asistente, escribir la contraseña de la base y tocar «Apartar tablas y continuar».
+     Las tablas existentes se renombran con el prefijo `viejo_` (no se borra nada; si otro sistema usaba esa base,
+     deja de funcionar).
 - **Error 500 después de actualizar**: `php artisan config:clear` y revisar `storage/logs/laravel.log`; luego
   volver a `php artisan config:cache`.
 - **«Instalación o clave de licencia inválida» (401) en un empaque**: el `GALPON_INSTALLATION_ID` o la

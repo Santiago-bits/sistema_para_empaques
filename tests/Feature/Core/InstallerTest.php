@@ -63,7 +63,7 @@ class InstallerTest extends TestCase
         });
         DB::table('users')->insert(['nombre' => 'usuario viejo']);
 
-        $this->get(route('install.show'))->assertOk()->assertSee('tablas de otro sistema');
+        $this->get(route('install.show'))->assertOk()->assertSee('de otro sistema');
         $this->post(route('install.store'), $this->payload())
             ->assertRedirect(route('install.show'))
             ->assertSessionHasErrors('install');
@@ -71,6 +71,39 @@ class InstallerTest extends TestCase
         // No se borró ni migró nada.
         $this->assertSame('usuario viejo', DB::table('users')->value('nombre'));
         $this->assertFalse(Schema::hasTable('roles'));
+    }
+
+    public function test_old_tables_can_be_set_aside_with_the_database_password_and_then_install(): void
+    {
+        Schema::create('users', function (Blueprint $table) {
+            $table->id();
+            $table->string('nombre');
+        });
+        Schema::create('empaques', fn (Blueprint $table) => $table->id());
+        DB::table('users')->insert(['nombre' => 'usuario viejo']);
+        config(['database.connections.'.config('database.default').'.password' => 'secreta']);
+
+        $this->get(route('install.show'))->assertOk()->assertSee('Apartar tablas y continuar')->assertSee('2 tabla(s)', false);
+
+        // Sin confirmar o con otra contraseña no toca nada.
+        $this->post(route('install.archive'), ['db_password' => 'secreta'])->assertSessionHasErrors('confirm');
+        $this->post(route('install.archive'), ['db_password' => 'otra', 'confirm' => 1])->assertSessionHasErrors('db_password');
+        $this->assertTrue(Schema::hasTable('empaques'));
+
+        $this->post(route('install.archive'), ['db_password' => 'secreta', 'confirm' => 1])
+            ->assertRedirect(route('install.show'))->assertSessionHas('success');
+        // Nada se borró: quedaron renombradas.
+        $this->assertSame('usuario viejo', DB::table('viejo_users')->value('nombre'));
+        $this->assertTrue(Schema::hasTable('viejo_empaques'));
+
+        $this->get(route('install.show'))->assertOk()->assertDontSee('No se puede instalar todavía');
+        $this->post(route('install.store'), $this->payload())->assertRedirect(route('home'));
+        $this->assertTrue(User::query()->where('username', 'ana')->exists());
+
+        // Instalado: la acción desaparece.
+        $this->post(route('install.archive'), ['db_password' => 'secreta', 'confirm' => 1])->assertNotFound();
+        Schema::dropIfExists('viejo_users');
+        Schema::dropIfExists('viejo_empaques');
     }
 
     public function test_invalid_timezone_is_rejected(): void

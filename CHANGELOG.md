@@ -2,6 +2,21 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versionado semántico.
 
+## [1.6.1] - 2026-10-02
+
+### Corregido
+- **Instalador**: decía «la base ya tiene tablas de otro sistema» aunque la base configurada estuviera vacía, porque
+  contaba también las tablas de otras bases a las que tiene acceso el mismo usuario de MySQL. Ahora mira sólo la
+  base configurada.
+- Cambiar el `.env` (por ejemplo, para usar otra base de datos) ahora descarta la configuración en caché: antes,
+  después de `config:cache`, el sistema seguía usando la base anterior.
+- Se había subido al repositorio la marca interna `storage/framework/tables.ready`: en una base vacía podía dar
+  error 500 al abrir el instalador. Se quitó y ahora la marca recuerda a qué base corresponde.
+
+### Agregado
+- **Instalador**: si la base tiene tablas de otro sistema, se pueden apartar desde el navegador (se renombran con el
+  prefijo `viejo_`, no se borra nada). Pide la contraseña de la base para confirmar que lo hace el dueño del servidor.
+
 ## [1.6.0] - 2026-10-02
 
 ### Corregido
