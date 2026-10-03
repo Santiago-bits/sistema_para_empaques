@@ -24,6 +24,10 @@
 Sólo para el **Super Administrador** (el dueño del sistema). Se entra desde el menú Sistema → Administración
 general o escribiendo `tu-dominio/administradorgeneral`. Para cualquier otro usuario esa dirección no existe.
 
+- **Cómo entrar**: primero ingresá al sistema con tu usuario de Super Administrador (si escribís la dirección sin
+  haber ingresado, te lleva al ingreso y después vuelve sola). Si te olvidaste el usuario o la contraseña del
+  Super Administrador, en la pantalla de ingreso tocá «¿Sos el dueño y no recordás el usuario o la contraseña?»:
+  con la contraseña de la base de datos (hPanel → Bases de datos) elegís una nueva y te muestra tu usuario.
 - **Seguridad**: pide volver a escribir tu contraseña cada 15 minutos (aunque alguien encuentre tu sesión abierta,
   no entra). «Salir de la administración» la vuelve a pedir. Cada ingreso, cada intento fallido y cada ficha
   consultada quedan en la auditoría.

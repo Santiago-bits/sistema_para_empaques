@@ -25,7 +25,12 @@ class LoginController extends Controller
 
     public function show(): View
     {
-        return view('auth.login', ['hint' => LoginIdentifiers::hint()]);
+        $intended = (string) session('url.intended', '');
+
+        return view('auth.login', [
+            'hint' => LoginIdentifiers::hint(),
+            'adminArea' => str_contains(parse_url($intended, PHP_URL_PATH) ?? '', '/administradorgeneral'),
+        ]);
     }
 
     public function store(LoginRequest $request): RedirectResponse
