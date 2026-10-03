@@ -2,6 +2,15 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versionado semántico.
 
+## [1.9.0] - 2026-10-03
+
+### Agregado
+- **App instalable** en computadoras (Chrome/Edge) y celulares (Android y iPhone): botón «Instalar app» en el
+  encabezado, ícono en el escritorio/menú Inicio/pantalla del celular y ventana propia como un programa. La app
+  carga siempre desde el servidor: cada actualización que se sube (Hostinger → Implementar) la ven todos al
+  abrirla, sin reinstalar. Lleva el nombre de la empresa. Si se corta la conexión muestra un aviso claro (no
+  guarda pantallas ni datos en la PC). Instrucciones en Ayuda y atajos.
+
 ## [1.8.1] - 2026-10-03
 
 ### Cambiado

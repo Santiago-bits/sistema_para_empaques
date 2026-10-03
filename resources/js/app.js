@@ -8,6 +8,7 @@ import './lib/connection';
 import { openCameraScanner, scanInto } from './lib/camera-scanner';
 import { initShortcuts } from './lib/shortcuts';
 import { labelTables } from './lib/responsive-tables';
+import { registerApp } from './lib/install-app';
 
 window.Alpine = Alpine;
 window.Chart = Chart;
@@ -73,6 +74,9 @@ document.addEventListener('submit', (event) => {
         form.querySelectorAll('button[type=submit]').forEach((b) => b.removeAttribute('disabled'));
     }, 4000);
 });
+
+// App instalable (antes de Alpine.start para que el botón «Instalar app» exista).
+registerApp(Alpine);
 
 Alpine.start();
 

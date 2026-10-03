@@ -2,6 +2,25 @@
     <x-page-header title="Ayuda y atajos de teclado"
                    subtitle="Trabajá sin mouse, como en Excel. Apretá ? en cualquier pantalla para ver esta lista."/>
 
+    <x-panel title="Instalar el sistema como app (ícono en el escritorio o en el celular)" class="mb-4">
+        <div class="grid gap-4 text-sm text-stone-600 md:grid-cols-3 dark:text-stone-300">
+            <div>
+                <p class="font-semibold text-stone-900 dark:text-white">En la computadora (Chrome o Edge)</p>
+                <p class="mt-1">Tocá el botón verde <strong>«Instalar app»</strong> de arriba (o el ícono de instalar que aparece a la derecha de la barra de direcciones) y aceptá.
+                    Queda un ícono en el escritorio y en el menú Inicio, y se abre en su propia ventana como cualquier programa.</p>
+            </div>
+            <div>
+                <p class="font-semibold text-stone-900 dark:text-white">En un celular Android</p>
+                <p class="mt-1">Abrí el sistema en Chrome, tocá los tres puntitos <strong>⋮</strong> y elegí <strong>«Instalar app»</strong> (o «Agregar a pantalla principal»).</p>
+            </div>
+            <div>
+                <p class="font-semibold text-stone-900 dark:text-white">En un iPhone</p>
+                <p class="mt-1">Abrí el sistema en Safari, tocá el botón <strong>Compartir</strong> (el cuadrado con la flecha) y elegí <strong>«Agregar a inicio»</strong>.</p>
+            </div>
+        </div>
+        <p class="mt-3 text-xs text-stone-500">La app se actualiza sola: cuando subís una versión nueva al servidor, todos la ven la próxima vez que la abren.</p>
+    </x-panel>
+
     <div class="grid gap-4 md:grid-cols-3">
         <x-panel title="Cómo se usan">
             <ul class="space-y-2 text-sm text-stone-600 dark:text-stone-300">

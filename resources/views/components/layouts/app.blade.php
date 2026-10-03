@@ -20,6 +20,7 @@
             if (dark) document.documentElement.classList.add('dark');
         })();
     </script>
+    @include('partials.app-head')
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('head')
 </head>
@@ -132,6 +133,12 @@
                         @unless ($usdRate->date->isToday())<span class="text-amber-600 dark:text-amber-400" aria-label="No es de hoy">•</span>@endunless
                     </a>
                 @endif
+
+                {{-- Instalar como app (sólo aparece si el navegador lo permite y todavía no está instalada). --}}
+                <button type="button" x-data="installApp" x-cloak x-show="available" @click="install()"
+                        class="btn btn-secondary btn-sm hidden sm:inline-flex" title="Instalar el sistema como un programa, con ícono en el escritorio">
+                    <x-icon name="download" class="size-4"/> Instalar app
+                </button>
 
                 {{-- Tema --}}
                 <div x-data="{ open: false }" class="relative">
