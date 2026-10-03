@@ -2,6 +2,15 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versionado semántico.
 
+## [1.6.2] - 2026-10-03
+
+### Corregido
+- **Instalador**: al apartar las tablas viejas también se apartaban las de sesiones y caché del sistema anterior,
+  que el sistema estaba usando, y desde ahí todas las páginas daban error («No se pudo completar la operación»).
+  Ahora, al apartarlas, crea en el momento las tablas del sistema (o usa archivos si no puede). Los servidores que
+  quedaron con ese error se arreglan solos al actualizar.
+- Al terminar la instalación con la base vacía, el administrador quedaba afuera y tenía que volver a ingresar.
+
 ## [1.6.1] - 2026-10-02
 
 ### Corregido

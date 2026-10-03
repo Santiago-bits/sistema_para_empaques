@@ -106,6 +106,48 @@ class InstallerTest extends TestCase
         Schema::dropIfExists('viejo_empaques');
     }
 
+    /** Caso real en Hostinger: las tablas viejas incluían «sessions» y «cache», en uso por la misma petición. */
+    public function test_setting_aside_old_session_and_cache_tables_keeps_the_site_working(): void
+    {
+        // Índices como los de Laravel sólo en MySQL: en SQLite sus nombres son globales y chocarían con los nuevos.
+        $mysql = in_array(DB::connection()->getDriverName(), ['mysql', 'mariadb'], true);
+        Schema::create('sessions', function (Blueprint $table) use ($mysql) {
+            $table->string('id')->primary();
+            $table->unsignedBigInteger('user_id')->nullable();
+            $table->string('ip_address', 45)->nullable();
+            $table->text('user_agent')->nullable();
+            $table->longText('payload');
+            $table->integer('last_activity');
+            if ($mysql) {
+                $table->index('user_id');
+                $table->index('last_activity');
+            }
+        });
+        Schema::create('cache', function (Blueprint $table) {
+            $table->string('key')->primary();
+            $table->mediumText('value');
+            $table->integer('expiration');
+        });
+        Schema::create('empaques', fn (Blueprint $table) => $table->id());
+        config(['session.driver' => 'database', 'cache.default' => 'database']);
+
+        $this->get(route('install.show'))->assertOk()->assertSee('Apartar tablas y continuar');
+        $this->post(route('install.archive'), ['db_password' => '', 'confirm' => 1])
+            ->assertRedirect(route('install.show'))->assertSessionHas('success');
+
+        $this->assertTrue(Schema::hasTable('viejo_sessions'));
+        $this->assertTrue(Schema::hasTable('sessions'));
+        $this->assertTrue(Schema::hasTable('roles')); // ya quedaron creadas las tablas del sistema
+
+        $this->get(route('install.show'))->assertOk()->assertDontSee('No se puede instalar todavía');
+        $this->post(route('install.store'), $this->payload())->assertRedirect(route('home'));
+        $this->assertTrue(User::query()->where('username', 'ana')->exists());
+
+        foreach (['viejo_sessions', 'viejo_cache', 'viejo_empaques'] as $table) {
+            Schema::dropIfExists($table);
+        }
+    }
+
     public function test_invalid_timezone_is_rejected(): void
     {
         $this->post(route('install.store'), $this->payload(['timezone' => 'Marte/Olympus']))->assertSessionHasErrors('timezone');
