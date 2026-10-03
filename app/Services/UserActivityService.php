@@ -41,7 +41,7 @@ class UserActivityService
         $online = DB::table('sessions')->whereNotNull('user_id')->where('last_activity', '>=', now()->subMinutes(10)->getTimestamp())
             ->distinct()->pluck('user_id')->flip();
 
-        $users = User::query()->with('role:id,name,slug')->where('status', 'active')->orderBy('last_name')->get()
+        $users = User::query()->visibleTo()->with('role:id,name,slug')->where('status', 'active')->orderBy('last_name')->get()
             ->map(function (User $user) use ($audit, $crates, $online) {
                 $row = $audit->get($user->id);
 

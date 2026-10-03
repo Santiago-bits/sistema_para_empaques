@@ -2,7 +2,7 @@
     <x-page-header title="Configuración" subtitle="Parámetros generales del galpón. Cada cambio queda registrado en auditoría."/>
 
     <div class="flex flex-col gap-6 lg:flex-row">
-        <nav class="flex shrink-0 gap-1 overflow-x-auto lg:w-52 lg:flex-col">
+        <nav class="flex shrink-0 flex-wrap gap-1 lg:w-52 lg:flex-col">
             @foreach ($groups as $key => $label)
                 <a href="{{ route('admin.settings.index', ['tab' => $key]) }}"
                    @class(['rounded-lg px-3 py-2 text-sm whitespace-nowrap', 'bg-white font-medium shadow-sm ring-1 ring-stone-200 dark:bg-stone-900 dark:ring-stone-800' => $group === $key, 'text-stone-600 hover:bg-white/60 dark:text-stone-400 dark:hover:bg-stone-900/60' => $group !== $key])>

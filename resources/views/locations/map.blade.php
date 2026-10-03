@@ -25,16 +25,17 @@
                     </template>
                 </div>
             </x-slot:actions>
-            <div class="overflow-auto p-4">
-                <div class="relative grid gap-1 rounded-lg bg-stone-100 p-1 dark:bg-stone-950"
-                     :style="`grid-template-columns: repeat(${cols}, minmax(28px, 1fr)); grid-template-rows: repeat(${rows}, 34px); min-width: ${cols * 30}px`">
+            {{-- El mapa se achica para entrar en la pantalla (sin desplazarse hacia el costado). --}}
+            <div class="p-2 sm:p-4">
+                <div class="relative grid gap-0.5 rounded-lg bg-stone-100 p-1 sm:gap-1 dark:bg-stone-950"
+                     :style="`grid-template-columns: repeat(${cols}, minmax(0, 1fr)); grid-template-rows: repeat(${rows}, 34px)`">
                     <template x-for="item in placed" :key="item.id">
                         <button type="button" @click="select(item)"
-                                class="flex flex-col items-start justify-between overflow-hidden rounded-md border p-1.5 text-left text-xs transition hover:ring-2 hover:ring-brand-500"
+                                class="flex min-w-0 flex-col items-start justify-between overflow-hidden rounded-md border p-0.5 text-left text-[10px] leading-tight transition sm:p-1.5 sm:text-xs hover:ring-2 hover:ring-brand-500"
                                 :class="[colorFor(item), selected && selected.id === item.id ? 'ring-2 ring-brand-500' : '']"
                                 :style="`grid-column: ${item.x} / span ${item.w}; grid-row: ${item.y} / span ${item.h}`">
                             <span class="w-full truncate font-semibold" x-text="item.name"></span>
-                            <span class="tabular-nums opacity-80" x-text="item.capacity ? item.pallets + '/' + item.capacity : item.pallets + ' pallets'"></span>
+                            <span class="w-full truncate tabular-nums opacity-80" x-text="item.capacity ? item.pallets + '/' + item.capacity : item.pallets + ' pallets'"></span>
                         </button>
                     </template>
                 </div>

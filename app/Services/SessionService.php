@@ -30,7 +30,7 @@ class SessionService
             ->orderByDesc('last_activity')
             ->get(['id', 'user_id', 'ip_address', 'user_agent', 'last_activity']);
 
-        $users = User::query()->with('role')->whereIn('id', $rows->pluck('user_id')->unique())->get()->keyBy('id');
+        $users = User::query()->visibleTo()->with('role')->whereIn('id', $rows->pluck('user_id')->unique())->get()->keyBy('id');
 
         return $rows->map(fn ($row) => (object) [
             'id' => $row->id,
@@ -47,8 +47,10 @@ class SessionService
         if (! $row) {
             return;
         }
-        DB::table(config('session.table', 'sessions'))->where('id', $sessionId)->delete();
         $user = $row->user_id ? User::query()->find($row->user_id) : null;
+        // La sesión del Super Administrador no existe para los demás.
+        abort_if($user?->isHiddenFromViewer(), 404);
+        DB::table(config('session.table', 'sessions'))->where('id', $sessionId)->delete();
         $this->audit->log('session_terminated', $user, description: 'Sesión cerrada remotamente (IP '.$row->ip_address.')');
     }
 

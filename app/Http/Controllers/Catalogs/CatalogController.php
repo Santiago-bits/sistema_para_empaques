@@ -88,7 +88,7 @@ class CatalogController extends Controller
             'definition' => $definition,
             'record' => $model,
             'history' => $request->user()->can('audit.view')
-                ? AuditLog::query()->with('user:id,first_name,last_name')
+                ? AuditLog::query()->visibleToViewer()->with('user:id,first_name,last_name,role_id')
                     ->where('auditable_type', $model->getMorphClass())->where('auditable_id', $model->getKey())
                     ->latest('created_at')->latest('id')->limit(15)->get()
                 : collect(),

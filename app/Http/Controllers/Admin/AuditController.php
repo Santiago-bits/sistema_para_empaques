@@ -13,7 +13,8 @@ class AuditController extends Controller
     public function index(Request $request): View
     {
         $logs = AuditLog::query()
-            ->with('user:id,first_name,last_name,username')
+            ->visibleToViewer()
+            ->with('user:id,first_name,last_name,username,role_id')
             ->when($request->filled('user_id'), fn ($q) => $q->where('user_id', $request->integer('user_id')))
             ->when($request->filled('action'), fn ($q) => $q->where('action', $request->string('action')))
             ->when($request->filled('type'), fn ($q) => $q->where('auditable_type', $request->string('type')))
@@ -26,7 +27,7 @@ class AuditController extends Controller
 
         return view('admin.audit.index', [
             'logs' => $logs,
-            'users' => User::query()->orderBy('last_name')->get()->mapWithKeys(fn ($u) => [$u->id => $u->full_name.' ('.$u->username.')']),
+            'users' => User::query()->visibleTo()->orderBy('last_name')->get()->mapWithKeys(fn ($u) => [$u->id => $u->full_name.' ('.$u->username.')']),
             'actions' => AuditLog::query()->distinct()->orderBy('action')->pluck('action', 'action'),
             'types' => AuditLog::query()->whereNotNull('auditable_type')->distinct()->orderBy('auditable_type')->pluck('auditable_type', 'auditable_type'),
         ]);
@@ -34,6 +35,8 @@ class AuditController extends Controller
 
     public function show(AuditLog $log): View
     {
+        abort_unless(AuditLog::query()->visibleToViewer()->whereKey($log->id)->exists(), 404);
+
         return view('admin.audit.show', ['log' => $log->load('user')]);
     }
 }

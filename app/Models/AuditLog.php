@@ -32,6 +32,19 @@ class AuditLog extends Model
         return $this->belongsTo(User::class);
     }
 
+    /** Lo que hizo el Super Administrador (o lo que se hizo sobre su usuario) no lo ve nadie más. */
+    public function scopeVisibleToViewer(\Illuminate\Database\Eloquent\Builder $query, ?User $viewer = null): \Illuminate\Database\Eloquent\Builder
+    {
+        $hidden = User::hiddenIds($viewer);
+        if ($hidden === []) {
+            return $query;
+        }
+
+        return $query
+            ->where(fn ($q) => $q->whereNull('user_id')->orWhereNotIn('user_id', $hidden))
+            ->where(fn ($q) => $q->whereNull('auditable_type')->orWhere('auditable_type', '!=', 'user')->orWhereNotIn('auditable_id', $hidden));
+    }
+
     public function auditable(): MorphTo
     {
         return $this->morphTo();

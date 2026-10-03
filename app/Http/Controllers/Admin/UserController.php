@@ -30,6 +30,7 @@ class UserController extends Controller
         $this->authorize('viewAny', User::class);
 
         $users = User::query()
+            ->visibleTo($request->user())
             ->with('role')
             ->when($request->filled('q'), function ($q) use ($request) {
                 $term = '%'.$request->string('q').'%';
@@ -44,7 +45,8 @@ class UserController extends Controller
 
         return view('admin.users.index', [
             'users' => $users,
-            'roles' => Role::query()->orderBy('name')->pluck('name', 'id'),
+            'roles' => Role::query()->orderBy('name')
+                ->when(! $request->user()->isSuperAdmin(), fn ($q) => $q->where('slug', '!=', Role::SUPER_ADMIN))->pluck('name', 'id'),
             'statuses' => UserStatus::options(),
         ]);
     }
@@ -69,7 +71,7 @@ class UserController extends Controller
 
         return view('admin.users.show', [
             'user' => $user->load('role', 'packer', 'warehouses'),
-            'activity' => AuditLog::query()->where('user_id', $user->id)->latest('created_at')->limit(20)->get(),
+            'activity' => AuditLog::query()->visibleToViewer()->where('user_id', $user->id)->latest('created_at')->limit(20)->get(),
         ]);
     }
 

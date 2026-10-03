@@ -149,7 +149,7 @@ class SearchService
             ],
             'users' => [
                 'label' => 'Usuarios', 'icon' => 'shield', 'permission' => 'users.view',
-                'query' => fn () => User::query()->where(fn ($q) => $byDigits($q->where('username', 'like', $like)->orWhere('last_name', 'like', $like)->orWhere('first_name', 'like', $like), 'dni'))->orderBy('last_name'),
+                'query' => fn () => User::query()->visibleTo()->where(fn ($q) => $byDigits($q->where('username', 'like', $like)->orWhere('last_name', 'like', $like)->orWhere('first_name', 'like', $like), 'dni'))->orderBy('last_name'),
                 'map' => fn (User $u) => ['title' => $u->full_name, 'subtitle' => $u->username, 'url' => route('admin.users.show', $u)],
             ],
         ];

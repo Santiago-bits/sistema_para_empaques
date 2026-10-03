@@ -31,7 +31,7 @@ class ApiTokenController extends Controller
                 ->when(! $user->isSuperAdmin(), fn ($q) => $q->where('tokenable_type', $user->getMorphClass())->where('tokenable_id', $user->id))
                 ->latest('id')->paginate($this->perPage($request))->withQueryString(),
             'owners' => $user->isSuperAdmin()
-                ? User::query()->where('status', UserStatus::Active->value)->orderBy('last_name')->get()->mapWithKeys(fn ($u) => [$u->id => $u->full_name.' ('.$u->username.')'])->all()
+                ? User::query()->visibleTo()->where('status', UserStatus::Active->value)->orderBy('last_name')->get()->mapWithKeys(fn ($u) => [$u->id => $u->full_name.' ('.$u->username.')'])->all()
                 : [],
             'abilities' => ApiTokenService::ABILITIES,
         ]);
@@ -47,7 +47,7 @@ class ApiTokenController extends Controller
             'owner_id' => ['nullable', 'integer', 'exists:users,id'],
         ], [], ['name' => 'nombre', 'abilities' => 'permisos', 'expires_at' => 'vencimiento']);
 
-        $owner = ! empty($data['owner_id']) ? User::query()->findOrFail($data['owner_id']) : $request->user();
+        $owner = ! empty($data['owner_id']) ? User::query()->visibleTo()->findOrFail($data['owner_id']) : $request->user();
         $token = $this->tokens->create($owner, $data['name'], $data['abilities'], $request->user(),
             ! empty($data['expires_at']) ? \Illuminate\Support\Carbon::parse($data['expires_at'])->endOfDay() : null);
 

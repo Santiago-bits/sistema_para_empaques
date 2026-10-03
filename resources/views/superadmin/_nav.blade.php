@@ -12,7 +12,7 @@
     }
 @endphp
 <div class="mb-6 flex flex-wrap items-end justify-between gap-3 border-b border-stone-200 dark:border-stone-800">
-    <nav class="-mb-px flex gap-1 overflow-x-auto" aria-label="Administración general">
+    <nav class="-mb-px flex flex-wrap gap-1" aria-label="Administración general">
         @foreach ($tabs as [$route, $label, $icon, $pattern, $badge])
             <a href="{{ route($route) }}" @class([
                 'flex shrink-0 items-center gap-2 border-b-2 px-3 py-2 text-sm whitespace-nowrap',
