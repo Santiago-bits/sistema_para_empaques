@@ -34,7 +34,7 @@ class Load extends Model
         'warehouse_id', 'number', 'date', 'truck_id', 'driver_id', 'transporter_id', 'destination_id',
         'client_id', 'owner_id', 'status', 'planned_crates', 'total_crates', 'total_kg', 'notes',
         'closed_at', 'closed_by', 'dispatched_at', 'dispatched_by', 'created_by', 'trailer_plate', 'guide_number',
-        'commercial_destination', 'sales_channel', 'sale_condition', 'freight_amount', 'freight_posted_at',
+        'commercial_destination', 'sales_channel', 'sale_condition', 'freight_amount', 'freight_posted_at', 'unit_price',
     ];
 
     protected function casts(): array
@@ -46,6 +46,7 @@ class Load extends Model
             'closed_at' => 'datetime',
             'dispatched_at' => 'datetime',
             'freight_amount' => 'decimal:2',
+            'unit_price' => 'decimal:2',
             'freight_posted_at' => 'datetime',
         ];
     }
@@ -68,6 +69,12 @@ class Load extends Model
     public function destination(): BelongsTo
     {
         return $this->belongsTo(Destination::class);
+    }
+
+    /** Planilla de cargas: cantidad × precio por unidad (null si no se cargó precio). */
+    public function subtotal(): ?float
+    {
+        return $this->unit_price === null ? null : round((float) $this->unit_price * (int) $this->total_crates, 2);
     }
 
     public function client(): BelongsTo

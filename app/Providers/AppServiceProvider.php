@@ -105,6 +105,9 @@ class AppServiceProvider extends ServiceProvider
             'cash_movement' => \App\Models\CashMovement::class,
             'client_ticket' => \App\Models\ClientTicket::class,
             'license_payment' => \App\Models\LicensePayment::class,
+            'dtv_document' => \App\Models\DtvDocument::class,
+            'treatment' => \App\Models\Treatment::class,
+            'supply_yield' => \App\Models\SupplyYield::class,
         ]);
 
         Model::preventSilentlyDiscardingAttributes(! $this->app->isProduction());

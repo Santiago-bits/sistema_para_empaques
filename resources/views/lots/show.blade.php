@@ -3,6 +3,11 @@
         <x-slot:actions>
             <x-badge :color="['open' => 'emerald', 'closed' => 'blue', 'voided' => 'zinc'][$lot->status] ?? 'stone'" class="text-sm">{{ \App\Models\Lot::STATUSES[$lot->status] ?? $lot->status }}</x-badge>
             <a href="{{ route('lots.romaneo', $lot) }}" class="btn btn-secondary"><x-icon name="printer" class="size-4"/> Romaneo</a>
+            @if (module_enabled('loads'))
+                @can('dtv.manage')
+                    <a href="{{ route('dtv.create', ['lot' => $lot->id]) }}" class="btn btn-secondary"><x-icon name="document" class="size-4"/> DTV-e de ingreso</a>
+                @endcan
+            @endif
             @can('lots.manage')
                 @if ($lot->status === 'open')
                     <form method="POST" action="{{ route('lots.close', $lot) }}" x-data x-confirm="¿Cerrar el lote {{ $lot->code }}?">
@@ -34,6 +39,9 @@
                     'Propietario' => $lot->owner?->name,
                     'Variedad' => $lot->variety?->name,
                     'Temporada' => $lot->season?->name,
+                    'Chofer' => $lot->driver?->full_name,
+                    'Bines' => $lot->bins !== null ? num($lot->bins) : null,
+                    'N° de DTV-e' => $lot->dtv_number,
                     'Origen' => $lot->origin,
                     'Campo' => $lot->field,
                     'Cantidad declarada' => num($lot->quantity),

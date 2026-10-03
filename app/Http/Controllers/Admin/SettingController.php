@@ -24,6 +24,7 @@ class SettingController extends Controller
         'fields' => 'Campos',
         'label' => 'Etiquetas',
         'treasury' => 'Tesorería',
+        'treatments' => 'Tratamientos',
         'numbering' => 'Numeraciones',
         'alerts' => 'Alertas',
         'security' => 'Seguridad y red',
@@ -174,6 +175,14 @@ class SettingController extends Controller
         $this->settings->set('treasury.association_fee_per_kg', (float) ($data['association_fee_per_kg'] ?? 0));
         $this->settings->set('treasury.post_test_invoices', (bool) ($data['post_test_invoices'] ?? false));
         $this->settings->set('treasury.check_warning_days', (int) $data['check_warning_days']);
+    }
+
+    /** Nombres de los tipos de tratamiento que se ofrecen al cargar uno (p. ej. frío y bromuro). */
+    private function saveTreatments(Request $request): void
+    {
+        $data = $request->validate(['types' => ['array', 'max:6'], 'types.*' => ['nullable', 'string', 'max:60']], [], ['types.*' => 'tipo de tratamiento']);
+        $types = array_values(array_unique(array_filter(array_map('trim', $data['types'] ?? []))));
+        $this->settings->set('treatments.types', $types ?: \App\Models\Treatment::DEFAULT_TYPES);
     }
 
     private function saveNumbering(Request $request): void

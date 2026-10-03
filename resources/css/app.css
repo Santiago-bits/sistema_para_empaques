@@ -54,6 +54,19 @@
         @apply outline-2 outline-offset-2 outline-brand-500;
     }
 
+    /* Modo oscuro: los controles del navegador (calendario, reloj, flechas de las listas, barras de desplazamiento)
+       se dibujan claros sobre fondo oscuro; si no, el ícono del calendario queda negro sobre negro y no se ve. */
+    html.dark {
+        color-scheme: dark;
+    }
+    html:not(.dark) {
+        color-scheme: light;
+    }
+    input::-webkit-calendar-picker-indicator {
+        cursor: pointer;
+        opacity: 0.9;
+    }
+
     /* Una columna de grilla nunca se estira más que la pantalla por su contenido (tablas, textos largos):
        así nada se desplaza hacia el costado. En la capa base: cualquier utilidad min-w-* le gana. */
     :where(.grid) > * {

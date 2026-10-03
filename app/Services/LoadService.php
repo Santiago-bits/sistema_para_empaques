@@ -51,7 +51,7 @@ class LoadService
     public const EDITABLE = [
         'date', 'truck_id', 'driver_id', 'transporter_id', 'destination_id', 'client_id', 'owner_id',
         'planned_crates', 'notes', 'trailer_plate', 'guide_number', 'commercial_destination', 'sales_channel',
-        'sale_condition', 'freight_amount',
+        'sale_condition', 'freight_amount', 'unit_price',
     ];
 
     public function __construct(
@@ -822,7 +822,7 @@ class LoadService
     /** Datos que se pueden corregir con la carga ya cerrada o despachada (no cambian su contenido). */
     public const CORRECTABLE = [
         'truck_id', 'driver_id', 'transporter_id', 'trailer_plate', 'guide_number', 'commercial_destination', 'sales_channel',
-        'sale_condition', 'freight_amount', 'notes',
+        'sale_condition', 'freight_amount', 'unit_price', 'notes',
     ];
 
     /**

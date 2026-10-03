@@ -16,6 +16,7 @@ class LoadRequest extends FormRequest
     {
         $this->merge([
             'freight_amount' => parse_number($this->input('freight_amount')),
+            'unit_price' => parse_number($this->input('unit_price')),
             'trailer_plate' => $this->filled('trailer_plate')
                 ? \App\Catalogs\Definitions\TruckDefinition::normalizePlate((string) $this->input('trailer_plate')) : null,
         ]);
@@ -41,6 +42,7 @@ class LoadRequest extends FormRequest
             'sales_channel' => ['nullable', Rule::in(array_keys(\App\Models\Load::SALES_CHANNELS))],
             'sale_condition' => ['nullable', Rule::in(array_keys(\App\Models\Load::SALE_CONDITIONS))],
             'freight_amount' => ['nullable', 'numeric', 'min:0', 'max:999999999999'],
+            'unit_price' => ['nullable', 'numeric', 'min:0', 'max:999999999999'],
         ];
     }
 
@@ -63,7 +65,7 @@ class LoadRequest extends FormRequest
             'date' => 'fecha', 'truck_id' => 'camión', 'driver_id' => 'chofer', 'transporter_id' => 'transportista',
             'destination_id' => 'destino', 'client_id' => 'cliente', 'owner_id' => 'propietario', 'planned_crates' => 'cajones previstos',
             'trailer_plate' => 'patente del acoplado', 'guide_number' => 'N° de guía', 'commercial_destination' => 'destino comercial',
-            'sales_channel' => 'canal de comercialización', 'sale_condition' => 'condición de venta', 'freight_amount' => 'flete',
+            'sales_channel' => 'canal de comercialización', 'sale_condition' => 'condición de venta', 'freight_amount' => 'flete', 'unit_price' => 'precio por unidad',
         ];
     }
 }

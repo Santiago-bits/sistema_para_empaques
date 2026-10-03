@@ -29,7 +29,7 @@ return [
         'description' => 'Lotes de productores, pallets y cajones que entran al galpón.',
         'icon' => 'pallet',
         'permissions' => ['lots.view', 'lots.manage', 'pallets.view', 'pallets.create', 'pallets.update', 'crates.view', 'crates.create',
-            'labels.print', 'catalogs.view', 'traceability.view'],
+            'labels.print', 'catalogs.view', 'traceability.view', 'dtv.view', 'dtv.manage'],
     ],
     'quality' => [
         'label' => 'Calidad',
@@ -49,7 +49,7 @@ return [
         'icon' => 'truck',
         'permissions' => ['loads.view', 'loads.create', 'loads.update', 'loads.close', 'loads.dispatch', 'remitos.view', 'remitos.create',
             'remitos.deliver', 'documents.view', 'documents.manage', 'crates.view', 'pallets.view', 'catalogs.view', 'locations.view',
-            'locations.move', 'traceability.view'],
+            'locations.move', 'traceability.view', 'dtv.view', 'dtv.manage', 'treatments.view', 'treatments.manage'],
     ],
     'billing' => [
         'label' => 'Facturación',
@@ -69,7 +69,7 @@ return [
         'label' => 'Insumos y mantenimiento',
         'description' => 'Stock de materiales, máquinas y mantenimientos.',
         'icon' => 'archive',
-        'permissions' => ['supplies.view', 'supplies.manage', 'maintenance.view', 'maintenance.manage'],
+        'permissions' => ['supplies.view', 'supplies.manage', 'maintenance.view', 'maintenance.manage', 'yields.manage'],
     ],
     'reports' => [
         'label' => 'Reportes y estadísticas',

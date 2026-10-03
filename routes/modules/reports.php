@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['module:reports'])->group(function () {
     Route::middleware('can:reports.view')->group(function () {
         Route::get('reportes', [ReportController::class, 'index'])->name('reports.index');
+        // Rendimiento por quinta (antes: hoja «RENDIMIENTO QUINTA» del Excel).
+        Route::get('rendimiento-por-quinta', \App\Http\Controllers\Reports\QuintaYieldController::class)->name('reports.quintas');
         Route::get('reportes/descargas/{file}', [ReportController::class, 'download'])
             ->where('file', '[A-Za-z0-9_\-.]+')->name('reports.downloads.show');
         Route::get('reportes/{report}', [ReportController::class, 'show'])
