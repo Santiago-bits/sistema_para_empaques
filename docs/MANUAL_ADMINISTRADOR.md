@@ -66,8 +66,38 @@ Núcleo y Catálogos no se pueden apagar.
 Productores, propietarios, clientes y sus destinos, proveedores, transportistas, camiones, choferes
 (con vencimiento de licencia), variedades, tamaños, turnos, líneas, motivos, objetivos y temporadas.
 
-**Importar datos** (Administración → Importar datos): subir un Excel/CSV, el sistema muestra una vista
-previa con los errores fila por fila **antes** de guardar. Nada se importa hasta confirmar.
+Además: selecciones, tipos de envase, cuadrillas, empleados y embaladores. Cada ficha guarda los datos de
+todos los días (CUIL, dirección, CBU/alias, RENSPA, seguro y VTV del camión, licencia y contacto de emergencia
+del chofer…). Los vencimientos de licencia, seguro, VTV y habilitación SENASA generan alertas.
+
+**Exportar**: en el listado de cada catálogo, botón **Excel** (o CSV). Respeta la búsqueda y los filtros.
+
+**Importar datos** (botón **Importar** del catálogo o Sistema → Importar datos): subir un Excel/CSV, el sistema
+muestra una vista previa con los errores fila por fila **antes** de guardar. Nada se importa hasta confirmar.
+Dos modos:
+
+- **Agregar nuevos y actualizar los existentes**: si el código, CUIT, DNI o patente ya existe, actualiza ese
+  registro con las columnas que trae el archivo (una planilla puede traer sólo DNI + teléfono).
+- **Sólo agregar nuevos**: los que ya existen se informan como duplicados.
+
+Lo más práctico: **exportá → corregí en Excel → importá** con «actualizar los existentes». Los encabezados de
+la exportación son los mismos que pide la importación.
+
+## Corregir datos cargados
+
+Nada hay que borrar y volver a hacer. Cada corrección pide un **motivo** y queda en la auditoría (quién, cuándo,
+valor anterior y nuevo):
+
+| Qué | Dónde |
+|---|---|
+| Peso, variedad, tamaño o embalador de un cajón (romaneo) | Producción → Registros → **Corregir**, o la ficha del cajón. También dentro de una carga en armado (los totales se recalculan) |
+| Control de calidad / rechazo | Su ficha o el listado → **Corregir** |
+| Camión, chofer, acoplado, guía, datos comerciales o flete de una carga cerrada/despachada | Ficha de la carga → **Corregir datos** (el flete se corrige solo en la cuenta del transportista) |
+| Kilos, precio o productor de un lote ya liquidado | Editar el lote: se vuelve a liquidar solo |
+| Cobro, pago o ajuste de cuenta corriente / movimiento de caja | Botón **Corregir** en la fila |
+| Datos o importe de un cheque | Ficha del cheque → **Corregir datos** |
+
+Excepción: una **factura autorizada por ARCA** no se puede modificar por ley; se corrige con una nota de crédito.
 
 ## Cierre diario
 

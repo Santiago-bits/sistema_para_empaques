@@ -41,7 +41,8 @@ class SystemSeeder extends Seeder
 
     private function companyAndWarehouse(): void
     {
-        $company = Company::query()->firstOrCreate(['id' => 1], ['name' => 'Mi Empresa']);
+        // Sin forzar el id: el instalador corre este seeder fuera de `db:seed` (con protección de asignación masiva).
+        $company = Company::query()->orderBy('id')->first() ?? Company::query()->create(['name' => 'Mi Empresa']);
         Warehouse::query()->firstOrCreate(['code' => 'GAL-A'], ['company_id' => $company->id, 'name' => 'Galpón A']);
     }
 

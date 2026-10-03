@@ -2,6 +2,20 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versionado semántico.
 
+## [1.6.0] - 2026-10-02
+
+### Corregido
+- **Instalador**: daba error 503 («En mantenimiento») si la base tenía tablas de otro sistema y fallaba en una base
+  nueva al crear la empresa. Ahora crea las tablas solo si la base está vacía (sin consola/SSH), avisa claramente
+  si la base es de otro sistema (sin tocarla) y muestra el motivo exacto de cualquier problema de conexión.
+- El instalador ya no muestra datos de conexión de la base (servidor, nombre): son parte de la seguridad del servidor.
+- Con la base vacía, sesiones y caché usan archivos hasta que existan sus tablas.
+
+### Agregado
+- **Zona horaria** elegible en el instalador y en Configuración → Regional (preparado para usar el sistema fuera de Argentina).
+- Backups de MySQL **sin mysqldump** (volcado y restauración en PHP) cuando el hosting no permite ejecutar programas
+  (Hostinger). Se puede forzar con `GALPON_BACKUP_DRIVER=php`.
+
 ## [1.5.0] - 2026-10-02
 
 ### Agregado

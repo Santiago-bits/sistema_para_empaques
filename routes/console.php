@@ -22,10 +22,6 @@ use Illuminate\Support\Facades\Schedule;
 /** Programa un comando de artisan sin abrir procesos nuevos. */
 $artisan = fn (string $command) => Schedule::call(fn () => Artisan::call($command))->name($command);
 
-/** proc_open disponible (lo necesitan mysqldump/mysql para los backups por comando). */
-$canSpawn = fn (): bool => function_exists('proc_open')
-    && ! in_array('proc_open', array_map('trim', explode(',', (string) ini_get('disable_functions'))), true);
-
 // Señal de vida del programador (el panel de desarrollador avisa si dejó de correr).
 Schedule::call(fn () => Cache::put(SystemInfoService::SCHEDULER_CACHE_KEY, now()->toIso8601String(), now()->addDay()))
     ->everyMinute()->name('scheduler-heartbeat');
@@ -37,11 +33,11 @@ $artisan('queue:work --stop-when-empty --max-time=50 --tries=3')->everyMinute()-
 $artisan('galpon:check-alerts')->everyFiveMinutes()->withoutOverlapping(10);
 
 // Backups automáticos (se pueden apagar en Configuración → Backups). Sin proc_open (hosting compartido)
-// se omiten: en ese caso se usan las copias de seguridad del panel del hosting.
+// el volcado se hace en PHP, sin mysqldump.
 $artisan('galpon:backup --type=daily')->dailyAt('02:00')->withoutOverlapping(120)
-    ->when(fn () => (bool) setting('backup.daily', true) && $canSpawn());
+    ->when(fn () => (bool) setting('backup.daily', true));
 $artisan('galpon:backup --type=weekly')->weeklyOn(0, '03:00')->withoutOverlapping(120)
-    ->when(fn () => (bool) setting('backup.weekly', true) && $canSpawn());
+    ->when(fn () => (bool) setting('backup.weekly', true));
 
 // Panel General del proveedor: uso, soporte y licencia (sólo si GALPON_CENTRAL_URL está configurado).
 $artisan('galpon:central-sync')->everyFiveMinutes()->withoutOverlapping(10)

@@ -91,9 +91,11 @@ class SettingController extends Controller
         $data = $request->validate([
             'currency' => ['required', Rule::in(['ARS', 'USD'])],
             'date_format' => ['required', Rule::in(['d/m/Y', 'Y-m-d'])],
-        ]);
+            'timezone' => ['required', Rule::in(\DateTimeZone::listIdentifiers())],
+        ], [], ['timezone' => 'zona horaria']);
         $this->settings->set('regional.currency', $data['currency']);
         $this->settings->set('regional.date_format', $data['date_format']);
+        $this->settings->set('regional.timezone', $data['timezone']);
     }
 
     private function saveProduction(Request $request): void
