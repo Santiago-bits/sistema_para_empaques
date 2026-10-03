@@ -184,6 +184,16 @@ class SuperAdminPanelTest extends TestCase
         $this->get(route('login'))->assertSee('duenio');
 
         $this->post(route('login.store'), ['login' => 'duenio', 'password' => 'NuevaClave1'])->assertRedirect(route('home'));
+        $this->post(route('logout'));
+
+        // También puede elegir un usuario nuevo (que no use otra persona).
+        User::factory()->create(['username' => 'ocupado']);
+        $this->post(route('owner.recovery.store'), ['db_password' => 'clave-db', 'username' => 'ocupado', 'password' => 'OtraClave22', 'password_confirmation' => 'OtraClave22'])
+            ->assertSessionHasErrors('username');
+        $this->post(route('owner.recovery.store'), ['db_password' => 'clave-db', 'username' => 'leonardo', 'password' => 'OtraClave22', 'password_confirmation' => 'OtraClave22'])
+            ->assertRedirect(route('login'));
+        $this->assertSame('leonardo', $owner->fresh()->username);
+        $this->post(route('login.store'), ['login' => 'leonardo', 'password' => 'OtraClave22'])->assertRedirect(route('home'));
     }
 
     public function test_support_notification_goes_by_email_when_mail_is_configured(): void
