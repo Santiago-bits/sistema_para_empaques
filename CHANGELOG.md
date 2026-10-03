@@ -2,6 +2,17 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versionado semántico.
 
+## [1.7.1] - 2026-10-03
+
+### Agregado
+- **Recuperar acceso del dueño** (enlace en la pantalla de ingreso): si se olvidó el usuario o la contraseña del
+  Super Administrador, con la contraseña de la base de datos se elige una nueva y se muestra el usuario.
+- Al escribir `/administradorgeneral` sin haber ingresado, la pantalla de ingreso lo explica y, al ingresar,
+  lleva directo a la administración general.
+
+### Corregido
+- «Sesión expirada» (419) en la pantalla de ingreso: vuelve al ingreso con un aviso en lugar del error.
+
 ## [1.7.0] - 2026-10-03
 
 ### Agregado

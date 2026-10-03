@@ -28,6 +28,9 @@
                 @if (session('error'))
                     <div class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800 dark:bg-red-950/40 dark:text-red-200" role="alert">{{ session('error') }}</div>
                 @endif
+                @if (session('success'))
+                    <div class="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200" role="status">{{ session('success') }}</div>
+                @endif
                 {{ $slot }}
             </div>
         </div>

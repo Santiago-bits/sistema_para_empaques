@@ -90,8 +90,12 @@ return Application::configure(basePath: dirname(__DIR__))
         // las tablas): en vez de «Sesión expirada», vuelve al formulario con lo cargado. Si el navegador ni
         // siquiera devuelve la cookie de sesión, explica la causa probable (no tendría sentido reintentar).
         $exceptions->render(function (HttpExceptionInterface $e, Request $request) {
-            if ($e->getStatusCode() !== 419 || ! $request->routeIs('install.*')) {
+            if ($e->getStatusCode() !== 419 || ! $request->routeIs('install.*', 'login.store')) {
                 return null;
+            }
+            if ($request->routeIs('login.store') && $request->cookies->has((string) config('session.cookie'))) {
+                return redirect()->route('login')->withInput($request->only('login'))
+                    ->withErrors(['session' => 'La página de ingreso había quedado abierta mucho tiempo. Volvé a escribir tu contraseña y tocá «Ingresar».']);
             }
             if ($request->cookies->has((string) config('session.cookie'))) {
                 return redirect()->route('install.show')
@@ -106,7 +110,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 default => 'El navegador no está guardando las cookies de este sitio: permitilas o probá en otra ventana o navegador.',
             };
 
-            return response()->view('errors.419', ['hint' => $hint, 'retry' => route('install.show')], 419);
+            return response()->view('errors.419', ['hint' => $hint, 'retry' => route($request->routeIs('login.store') ? 'login' : 'install.show')], 419);
         });
 
         // Errores técnicos inesperados: código de referencia en lugar del detalle técnico.

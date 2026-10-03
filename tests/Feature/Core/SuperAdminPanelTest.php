@@ -152,6 +152,40 @@ class SuperAdminPanelTest extends TestCase
         $this->get(route('superadmin.index'))->assertSee('No imprime etiquetas');
     }
 
+    /** Escribir /administradorgeneral sin sesión: ingreso con aviso y, al ingresar, vuelve ahí solo. */
+    public function test_typing_the_address_logged_out_leads_there_after_login(): void
+    {
+        $owner = User::factory()->role('super_admin')->create(['username' => 'duenio']);
+
+        $this->get('/administradorgeneral')->assertRedirect(route('login'));
+        $this->get(route('login'))->assertOk()->assertSee('Administración general')->assertSee('Super Administrador');
+
+        $this->post(route('login.store'), ['login' => 'duenio', 'password' => 'password'])->assertRedirect(url('/administradorgeneral'));
+        $this->get('/administradorgeneral')->assertRedirect(route('superadmin.confirm'));
+        $this->post(route('superadmin.confirm.store'), ['password' => 'password'])->assertRedirect(route('superadmin.index'));
+        $this->get(route('superadmin.index'))->assertOk();
+        $this->assertAuthenticatedAs($owner);
+    }
+
+    public function test_owner_recovers_access_with_the_database_password(): void
+    {
+        $owner = User::factory()->role('super_admin')->create(['username' => 'duenio']);
+        config(['database.connections.'.config('database.default').'.password' => 'clave-db']);
+
+        $this->get(route('login'))->assertSee('¿Sos el dueño');
+        $this->get(route('owner.recovery'))->assertOk();
+        $this->post(route('owner.recovery.store'), ['db_password' => 'otra', 'password' => 'NuevaClave1', 'password_confirmation' => 'NuevaClave1'])
+            ->assertSessionHasErrors('db_password');
+        $this->assertTrue(Hash::check('password', $owner->fresh()->getAuthPassword()));
+
+        $this->post(route('owner.recovery.store'), ['db_password' => 'clave-db', 'password' => 'NuevaClave1', 'password_confirmation' => 'NuevaClave1'])
+            ->assertRedirect(route('login'))->assertSessionHas('success');
+        $this->assertTrue(Hash::check('NuevaClave1', $owner->fresh()->getAuthPassword()));
+        $this->get(route('login'))->assertSee('duenio');
+
+        $this->post(route('login.store'), ['login' => 'duenio', 'password' => 'NuevaClave1'])->assertRedirect(route('home'));
+    }
+
     public function test_support_notification_goes_by_email_when_mail_is_configured(): void
     {
         $owner = User::factory()->role('super_admin')->create(['email' => 'duenio@example.com']);
