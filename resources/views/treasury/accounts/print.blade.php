@@ -24,7 +24,7 @@
     </style>
 </head>
 <body>
-    <div class="toolbar"><button type="button" onclick="window.print()">Imprimir</button></div>
+    <div class="toolbar"><x-print-back :fallback="route('accounts.index')"/><button type="button" onclick="window.print()">Imprimir</button></div>
     <div class="page">
         <header>
             <div>

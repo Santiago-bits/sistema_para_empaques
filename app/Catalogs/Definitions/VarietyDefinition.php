@@ -16,17 +16,17 @@ class VarietyDefinition extends CatalogDefinition
 
     protected string $uri = 'catalogos/variedades';
 
-    protected string $title = 'Variedades';
+    protected string $title = 'Productos (variedades de fruta)';
 
-    protected string $singular = 'variedad';
+    protected string $singular = 'producto';
 
-    protected bool $feminine = true;
+    protected bool $feminine = false;
 
     protected string $icon = 'layers';
 
     protected string $group = 'Producción';
 
-    protected string $description = 'Especies y variedades de fruta, con color identificatorio.';
+    protected string $description = 'Las frutas que se empacan (naranja Valencia, limón Eureka…), con su color.';
 
     protected array $searchable = ['code', 'name', 'species'];
 

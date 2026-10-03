@@ -18,7 +18,7 @@
         <x-select name="lot_id" label="Lote" :options="$lots" :value="request('lot_id')" placeholder="Todos"/>
     </x-filters>
 
-    <form method="GET" action="{{ route('labels.pallets') }}" target="_blank" x-data="{ selected: [] }">
+    <form method="GET" action="{{ route('labels.pallets') }}" x-data="{ selected: [] }">
         @can('labels.print')
             <div class="mb-2 flex items-center gap-2" x-show="selected.length" x-cloak>
                 <button class="btn btn-secondary btn-sm"><x-icon name="printer" class="size-4"/> Imprimir etiquetas (<span x-text="selected.length"></span>)</button>

@@ -26,7 +26,7 @@
         @endforeach
     </x-filters>
 
-    <form method="GET" action="{{ $bulk ? route($bulk['route']) : '#' }}" target="_blank" x-data="{ selected: [] }">
+    <form method="GET" action="{{ $bulk ? route($bulk['route']) : '#' }}" x-data="{ selected: [] }">
         @if ($bulk)
             <div class="mb-2 flex items-center gap-2" x-show="selected.length > 0" x-cloak>
                 <button class="btn btn-secondary btn-sm" type="submit"><x-icon :name="$bulk['icon']" class="size-4"/> {{ $bulk['label'] }} (<span x-text="selected.length"></span>)</button>

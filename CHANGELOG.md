@@ -2,6 +2,15 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versionado semántico.
 
+## [1.9.1] - 2026-10-03
+
+### Cambiado
+- Nueva sección **Fichas** en el menú, a la vista: Clientes, Productos (variedades), Productores, Proveedores,
+  Camioneros, Camiones, Transportistas, Embaladores, Empleados y «Todas las fichas…». La ficha de variedades se
+  llama «Productos (variedades de fruta)».
+- Las pantallas de impresión (etiquetas, credenciales, romaneo, resumen de cuenta) se abren en la misma ventana y
+  siempre tienen el botón «← Volver» (en la app instalada no hay barra del navegador para volver).
+
 ## [1.9.0] - 2026-10-03
 
 ### Agregado

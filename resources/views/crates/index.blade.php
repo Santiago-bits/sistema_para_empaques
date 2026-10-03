@@ -30,7 +30,7 @@
         <span><strong class="tabular-nums text-stone-900 dark:text-white">{{ num($totals->crates) }}</strong> cajones</span>
         <span><strong class="tabular-nums text-stone-900 dark:text-white">{{ kg($totals->kg, 1) }}</strong> en total</span>
         @can('labels.print')
-            <a href="{{ route('labels.crates', array_merge(request()->except('page', 'per_page'), ['filtered' => 1])) }}" target="_blank" class="link">Imprimir etiquetas de este filtro</a>
+            <a href="{{ route('labels.crates', array_merge(request()->except('page', 'per_page'), ['filtered' => 1])) }}" class="link">Imprimir etiquetas de este filtro</a>
         @endcan
     </div>
 

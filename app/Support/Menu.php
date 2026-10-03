@@ -34,9 +34,10 @@ class Menu
                 if ($permissions !== [] && ! collect($permissions)->contains(fn ($p) => $user->can($p))) {
                     continue;
                 }
-                $pattern = str_ends_with($item['route'], '.index')
+                // 'match' fija qué pantallas lo marcan como abierto (p. ej. «Todas las fichas» sólo en su índice).
+                $pattern = $item['match'] ?? (str_ends_with($item['route'], '.index')
                     ? substr($item['route'], 0, -6).'.*'
-                    : $item['route'].'*';
+                    : $item['route'].'*');
                 $item['active'] = request()->routeIs($pattern) && ! request()->routeIs('production.scan*', 'locations.map*') || request()->routeIs($item['route']);
                 $items[] = $item;
             }

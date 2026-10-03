@@ -32,8 +32,8 @@
 </head>
 <body>
     <div class="toolbar">
+        <x-print-back :fallback="route('lots.show', $lot)"/>
         <button type="button" onclick="window.print()">Imprimir</button>
-        <a href="{{ route('lots.show', $lot) }}">Volver al lote</a>
     </div>
     <div class="page">
         <header>

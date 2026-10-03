@@ -9,7 +9,7 @@
     <x-page-header :title="$label" :subtitle="'Cuenta corriente · '.$singular.($holder->cuit ? ' · CUIT '.$holder->cuit : '')"
                    :back="route('accounts.index', ['type' => $type])">
         <x-slot:actions>
-            <a href="{{ route('accounts.print', [$type, $holder->getKey()] + $period) }}" target="_blank" class="btn btn-secondary"><x-icon name="printer" class="size-4"/> Imprimir resumen</a>
+            <a href="{{ route('accounts.print', [$type, $holder->getKey()] + $period) }}" class="btn btn-secondary"><x-icon name="printer" class="size-4"/> Imprimir resumen</a>
             <a href="{{ route('accounts.show', [$type, $holder->getKey()] + $period + ['format' => 'xlsx']) }}" class="btn btn-secondary"><x-icon name="download" class="size-4"/> Excel</a>
         </x-slot:actions>
     </x-page-header>

@@ -6,7 +6,7 @@
     <div class="grid gap-6 lg:grid-cols-2">
         @if ($type === 'crates')
             <x-panel title="Reimprimir por rango de códigos">
-                <form method="GET" action="{{ route('labels.crates') }}" target="_blank" class="space-y-4">
+                <form method="GET" action="{{ route('labels.crates') }}" class="space-y-4">
                     <div class="grid gap-4 sm:grid-cols-2">
                         <x-input name="from" label="Desde" class="code" placeholder="CJ-000001" required/>
                         <x-input name="to" label="Hasta" class="code" placeholder="CJ-000050"/>
@@ -35,7 +35,7 @@
             @endcan
 
             <x-panel title="Todas las etiquetas de un pallet">
-                <form method="GET" action="{{ route('labels.crates') }}" target="_blank" class="space-y-4">
+                <form method="GET" action="{{ route('labels.crates') }}" class="space-y-4">
                     <x-select name="pallet_id" label="Pallet" :options="$pallets" placeholder="Seleccionar…" required/>
                     @include('labels._size')
                     <button class="btn btn-primary"><x-icon name="printer" class="size-4"/> Ver e imprimir</button>
@@ -43,7 +43,7 @@
             </x-panel>
         @else
             <x-panel title="Seleccionar pallets">
-                <form method="GET" action="{{ route('labels.pallets') }}" target="_blank" class="space-y-4">
+                <form method="GET" action="{{ route('labels.pallets') }}" class="space-y-4">
                     <x-select name="ids[]" label="Pallets" :options="$pallets" multiple size="10" required hint="Ctrl + clic para elegir varios."/>
                     @include('labels._size')
                     <button class="btn btn-primary"><x-icon name="printer" class="size-4"/> Ver e imprimir</button>

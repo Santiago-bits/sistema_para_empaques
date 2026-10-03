@@ -4,7 +4,7 @@
 <x-layouts.app :title="$record->full_name">
     <x-page-header :title="$record->code.' — '.$record->full_name" subtitle="Embalador" :back="$definition->route('index')">
         <x-slot:actions>
-            <a href="{{ route('packers.badge', $record) }}" target="_blank" class="btn btn-secondary"><x-icon name="printer" class="size-4"/> Credencial</a>
+            <a href="{{ route('packers.badge', $record) }}" class="btn btn-secondary"><x-icon name="printer" class="size-4"/> Credencial</a>
             @if ($canManage)
                 <form method="POST" action="{{ $definition->route('toggle', $record->getKey()) }}" x-data x-confirm="¿{{ $definition->toggleLabel($record) }} al embalador?">
                     @csrf @method('PATCH')
