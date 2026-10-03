@@ -31,8 +31,9 @@ class OwnerRecoveryController extends Controller
     {
         $data = $request->validate([
             'db_password' => ['nullable', 'string', 'max:255'],
+            'username' => ['nullable', 'alpha_dash', 'max:60'],
             'password' => ['required', 'confirmed', Password::defaults()],
-        ], [], ['password' => 'contraseña nueva']);
+        ], [], ['password' => 'contraseña nueva', 'username' => 'usuario']);
 
         $expected = (string) config('database.connections.'.config('database.default').'.password');
         if (! hash_equals($expected, (string) ($data['db_password'] ?? ''))) {
@@ -47,7 +48,15 @@ class OwnerRecoveryController extends Controller
             return back()->withErrors(['db_password' => 'No hay ningún Super Administrador activo.']);
         }
 
-        $owner->forceFill(['password' => $data['password'], 'must_change_password' => false, 'password_changed_at' => now()])->save();
+        $username = $data['username'] ?? null;
+        if ($username && User::withTrashed()->where('username', $username)->whereKeyNot($owner->id)->exists()) {
+            return back()->withInput($request->only('username'))->withErrors(['username' => 'Ese usuario ya lo usa otra persona. Elegí otro.']);
+        }
+
+        $owner->forceFill(array_filter([
+            'username' => $username,
+            'password' => $data['password'],
+        ]) + ['must_change_password' => false, 'password_changed_at' => now()])->save();
         $sessions->terminateAllFor($owner);
         $audit->log('password_reset', $owner, description: 'Recuperó el acceso del Super Administrador con la contraseña de la base (IP '.$request->ip().')');
 

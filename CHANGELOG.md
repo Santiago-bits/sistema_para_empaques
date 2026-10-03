@@ -2,6 +2,11 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versionado semántico.
 
+## [1.7.2] - 2026-10-03
+
+### Agregado
+- «Recuperar acceso del dueño» permite elegir también un usuario nuevo para el Super Administrador.
+
 ## [1.7.1] - 2026-10-03
 
 ### Agregado

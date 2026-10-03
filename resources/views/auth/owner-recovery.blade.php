@@ -11,6 +11,7 @@
 
         <x-input name="db_password" type="password" label="Contraseña de la base de datos" autocomplete="off"
                  hint="La misma que figura en hPanel → Bases de datos (o en la línea DB_PASSWORD= del archivo .env del servidor)."/>
+        <x-input name="username" label="Usuario nuevo (opcional)" autocomplete="off" hint="Si lo dejás vacío se mantiene el usuario actual. Sin espacios: letras, números, guiones."/>
         <x-input name="password" type="password" label="Contraseña nueva del Super Administrador" required autocomplete="new-password" hint="Mínimo 8 caracteres, letras y números."/>
         <x-input name="password_confirmation" type="password" label="Repetir contraseña nueva" required autocomplete="new-password"/>
 
