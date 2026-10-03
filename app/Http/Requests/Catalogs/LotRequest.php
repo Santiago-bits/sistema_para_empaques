@@ -35,6 +35,9 @@ class LotRequest extends FormRequest
             'origin' => ['nullable', 'string', 'max:255'],
             'field' => ['nullable', 'string', 'max:255'],
             'quantity' => ['nullable', 'integer', 'min:0', 'max:1000000'],
+            'bins' => ['nullable', 'integer', 'min:0', 'max:1000000'],
+            'driver_id' => ['nullable', 'integer', 'exists:drivers,id'],
+            'dtv_number' => ['nullable', 'string', 'max:30'],
             'container_type_id' => ['nullable', 'integer', Rule::exists('container_types', 'id')->whereNull('deleted_at')],
             'reason' => ['nullable', 'string', 'max:255'],
             'kg_received' => ['nullable', 'numeric', 'min:0', 'max:99999999'],
@@ -48,7 +51,7 @@ class LotRequest extends FormRequest
         return [
             'code' => 'código', 'date' => 'fecha', 'producer_id' => 'productor', 'owner_id' => 'propietario',
             'variety_id' => 'variedad', 'season_id' => 'temporada', 'origin' => 'origen', 'field' => 'campo',
-            'quantity' => 'cantidad', 'notes' => 'observaciones', 'container_type_id' => 'envase',
+            'quantity' => 'cantidad', 'bins' => 'bines', 'driver_id' => 'chofer', 'dtv_number' => 'n° de DTV', 'notes' => 'observaciones', 'container_type_id' => 'envase',
             'kg_received' => 'kilos recibidos', 'price_per_kg' => 'precio por kilo',
         ];
     }

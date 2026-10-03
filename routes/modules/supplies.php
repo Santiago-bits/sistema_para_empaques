@@ -20,3 +20,14 @@ Route::middleware(['module:supplies', 'can:supplies.view'])->group(function () {
 
     Route::get('insumos/{supply}', [SupplyController::class, 'show'])->whereNumber('supply')->name('supplies.show');
 });
+
+// Rendimiento de cera e insumos (antes: hoja «RENDIMIENTO CERA» del Excel).
+Route::middleware(['module:supplies', 'can:supplies.view'])->prefix('rendimiento-insumos')->name('yields.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\Supplies\SupplyYieldController::class, 'index'])->name('index');
+    Route::middleware('can:yields.manage')->group(function () {
+        Route::get('nuevo', [\App\Http\Controllers\Supplies\SupplyYieldController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\Supplies\SupplyYieldController::class, 'store'])->name('store');
+        Route::get('{yield}/editar', [\App\Http\Controllers\Supplies\SupplyYieldController::class, 'edit'])->whereNumber('yield')->name('edit');
+        Route::put('{yield}', [\App\Http\Controllers\Supplies\SupplyYieldController::class, 'update'])->whereNumber('yield')->name('update');
+    });
+});

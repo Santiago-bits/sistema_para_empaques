@@ -2,6 +2,28 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versionado semántico.
 
+## [1.10.0] - 2026-10-03
+
+### Agregado (lo que el galpón llevaba en la planilla de Excel)
+- **DTV-e (SENASA)** (Logística → DTV-e): registro de ingresos y egresos con número, tipo, emisor, establecimiento,
+  destinatario, destino, transporte y una línea por especie/variedad (cantidad, unidad, kg por unidad y kg totales,
+  que se calculan solos). Saldo de kilos por variedad, filtros, exportación a Excel con las mismas columnas que la
+  planilla e **importación de la planilla existente** (encuentra sola la fila de títulos y no repite DTV ya cargados).
+  Se arma solo desde una carga (egreso) o un ingreso de fruta (ingreso).
+- **Tratamientos** (Logística → Tratamientos): fecha, cliente, destino, cantidad, tipo de tratamiento (configurable
+  en Configuración → Tratamientos) y empresa que lo hace, con totales por tipo y exportación.
+- **Rendimiento de cera** (Galpón → Rendimiento de cera): desde, hasta y bultos de cada tambor de cera u otro
+  insumo; los bultos se cuentan solos con la producción registrada o se cargan a mano.
+- **Rendimiento por quinta** (Informes): bines y kilos que entraron de cada productor contra bultos y kilos
+  empacados y descartados, con el porcentaje.
+- **Ingresos de fruta (lotes)**: chofer, bines y n° de DTV; listado como la planilla de ingresos, con totales,
+  filtro «temporada en curso» (ingresos corrientes) y exportación a Excel.
+- **Cargas**: precio por unidad y subtotal (cajones × precio), como la planilla de cargas.
+
+### Corregido
+- Modo oscuro: los calendarios, relojes y flechas de las listas se dibujan claros (antes el ícono del calendario
+  quedaba negro sobre negro).
+
 ## [1.9.2] - 2026-10-03
 
 ### Cambiado

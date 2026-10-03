@@ -17,7 +17,10 @@
                 <x-select name="variety_id" label="Variedad" :options="$varieties" :value="$lot->variety_id" placeholder="—"/>
                 <x-input name="origin" label="Origen / procedencia" :value="$lot->origin"/>
                 <x-input name="field" label="Campo / cuadro" :value="$lot->field"/>
-                <x-input name="quantity" type="number" min="0" label="Cantidad (bins/cajones)" :value="$lot->quantity"/>
+                <x-input name="bins" type="number" min="0" label="Bines" :value="$lot->bins" hint="Como en la planilla de ingresos."/>
+                <x-select name="driver_id" label="Chofer (camionero)" :options="$drivers" :value="$lot->driver_id" placeholder="—"/>
+                <x-input name="dtv_number" label="N° de DTV-e" :value="$lot->dtv_number" class="code" placeholder="DTV 1/10"/>
+                <x-input name="quantity" type="number" min="0" label="Cantidad de cajones (opcional)" :value="$lot->quantity"/>
                 <x-select name="container_type_id" label="Envase" :options="\App\Catalogs\Definitions\ContainerTypeDefinition::options()" :value="$lot->container_type_id" placeholder="—"/>
             </div>
             <h3 class="mt-6 mb-2 text-sm font-semibold text-stone-700 dark:text-stone-300">Compra al productor (opcional)</h3>

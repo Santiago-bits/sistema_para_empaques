@@ -4,6 +4,9 @@
         <x-slot:actions>
             <x-status :status="$status" class="text-sm"/>
             @if (in_array($status->value, ['closed', 'dispatched', 'delivered'], true))
+                @can('dtv.manage')
+                    <a href="{{ route('dtv.create', ['load' => $load->id]) }}" class="btn btn-secondary"><x-icon name="document" class="size-4"/> DTV-e de egreso</a>
+                @endcan
                 @can('loads.update')
                     <a href="{{ route('loads.correct', $load) }}" class="btn btn-secondary"><x-icon name="pencil" class="size-4"/> Corregir datos</a>
                 @endcan
@@ -64,6 +67,8 @@
                     'Destino comercial' => \App\Models\Load::COMMERCIAL_DESTINATIONS[$load->commercial_destination] ?? null,
                     'Canal' => \App\Models\Load::SALES_CHANNELS[$load->sales_channel] ?? null,
                     'Condición de venta' => \App\Models\Load::SALE_CONDITIONS[$load->sale_condition] ?? null,
+                    'Precio por unidad' => $load->unit_price !== null ? money($load->unit_price) : null,
+                    'Subtotal' => $load->subtotal() !== null ? money($load->subtotal()).' ('.num($load->total_crates).' × '.money($load->unit_price).')' : null,
                     'Flete' => $load->freight_amount !== null ? money($load->freight_amount).($load->freight_posted_at ? ' · imputado al transportista' : '') : null,
                     'Creada por' => $load->creator?->full_name,
                     'Cerrada' => $load->closed_at ? fdate($load->closed_at, true).' · '.$load->closer?->full_name : null,

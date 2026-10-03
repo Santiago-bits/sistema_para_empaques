@@ -181,6 +181,16 @@
                         </div>
                         @break
 
+                    @case('treatments')
+                        <p class="mb-4 text-sm text-stone-600 dark:text-stone-400">Los tipos de tratamiento que se eligen al cargar uno (por ejemplo los dos que usan para entrar a la Patagonia).</p>
+                        @php $treatmentTypes = array_pad(array_values((array) $s['treatments.types']), 4, ''); @endphp
+                        <div class="grid gap-4 md:grid-cols-2">
+                            @foreach ($treatmentTypes as $i => $type)
+                                <x-input :name="'types['.$i.']'" :label="'Tipo '.($i + 1)" :value="$type" :placeholder="$i < 2 ? \App\Models\Treatment::DEFAULT_TYPES[$i] : 'Opcional'"/>
+                            @endforeach
+                        </div>
+                        @break
+
                     @case('arca')
                         <div class="mb-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
                             Los certificados y claves de ARCA se configuran sólo en el archivo <span class="code">.env</span> del servidor

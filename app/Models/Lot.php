@@ -20,7 +20,7 @@ class Lot extends Model
     protected $fillable = [
         'warehouse_id', 'season_id', 'code', 'date', 'producer_id', 'owner_id', 'variety_id', 'origin',
         'field', 'quantity', 'status', 'notes', 'created_by', 'container_type_id', 'kg_received', 'price_per_kg',
-        'settled_at', 'settled_by',
+        'settled_at', 'settled_by', 'driver_id', 'bins', 'dtv_number',
     ];
 
     protected function casts(): array
@@ -31,6 +31,12 @@ class Lot extends Model
             'price_per_kg' => 'decimal:4',
             'settled_at' => 'datetime',
         ];
+    }
+
+    /** Chofer que trajo la fruta (planilla de ingresos). */
+    public function driver(): BelongsTo
+    {
+        return $this->belongsTo(Driver::class);
     }
 
     public function producer(): BelongsTo

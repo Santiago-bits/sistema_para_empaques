@@ -38,7 +38,7 @@ return [
         'items' => [
             ['label' => 'Escanear cajones', 'route' => 'production.scan', 'icon' => 'scan', 'permission' => 'production.scan', 'module' => 'production', 'highlight' => true],
             ['label' => 'Pallets', 'route' => 'pallets.index', 'icon' => 'pallet', 'permission' => 'pallets.view', 'module' => 'pallets'],
-            ['label' => 'Lotes', 'route' => 'lots.index', 'icon' => 'layers', 'permission' => 'lots.view', 'module' => 'catalogs'],
+            ['label' => 'Ingresos de fruta (lotes)', 'route' => 'lots.index', 'icon' => 'layers', 'permission' => 'lots.view', 'module' => 'catalogs'],
             ['label' => 'Cajones', 'route' => 'crates.index', 'icon' => 'box', 'permission' => 'crates.view', 'module' => 'crates'],
             ['label' => 'Producción registrada', 'route' => 'production.index', 'icon' => 'list', 'permission' => 'production.view', 'module' => 'production'],
             ['label' => 'Paradas de línea', 'route' => 'stoppages.index', 'icon' => 'pause', 'permission' => 'stoppages.manage', 'module' => 'production'],
@@ -54,6 +54,7 @@ return [
             ['label' => 'Ubicaciones', 'route' => 'locations.index', 'icon' => 'pin', 'permission' => 'locations.view', 'module' => 'locations'],
             ['label' => 'Cámaras de frío', 'route' => 'cold-rooms.index', 'icon' => 'snow', 'permission' => 'cold_rooms.view', 'module' => 'cold_rooms'],
             ['label' => 'Insumos', 'route' => 'supplies.index', 'icon' => 'archive', 'permission' => 'supplies.view', 'module' => 'supplies'],
+            ['label' => 'Rendimiento de cera', 'route' => 'yields.index', 'icon' => 'chart-line', 'permission' => 'supplies.view', 'module' => 'supplies'],
             ['label' => 'Mantenimiento', 'route' => 'machines.index', 'icon' => 'wrench', 'permission' => 'maintenance.view', 'module' => 'maintenance'],
             ['label' => 'Problemas e incidentes', 'route' => 'incidents.index', 'icon' => 'alert', 'permission' => 'incidents.view', 'module' => 'incidents'],
         ],
@@ -63,6 +64,8 @@ return [
         'items' => [
             ['label' => 'Cargas', 'route' => 'loads.index', 'icon' => 'truck', 'permission' => 'loads.view', 'module' => 'loads'],
             ['label' => 'Remitos', 'route' => 'remitos.index', 'icon' => 'document', 'permission' => 'remitos.view', 'module' => 'remitos'],
+            ['label' => 'DTV-e (SENASA)', 'route' => 'dtv.index', 'icon' => 'document', 'permission' => 'dtv.view', 'module' => 'loads'],
+            ['label' => 'Tratamientos', 'route' => 'treatments.index', 'icon' => 'check-badge', 'permission' => 'treatments.view', 'module' => 'loads'],
             ['label' => 'Documentos', 'route' => 'documents.index', 'icon' => 'folder', 'permission' => 'documents.view', 'module' => 'documents'],
         ],
     ],
@@ -86,7 +89,8 @@ return [
     [
         'title' => 'Informes',
         'items' => [
-            ['label' => 'Reportes', 'route' => 'reports.index', 'icon' => 'chart-bar', 'permission' => 'reports.view', 'module' => 'reports'],
+            ['label' => 'Reportes', 'route' => 'reports.index', 'match' => ['reports.index', 'reports.show', 'reports.downloads.*'], 'icon' => 'chart-bar', 'permission' => 'reports.view', 'module' => 'reports'],
+            ['label' => 'Rendimiento por quinta', 'route' => 'reports.quintas', 'icon' => 'chart-line', 'permission' => 'reports.view', 'module' => 'reports'],
             ['label' => 'Estadísticas', 'route' => 'stats.index', 'icon' => 'chart-line', 'permission' => 'stats.view', 'module' => 'reports'],
             ['label' => 'Cierre diario', 'route' => 'closings.index', 'icon' => 'lock', 'permission' => 'closings.manage', 'module' => 'core'],
         ],

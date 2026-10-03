@@ -340,6 +340,8 @@ class DemoSeeder extends Seeder
         $qualityUser = $this->userId('calidad');
         $producers = Producer::query()->pluck('id')->all();
         $owners = Owner::query()->pluck('id')->all();
+        $drivers = Driver::query()->pluck('id')->all();
+        $dtvSeq = 1;
         $shifts = Shift::query()->pluck('id', 'code');
         $lines = ProductionLine::query()->pluck('id')->all();
         // Capacidad libre por posición: los datos demo respetan la misma regla que el sistema.
@@ -376,6 +378,8 @@ class DemoSeeder extends Seeder
                     'producer_id' => $producer, 'owner_id' => $this->pick($owners), 'variety_id' => $variety,
                     'origin' => $this->pick(['Famaillá', 'Lules', 'Monteros', 'Concepción']),
                     'field' => 'Cuadro '.random_int(1, 20), 'quantity' => 0, 'status' => $d > 2 ? 'closed' : 'open',
+                    // Como la planilla de ingresos: chofer, bines y n° de DTV.
+                    'driver_id' => $drivers ? $this->pick($drivers) : null, 'bins' => random_int(20, 65), 'dtv_number' => 'DTV '.($dtvSeq++).'/'.$day->format('m'),
                     'created_by' => $operator,
                 ]);
 
@@ -537,7 +541,7 @@ class DemoSeeder extends Seeder
                 'transporter_id' => Truck::query()->whereKey($trucks[$i % count($trucks)])->value('transporter_id'),
                 'trailer_plate' => $i % 3 === 2 ? null : sprintf('A%s%03d%s', chr(67 + $i % 5), 120 + $i * 7, ['BD', 'FG', 'HJ', 'KL'][$i % 4]), 'guide_number' => 'DTV-'.(4500 + $i),
                 'commercial_destination' => $i % 4 === 2 ? 'export' : 'domestic', 'sales_channel' => ['market', 'supermarket', 'export', 'distributor'][$i % 4],
-                'sale_condition' => ['account', 'account', 'consignment', 'cash'][$i % 4], 'freight_amount' => 350000 + $i * 25000,
+                'sale_condition' => ['account', 'account', 'consignment', 'cash'][$i % 4], 'freight_amount' => 350000 + $i * 25000, 'unit_price' => 1400 + $i * 50,
             ], $user);
             $loads->assignCrates($load, $loads->takeAvailable($load, [], $quantity), $user);
             if ($target === 'draft') {
@@ -757,6 +761,8 @@ class DemoSeeder extends Seeder
         $reasons = Reason::query()->where('type', 'stoppage')->pluck('id')->all();
         $lines = ProductionLine::query()->pluck('id')->all();
         $shifts = Shift::query()->pluck('id')->all();
+        $this->registers($user);
+
         if ($reasons && $lines && ! \App\Models\ProductionStoppage::query()->where('notes', 'like', '%(ejemplo)%')->exists()) {
             for ($i = 0; $i < 10; $i++) {
                 $start = now()->subDays($i)->setTime(8 + ($i % 6), 15 * ($i % 4));
@@ -778,6 +784,49 @@ class DemoSeeder extends Seeder
         }
 
         $this->restoreAuth();
+    }
+
+    /** DTV-e (desde lotes y cargas), tratamientos y rendimiento de cera: lo que el galpón llevaba en Excel. */
+    private function registers(User $user): void
+    {
+        $dtv = app(\App\Services\DtvService::class);
+        if (! \App\Models\DtvDocument::query()->exists()) {
+            foreach (Lot::query()->with('producer', 'variety', 'driver')->whereNotNull('dtv_number')->orderByDesc('id')->limit(6)->get() as $lot) {
+                $draft = $dtv->draftFromLot($lot);
+                if ($draft['header']['number'] !== '' && ! \App\Models\DtvDocument::query()->where('direction', 'in')->where('number', $draft['header']['number'])->exists()) {
+                    $dtv->save(null, $draft['header'], $draft['lines'], $user);
+                }
+            }
+            $n = 14606800;
+            foreach (\App\Models\Load::query()->with('client', 'destination', 'driver', 'transporter')->whereIn('status', ['closed', 'dispatched', 'delivered'])->get() as $load) {
+                $draft = $dtv->draftFromLoad($load);
+                $draft['header']['number'] = ($n++).'-'.random_int(1, 9);
+                if ($draft['lines'] !== []) {
+                    $dtv->save(null, $draft['header'], $draft['lines'], $user);
+                }
+            }
+        }
+
+        if (! \App\Models\Treatment::query()->exists()) {
+            $types = \App\Models\Treatment::types();
+            $client = Client::query()->orderBy('id')->value('id');
+            foreach ([['Neuquén', 108], ['Puerto Madryn', 280], ['Puerto Madryn', 162], ['Neuquén', 108], ['Neuquén', 162], ['Neuquén', 108], ['Puerto Madryn', 540],
+                ['Neuquén', 54], ['Neuquén', 108], ['Neuquén', 108]] as $i => [$destination, $qty]) {
+                \App\Models\Treatment::query()->create(['date' => today()->subDays(30 - $i * 3), 'client_id' => $client, 'destination' => $destination,
+                    'quantity' => $qty, 'unit' => 'Cajón', 'type' => $types[$i % 3 === 0 ? 0 : (count($types) > 1 ? 1 : 0)], 'provider' => 'Bromex',
+                    'notes' => 'Carga de ejemplo', 'created_by' => $user->id]);
+            }
+        }
+
+        if (! \App\Models\SupplyYield::query()->exists()) {
+            $wax = \App\Models\Supply::query()->where('code', 'CER-01')->value('id');
+            for ($i = 0; $i < 10; $i++) {
+                $start = today()->subDays(60 - $i * 6);
+                \App\Models\SupplyYield::query()->create(['supply_id' => $wax, 'name' => 'Tambor de cera N° '.($i + 1), 'started_on' => $start,
+                    'ended_on' => $i === 9 ? null : $start->copy()->addDays(5), 'quantity_used' => $i === 9 ? null : 200, 'unit' => 'litros',
+                    'packages_manual' => $i < 7 ? 26000 + $i * 450 : null, 'notes' => 'Carga de ejemplo', 'created_by' => $user->id]);
+            }
+        }
     }
 
     /** Firma de ejemplo (PNG generado sin ext-gd). */

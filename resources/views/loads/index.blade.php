@@ -18,7 +18,7 @@
     </x-filters>
 
     <x-table>
-        <thead><tr><th>Número</th><th>Fecha</th><th>Cliente</th><th>Destino</th><th>Camión</th><th>Camionero</th><th class="num">Cajones</th><th class="num">Kg</th><th>Estado</th><th></th></tr></thead>
+        <thead><tr><th>Número</th><th>Fecha</th><th>Cliente</th><th>Destino</th><th>Camión</th><th>Camionero</th><th class="num">Cajones</th><th class="num">Kg</th><th class="num">P. unitario</th><th class="num">Subtotal</th><th>Estado</th><th></th></tr></thead>
         <tbody>
             @forelse ($loads as $load)
                 <tr>
@@ -30,6 +30,8 @@
                     <td>{{ $load->driver?->full_name ?? '—' }}</td>
                     <td class="num">{{ num($load->total_crates) }}</td>
                     <td class="num">{{ num($load->total_kg, 1) }}</td>
+                    <td class="num whitespace-nowrap">{{ $load->unit_price !== null ? money($load->unit_price) : '—' }}</td>
+                    <td class="num whitespace-nowrap font-medium">{{ $load->subtotal() !== null ? money($load->subtotal()) : '—' }}</td>
                     <td><x-status :status="$load->status"/></td>
                     <td class="text-right whitespace-nowrap">
                         @if ($load->status->isEditable())
@@ -40,7 +42,7 @@
                     </td>
                 </tr>
             @empty
-                <x-empty colspan="10"/>
+                <x-empty colspan="12"/>
             @endforelse
         </tbody>
         <x-slot:footer>{{ $loads->links() }}</x-slot:footer>

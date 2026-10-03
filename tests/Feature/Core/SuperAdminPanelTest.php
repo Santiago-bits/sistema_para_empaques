@@ -209,10 +209,12 @@ class SuperAdminPanelTest extends TestCase
             \App\Models\ColdRoom::class, \App\Models\Supply::class, \App\Models\Machine::class, \App\Models\Incident::class, \App\Models\Cost::class,
             \App\Models\ProductionStoppage::class, \App\Models\ContainerType::class, \App\Models\Employee::class, \App\Models\ExchangeRate::class,
             \App\Models\Check::class, \App\Models\CashMovement::class, \App\Models\Lot::class, \App\Models\Pallet::class, \App\Models\Crate::class,
-            \App\Models\Packer::class, \App\Models\InventoryMovement::class] as $model) {
+            \App\Models\Packer::class, \App\Models\InventoryMovement::class, \App\Models\Treatment::class, \App\Models\SupplyYield::class] as $model) {
             $this->assertGreaterThanOrEqual(10, $model::query()->count(), class_basename($model).' debería tener al menos 10 ejemplos');
         }
         $this->assertGreaterThanOrEqual(8, \App\Models\Load::query()->count());
+        $this->assertGreaterThanOrEqual(6, \App\Models\DtvDocument::query()->count());
+        $this->assertGreaterThan(0, \App\Models\Lot::query()->whereNotNull('driver_id')->whereNotNull('bins')->count());
         $this->assertGreaterThanOrEqual(3, \App\Models\Invoice::query()->count());
         // No crea usuarios (en un servidor real serían cuentas con contraseña conocida).
         $this->assertSame($users, User::query()->count());

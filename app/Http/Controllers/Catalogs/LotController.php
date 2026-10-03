@@ -22,10 +22,10 @@ class LotController extends Controller
     {
     }
 
-    public function index(Request $request): View
+    public function index(Request $request): View|\Symfony\Component\HttpFoundation\Response
     {
-        $lots = Lot::query()
-            ->with(['producer:id,name', 'owner:id,name', 'variety:id,name'])
+        $query = Lot::query()
+            ->with(['producer:id,name', 'owner:id,name', 'variety:id,name,species', 'driver:id,first_name,last_name'])
             ->withCount('crates')
             ->when($request->filled('q'), fn ($q) => $q->where('code', 'like', trim((string) $request->query('q')).'%'))
             ->when($request->filled('producer_id'), fn ($q) => $q->where('producer_id', $request->integer('producer_id')))
@@ -35,10 +35,31 @@ class LotController extends Controller
                 fn ($q) => $q->where('status', $request->query('status')))
             ->when($request->filled('from'), fn ($q) => $q->whereDate('date', '>=', $request->date('from')))
             ->when($request->filled('to'), fn ($q) => $q->whereDate('date', '<=', $request->date('to')))
-            ->orderByDesc('date')->orderByDesc('id')
-            ->paginate($this->perPage($request))->withQueryString();
+            // «Ingresos corrientes»: los de la temporada en curso.
+            ->when($request->query('season') === 'current', fn ($q) => $q->where('season_id', Season::current()?->id ?? 0))
+            ->when($request->filled('driver_id'), fn ($q) => $q->where('driver_id', $request->integer('driver_id')))
+            ->orderByDesc('date')->orderByDesc('id');
 
-        return view('lots.index', ['lots' => $lots] + $this->options());
+        if (in_array($request->query('format'), ['xlsx', 'csv'], true)) {
+            return $this->exportIntakes($request, $query, (string) $request->query('format'));
+        }
+        $totals = (clone $query)->reorder()->toBase()->selectRaw('COUNT(*) as n, COALESCE(SUM(bins), 0) as bins, COALESCE(SUM(kg_received), 0) as kg')->first();
+
+        return view('lots.index', ['lots' => $query->paginate($this->perPage($request))->withQueryString(), 'totals' => $totals] + $this->options());
+    }
+
+    /** Planilla de ingresos como la del Excel: fecha, quinta/productor, especie, variedad, chofer, bines y observaciones. */
+    private function exportIntakes(Request $request, $query, string $format): \Symfony\Component\HttpFoundation\Response
+    {
+        $spec = collect(['FECHA', 'LOTE', 'QUINTA/PRODUCTOR', 'ESPECIE', 'VARIEDAD', 'CHOFER', 'BINES', 'KG', 'DTV-e', 'OBSERVACIONES'])
+            ->mapWithKeys(fn ($h) => [$h => ['label' => $h, 'type' => 'text']])->all();
+        $dataset = new \App\Services\Reports\ReportDataset('ingresos', 'Ingresos de fruta', $spec, fn () => (clone $query)->lazyById(500)->map(fn (Lot $lot) => [
+            'FECHA' => $lot->date?->format('d/m/Y'), 'LOTE' => $lot->code, 'QUINTA/PRODUCTOR' => $lot->producer?->name,
+            'ESPECIE' => $lot->variety?->species, 'VARIEDAD' => $lot->variety?->name, 'CHOFER' => $lot->driver?->full_name,
+            'BINES' => $lot->bins, 'KG' => $lot->kg_received !== null ? num($lot->kg_received, 2) : null, 'DTV-e' => $lot->dtv_number, 'OBSERVACIONES' => $lot->notes,
+        ]));
+
+        return app(\App\Services\ExportService::class)->download($dataset, $format, \App\Services\Reports\ReportFilters::between(today(), today()), $request->user());
     }
 
     public function create(): View
@@ -112,6 +133,7 @@ class LotController extends Controller
     {
         return [
             'producers' => Producer::query()->where('active', true)->orderBy('name')->pluck('name', 'id'),
+            'drivers' => \App\Models\Driver::query()->where('active', true)->orderBy('last_name')->get()->mapWithKeys(fn ($d) => [$d->id => $d->full_name]),
             'owners' => Owner::query()->where('active', true)->orderBy('name')->pluck('name', 'id'),
             'varieties' => Variety::query()->where('active', true)->orderBy('name')->pluck('name', 'id'),
             'seasons' => Season::query()->orderByDesc('starts_on')->pluck('name', 'id'),

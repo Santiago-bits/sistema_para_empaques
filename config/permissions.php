@@ -83,6 +83,10 @@ return [
             'loads.reopen' => 'Reabrir cargas cerradas',
             'loads.dispatch' => 'Despachar (checklist)',
             'loads.cancel' => 'Cancelar cargas',
+            'dtv.view' => 'Ver DTV-e (SENASA)',
+            'dtv.manage' => 'Cargar y modificar DTV-e',
+            'treatments.view' => 'Ver tratamientos',
+            'treatments.manage' => 'Cargar y modificar tratamientos',
         ],
         'remitos' => [
             'remitos.view' => 'Ver remitos',
@@ -111,6 +115,7 @@ return [
         'supplies' => [
             'supplies.view' => 'Ver insumos',
             'supplies.manage' => 'Gestionar insumos y movimientos',
+            'yields.manage' => 'Cargar rendimiento de cera e insumos',
         ],
         'incidents' => [
             'incidents.view' => 'Ver incidentes',
@@ -177,6 +182,7 @@ return [
                 'locations.view', 'locations.move', 'loads.view', 'loads.create', 'loads.update', 'loads.close',
                 'loads.dispatch', 'remitos.view', 'remitos.create', 'remitos.deliver', 'documents.view',
                 'documents.manage', 'support.use', 'alerts.view', 'incidents.view', 'incidents.manage',
+                'dtv.view', 'dtv.manage', 'treatments.view', 'treatments.manage',
             ],
         ],
         'quality' => [
@@ -197,7 +203,7 @@ return [
                 'arca.manage', 'reports.view', 'reports.export_excel', 'reports.export_pdf', 'costs.view',
                 'costs.manage', 'support.use', 'alerts.view', 'supplies.view', 'supplies.manage',
                 'lots.view', 'staff.view', 'treasury.view', 'cash.manage', 'accounts.manage', 'checks.manage',
-                'exchange.manage', 'lots.settle',
+                'exchange.manage', 'lots.settle', 'dtv.view', 'treatments.view',
             ],
         ],
         'supervisor' => [
@@ -210,6 +216,7 @@ return [
                 'documents.view', 'reports.view', 'reports.export_excel', 'reports.export_pdf', 'stats.view',
                 'audit.view', 'closings.manage', 'alerts.view', 'alerts.manage', 'incidents.view', 'incidents.manage',
                 'supplies.view', 'maintenance.view', 'cold_rooms.view', 'support.use', 'staff.view', 'treasury.view',
+                'dtv.view', 'treatments.view',
             ],
         ],
         'employee' => [
