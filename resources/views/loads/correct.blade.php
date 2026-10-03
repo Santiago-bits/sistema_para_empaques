@@ -10,7 +10,7 @@
             <div class="grid gap-4 md:grid-cols-3">
                 <x-select name="transporter_id" label="Transportista" :options="$transporters" :value="$load->transporter_id" placeholder="—"/>
                 <x-select name="truck_id" label="Camión" :options="$trucks" :value="$load->truck_id" placeholder="—"/>
-                <x-select name="driver_id" label="Chofer" :options="$drivers" :value="$load->driver_id" placeholder="—"/>
+                <x-select name="driver_id" label="Camionero" :options="$drivers" :value="$load->driver_id" placeholder="—"/>
                 <x-input name="trailer_plate" label="Patente del acoplado" :value="$load->trailer_plate" class="uppercase" maxlength="12"/>
                 <x-input name="guide_number" label="N° de guía" :value="$load->guide_number" maxlength="40"/>
             </div>

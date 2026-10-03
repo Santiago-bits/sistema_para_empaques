@@ -148,8 +148,8 @@
                             <x-input name="retention_days" type="number" label="Retención (días)" :value="$s['backup.retention_days']"/>
                         </div>
                         <div class="mt-4 space-y-2">
-                            <x-checkbox name="daily" label="Backup automático diario (03:00)" :checked="$s['backup.daily']"/>
-                            <x-checkbox name="weekly" label="Backup automático semanal (domingo 04:00)" :checked="$s['backup.weekly']"/>
+                            <x-checkbox name="daily" label="Copia de seguridad automática todos los días (03:00)" :checked="$s['backup.daily']"/>
+                            <x-checkbox name="weekly" label="Copia de seguridad automática semanal (domingo 04:00)" :checked="$s['backup.weekly']"/>
                         </div>
                         @break
 

@@ -2,14 +2,14 @@
     $statusColors = ['validated' => 'amber', 'imported' => 'emerald', 'failed' => 'red', 'discarded' => 'zinc'];
     $statusLabels = ['validated' => 'Pendiente de confirmar', 'imported' => 'Importado', 'failed' => 'Fallido', 'discarded' => 'Descartado'];
 @endphp
-<x-layouts.app title="Importar datos">
-    <x-page-header title="Importar datos" subtitle="Carga masiva desde Excel o CSV. Nada se guarda hasta que confirmes la vista previa.">
+<x-layouts.app title="Planillas subidas">
+    <x-page-header title="Planillas subidas" subtitle="Cargá muchos datos de una vez desde Excel. Nada se guarda hasta que confirmes lo que te muestra." :back="route('transfer.index')">
         <x-slot:actions>
-            <a href="{{ route('imports.create') }}" class="btn btn-primary"><x-icon name="upload" class="size-4"/> Nueva importación</a>
+            <a href="{{ route('imports.create') }}" class="btn btn-primary"><x-icon name="upload" class="size-4"/> Subir una planilla</a>
         </x-slot:actions>
     </x-page-header>
 
-    <x-panel title="Plantillas" class="mb-6">
+    <x-panel title="Planillas modelo (vacías, para completar)" class="mb-6">
         <div class="flex flex-wrap gap-2">
             @foreach ($types as $type => $label)
                 <a href="{{ route('imports.template', $type) }}" class="btn btn-secondary btn-sm"><x-icon name="download" class="size-4"/> {{ $label }}</a>

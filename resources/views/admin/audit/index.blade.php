@@ -1,5 +1,5 @@
-<x-layouts.app title="Auditoría">
-    <x-page-header title="Auditoría" subtitle="Registro inmutable de operaciones: qué, quién, cuándo, desde dónde y por qué."/>
+<x-layouts.app title="Historial de cambios">
+    <x-page-header title="Historial de cambios" subtitle="Registro inmutable de operaciones: qué, quién, cuándo, desde dónde y por qué."/>
 
     <x-filters>
         <x-select name="user_id" label="Usuario" :options="$users" :value="request('user_id')" placeholder="Todos"/>

@@ -35,7 +35,7 @@
             'Destino' => $load->destination?->name,
             'Propietario' => $load->owner?->name,
             'Camión' => $load->truck?->plate,
-            'Chofer' => $load->driver?->full_name,
+            'Camionero' => $load->driver?->full_name,
         ]"/>
     </x-panel>
 

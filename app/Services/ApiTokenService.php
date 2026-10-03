@@ -16,9 +16,9 @@ class ApiTokenService
 {
     /** Habilidades disponibles para los tokens. */
     public const ABILITIES = [
-        'read' => 'Lectura (cajones, pallets, cargas, insumos, reportes)',
-        'scale:write' => 'Balanza: enviar lecturas de peso',
-        'sensors:write' => 'Sensores: enviar lecturas de temperatura/humedad',
+        'read' => 'Ver datos (cajones, pallets, cargas, insumos e informes) desde otro programa',
+        'scale:write' => 'Balanza: mandar los pesos solos al sistema',
+        'sensors:write' => 'Sensor de cámara: mandar la temperatura y la humedad solas'
     ];
 
     public function __construct(private readonly AuditService $audit)

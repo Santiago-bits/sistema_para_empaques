@@ -2,6 +2,25 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versionado semántico.
 
+## [1.8.0] - 2026-10-03
+
+### Agregado
+- **Importar y exportar** (en el menú, sección Sistema): un solo lugar para bajar a Excel o subir desde Excel
+  clientes, proveedores, camioneros, camiones, transportistas, embaladores, productores y demás fichas, con su
+  planilla modelo; también los movimientos (producción, cargas, rechazos, cuentas corrientes y cheques).
+- **Datos de ejemplo** con un botón en la administración general: al menos 10 de cada cosa (fichas, 10 cámaras de
+  frío, lotes, pallets, cajones con etiqueta, 10 cargas con remitos y facturas, caja, cheques, cuentas corrientes,
+  máquinas y mantenimientos, incidentes, costos, paradas de línea, insumos y sus movimientos). No crea usuarios
+  y funciona en el hosting (no necesita consola ni dependencias de desarrollo).
+
+### Cambiado
+- Textos más simples, en criollo: «Inicio» (antes Dashboard), «Escanear cajones», «Cámaras de frío», «Fichas»
+  (antes Catálogos), «Camioneros» (antes Choferes), «Copias de seguridad» (antes Backups), «Balanzas y sensores»
+  (antes Tokens de API, con una explicación de para qué sirve), «Historial de cambios» (antes Auditoría),
+  «Herramientas técnicas», «Puesto fijo de escaneo» (antes Modo kiosco), entre otros.
+- El menú de la izquierda queda donde lo dejaste al cambiar de pantalla (antes volvía siempre arriba).
+- Los importes de las tarjetas ya no se cortan a la mitad en pantallas angostas: se achica la letra.
+
 ## [1.7.2] - 2026-10-03
 
 ### Agregado

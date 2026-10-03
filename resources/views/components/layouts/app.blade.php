@@ -78,6 +78,23 @@
                 </div>
             @endforeach
         </nav>
+        {{-- El menú queda donde lo dejaste al cambiar de pantalla (antes volvía siempre arriba de todo). --}}
+        <script>
+            (function () {
+                var nav = document.querySelector('.sidebar-scroll');
+                if (!nav) return;
+                var key = 'galpon.sidebar-scroll';
+                try { var saved = sessionStorage.getItem(key); if (saved !== null) nav.scrollTop = parseInt(saved, 10) || 0; } catch (e) {}
+                var active = nav.querySelector('.nav-item.active');
+                if (active) {
+                    var a = active.getBoundingClientRect(), n = nav.getBoundingClientRect();
+                    if (a.top < n.top || a.bottom > n.bottom) active.scrollIntoView({ block: 'center' });
+                }
+                var save = function () { try { sessionStorage.setItem(key, String(nav.scrollTop)); } catch (e) {} };
+                nav.addEventListener('scroll', save, { passive: true });
+                nav.addEventListener('click', save);
+            })();
+        </script>
         <div class="border-t border-white/5 px-5 py-3 text-[11px] text-stone-500">
             v{{ config('galpon.version') }}
             @if ($envLabel)

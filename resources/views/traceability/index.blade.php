@@ -1,5 +1,5 @@
-<x-layouts.app title="Trazabilidad">
-    <x-page-header title="Trazabilidad" subtitle="Escaneá o escribí el código de un cajón o pallet para ver toda su historia."/>
+<x-layouts.app title="Seguir un cajón">
+    <x-page-header title="Seguir un cajón o pallet" subtitle="Escaneá o escribí el código de un cajón o pallet para ver toda su historia."/>
 
     <form method="GET" action="{{ route('traceability.index') }}" class="panel mb-6 flex flex-wrap items-end gap-3 p-4" data-allow-resubmit>
         <div class="min-w-64 flex-1">

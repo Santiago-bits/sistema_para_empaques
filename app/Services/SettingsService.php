@@ -81,6 +81,8 @@ class SettingsService
         'system.installed' => [false, 'bool', 'system'],
         // Gestión de clientes (Panel General) activada desde la administración general, sin tocar el .env.
         'system.central_panel' => [false, 'bool', 'system'],
+        // Fecha en que se cargaron los datos de ejemplo desde la administración general (se cargan una sola vez).
+        'system.sample_data_at' => ['', 'string', 'system'],
         'system.environment_label' => ['', 'string', 'system'],
     ];
 

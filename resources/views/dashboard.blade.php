@@ -3,11 +3,11 @@
     $cmp = $stats['comparisons'];
     $delta = fn ($key, $metric = 'kg') => $cmp[$key]['metrics'][$metric]['pct'] ?? null;
 @endphp
-<x-layouts.app title="Dashboard">
-    <x-page-header title="Dashboard" :subtitle="'Hoy, '.now()->translatedFormat('l j \d\e F').' · actualizado '.$stats['generated_at']">
+<x-layouts.app title="Inicio">
+    <x-page-header title="Inicio" :subtitle="'Hoy, '.now()->translatedFormat('l j \d\e F').' · actualizado '.$stats['generated_at']">
         <x-slot:actions>
             @can('production.scan')
-                <a href="{{ route('production.scan') }}" class="btn btn-primary"><x-icon name="scan" class="size-4"/> Modo escaneo</a>
+                <a href="{{ route('production.scan') }}" class="btn btn-primary"><x-icon name="scan" class="size-4"/> Escanear cajones</a>
             @endcan
         </x-slot:actions>
     </x-page-header>

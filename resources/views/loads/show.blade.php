@@ -58,7 +58,7 @@
                     'Propietario' => $load->owner?->name,
                     'Transportista' => $load->transporter?->business_name ?? $load->truck?->transporter?->business_name,
                     'Camión' => $load->truck ? $load->truck->plate.' — '.trim($load->truck->brand.' '.$load->truck->model) : null,
-                    'Chofer' => $load->driver ? $load->driver->full_name.' (DNI '.$load->driver->dni.')' : null,
+                    'Camionero' => $load->driver ? $load->driver->full_name.' (DNI '.$load->driver->dni.')' : null,
                     'Acoplado' => $load->trailer_plate,
                     'N° de guía' => $load->guide_number,
                     'Destino comercial' => \App\Models\Load::COMMERCIAL_DESTINATIONS[$load->commercial_destination] ?? null,

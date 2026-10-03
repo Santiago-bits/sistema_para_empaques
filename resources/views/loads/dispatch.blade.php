@@ -7,7 +7,7 @@
         <x-panel title="Datos a verificar">
             <x-dl class="!grid-cols-1" :items="[
                 'Camión / patente' => $load->truck ? $load->truck->plate.' — '.trim($load->truck->brand.' '.$load->truck->model) : null,
-                'Chofer' => $load->driver ? $load->driver->full_name.' · DNI '.$load->driver->dni.($load->driver->licenseExpired() ? ' · LICENCIA VENCIDA' : '') : null,
+                'Camionero' => $load->driver ? $load->driver->full_name.' · DNI '.$load->driver->dni.($load->driver->licenseExpired() ? ' · LICENCIA VENCIDA' : '') : null,
                 'Destino' => $load->destination?->name,
                 'Cliente' => $load->client?->business_name,
                 'Cantidad' => num($load->total_crates).' cajones',

@@ -52,7 +52,7 @@ class ApiTokenController extends Controller
             ! empty($data['expires_at']) ? \Illuminate\Support\Carbon::parse($data['expires_at'])->endOfDay() : null);
 
         return redirect()->route('admin.tokens.index')
-            ->with('success', 'Token creado. Copialo ahora: no se vuelve a mostrar.')
+            ->with('success', 'Llave de conexión creada. Copiala ahora: no se vuelve a mostrar.')
             ->with('plain_token', $token->plainTextToken);
     }
 
@@ -64,6 +64,6 @@ class ApiTokenController extends Controller
             ->findOrFail($token);
         $this->tokens->revoke($model);
 
-        return back()->with('success', 'Token revocado. Los dispositivos que lo usaban dejan de tener acceso.');
+        return back()->with('success', 'Llave anulada. Los equipos que la usaban dejan de conectarse.');
     }
 }

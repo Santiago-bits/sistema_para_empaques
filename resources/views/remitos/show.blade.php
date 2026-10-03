@@ -24,7 +24,7 @@
                     'CUIT cliente' => \App\Rules\Cuit::format($remito->client?->cuit),
                     'Destino' => $remito->destination?->name,
                     'Camión' => $remito->truck?->plate,
-                    'Chofer' => $remito->driver?->full_name,
+                    'Camionero' => $remito->driver?->full_name,
                     'Emitido por' => $remito->creator?->full_name,
                     'Observaciones' => $remito->notes,
                 ]"/>

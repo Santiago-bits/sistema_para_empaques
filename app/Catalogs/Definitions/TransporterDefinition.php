@@ -79,7 +79,7 @@ class TransporterDefinition extends CatalogDefinition
             Column::make('Contacto', 'contact'),
             Column::make('Teléfono', 'phone'),
             Column::make('Camiones', 'trucks_count')->num(),
-            Column::make('Choferes', 'drivers_count')->num(),
+            Column::make('Camioneros', 'drivers_count')->num(),
             Column::make('Estado', 'active')->as('active'),
         ];
     }
@@ -126,7 +126,7 @@ class TransporterDefinition extends CatalogDefinition
                     ]),
                 ],
                 [
-                    'title' => 'Choferes',
+                    'title' => 'Camioneros',
                     'items' => $record->drivers->map(fn ($d) => [
                         'label' => $d->full_name, 'meta' => 'DNI '.$d->dni, 'url' => route('catalogs.drivers.show', $d), 'active' => $d->active,
                     ]),

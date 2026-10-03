@@ -93,6 +93,33 @@ class HubController extends Controller
         ]);
     }
 
+    /**
+     * Carga al menos 10 ejemplos de todo (fichas, cámaras, lotes, pallets, cajones, cargas, facturas, caja,
+     * cheques, mantenimiento…) para ver cómo se ve el sistema y probarlo. Una sola vez; no crea usuarios.
+     */
+    public function sampleData(Request $request, SettingsService $settings): RedirectResponse
+    {
+        if ($loaded = setting('system.sample_data_at')) {
+            return back()->with('error', 'Los datos de ejemplo ya se cargaron el '.fdate(\Illuminate\Support\Carbon::parse($loaded), true).'.');
+        }
+        @set_time_limit(300);
+        @ignore_user_abort(true);
+
+        try {
+            (new \Database\Seeders\DemoSeeder)->runFor($request->user());
+        } catch (\Throwable $e) {
+            report($e);
+
+            return back()->with('error', 'No se pudieron cargar todos los ejemplos ('.class_basename($e).'). No se guardó nada a medias: probá de nuevo.');
+        }
+        $settings->set('system.sample_data_at', now()->toIso8601String());
+        $this->audit->log('settings', null, null, ['system.sample_data_at' => true], 'Cargó los datos de ejemplo');
+
+        return redirect()->route('superadmin.index')->with('success',
+            'Listo: se cargaron ejemplos de todo (fichas, cámaras de frío, lotes, pallets, cajones, cargas, remitos, facturas, caja, cheques, '
+            .'mantenimiento, incidentes y más). Recorré el menú para verlos.');
+    }
+
     /** Activa la gestión de clientes (Panel General) en este servidor: clientes, pagos, uso y soporte. */
     public function centralPanel(Request $request, SettingsService $settings): RedirectResponse
     {

@@ -1,5 +1,5 @@
 <x-layouts.app title="Errores del sistema">
-    <x-page-header title="Panel desarrollador" subtitle="Errores técnicos registrados con su código ERR-…"/>
+    <x-page-header title="Herramientas técnicas" subtitle="Errores técnicos registrados con su código ERR-…"/>
     @include('developer._nav')
 
     <x-filters>

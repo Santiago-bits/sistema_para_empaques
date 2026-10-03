@@ -76,7 +76,7 @@
                           :value="$user->exists ? $user->warehouses->pluck('id')->all() : array_keys($warehouses->all())"/>
             </div>
             <div class="mt-4">
-                <x-checkbox name="kiosk_mode" label="Modo kiosco" :checked="$user->kiosk_mode"
+                <x-checkbox name="kiosk_mode" label="Puesto fijo de escaneo (sin menú)" :checked="$user->kiosk_mode"
                             hint="El usuario sólo verá la pantalla de escaneo (PCs dedicadas a producción)."/>
             </div>
         </x-panel>

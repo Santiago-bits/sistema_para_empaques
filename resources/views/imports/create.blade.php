@@ -8,7 +8,7 @@
                 <x-select name="type" label="¿Qué vas a importar?" :options="$types" :value="$type" placeholder="Seleccionar…" required/>
                 <x-select name="mode" label="Si un registro ya existe (mismo código, CUIT, DNI o patente)" :options="\App\Services\ImportService::MODES" :value="request('mode', 'upsert')"
                           hint="Tip: exportá el catálogo a Excel desde su listado, corregilo y volvé a importarlo con «actualizar los existentes»."/>
-                <x-field label="Archivo (CSV o XLSX, máximo 10 MB)" name="file">
+                <x-field label="Planilla de Excel (máximo 10 MB)" name="file">
                     <input type="file" name="file" accept=".csv,.xlsx,.txt" required class="form-input">
                 </x-field>
                 <button class="btn btn-primary"><x-icon name="upload" class="size-4"/> Validar archivo</button>

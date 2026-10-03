@@ -1,5 +1,5 @@
-<x-layouts.app title="Catálogos">
-    <x-page-header title="Catálogos" subtitle="Datos maestros del galpón: personas, empresas, productos y parámetros de producción.">
+<x-layouts.app title="Fichas">
+    <x-page-header title="Fichas" subtitle="Los datos que se cargan una vez y se usan siempre: personas, empresas, productos y datos de producción.">
         <x-slot:actions>
             @can('lots.view')
                 <a href="{{ route('lots.index') }}" class="btn btn-secondary"><x-icon name="layers" class="size-4"/> Lotes</a>

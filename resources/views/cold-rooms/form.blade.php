@@ -14,7 +14,7 @@
                 <div></div>
                 <x-input name="humidity_min" label="Humedad mínima (%)" :value="$room->humidity_min" inputmode="decimal"/>
                 <x-input name="humidity_max" label="Humedad máxima (%)" :value="$room->humidity_max" inputmode="decimal"/>
-                <x-input name="sensor_key" label="Clave de sensor (API)" :value="$room->sensor_key" class="code" hint="Para lecturas automáticas: POST /api/v1/cold-rooms/{clave}/readings"/>
+                <x-input name="sensor_key" label="Código del sensor automático (opcional)" :value="$room->sensor_key" class="code" hint="Sólo si la cámara tiene un sensor que manda la temperatura solo. Si anotás la temperatura a mano, dejalo vacío."/>
                 <div class="pt-6"><x-checkbox name="active" label="Activa" :checked="$room->active"/></div>
             </div>
         </x-panel>

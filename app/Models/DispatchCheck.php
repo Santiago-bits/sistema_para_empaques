@@ -15,7 +15,7 @@ class DispatchCheck extends Model
     public const ITEMS = [
         'truck' => 'Camión correcto',
         'plate' => 'Patente correcta',
-        'driver' => 'Chofer correcto',
+        'driver' => 'Camionero correcto',
         'quantity' => 'Cantidad correcta',
         'weight' => 'Peso correcto',
         'documentation' => 'Documentación',

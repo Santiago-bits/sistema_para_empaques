@@ -4,7 +4,7 @@
     $colors = ['active' => 'emerald', 'suspended' => 'amber', 'expired' => 'red'];
 @endphp
 <x-layouts.app title="Licencias">
-    <x-page-header title="Panel desarrollador" subtitle="Licencias por instalación. Una licencia vencida sólo muestra un aviso: nunca bloquea datos.">
+    <x-page-header title="Herramientas técnicas" subtitle="Licencias por instalación. Una licencia vencida sólo muestra un aviso: nunca bloquea datos.">
         <x-slot:actions>
             <a href="{{ route('developer.licenses.create') }}" class="btn btn-primary"><x-icon name="plus" class="size-4"/> Nueva licencia</a>
         </x-slot:actions>

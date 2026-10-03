@@ -2,8 +2,8 @@
     $healthColor = ['ok' => 'emerald', 'warning' => 'amber', 'error' => 'red'][$health['status']];
     $checkLabels = ['database' => 'Base de datos', 'backup' => 'Backups al día', 'storage_writable' => 'Carpeta storage escribible'];
 @endphp
-<x-layouts.app title="Panel desarrollador">
-    <x-page-header title="Panel desarrollador" :subtitle="'Versión '.$version.' · '.config('galpon.installation_id')">
+<x-layouts.app title="Herramientas técnicas">
+    <x-page-header title="Herramientas técnicas" :subtitle="'Versión '.$version.' · '.config('galpon.installation_id')">
         <x-slot:actions><x-badge :color="$healthColor">{{ $health['label'] }}</x-badge></x-slot:actions>
     </x-page-header>
     @include('developer._nav')

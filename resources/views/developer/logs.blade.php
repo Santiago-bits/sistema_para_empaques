@@ -1,5 +1,5 @@
-<x-layouts.app title="Logs">
-    <x-page-header title="Panel desarrollador" subtitle="Últimas líneas de los logs técnicos (contraseñas y tokens enmascarados)"/>
+<x-layouts.app title="Registro técnico">
+    <x-page-header title="Herramientas técnicas" subtitle="Últimas líneas de los logs técnicos (contraseñas y tokens enmascarados)"/>
     @include('developer._nav')
 
     <form method="GET" class="panel mb-4 flex flex-wrap items-end gap-3 p-4" data-allow-resubmit>
