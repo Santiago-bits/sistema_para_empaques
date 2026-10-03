@@ -12,6 +12,8 @@ class SecurityHeaders
     {
         $response = $next($request);
 
+        // La caché de LiteSpeed (Hostinger) no debe guardar páginas: cada una lleva su clave de formulario (CSRF).
+        $response->headers->set('X-LiteSpeed-Cache-Control', 'no-cache');
         $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
         $response->headers->set('X-Content-Type-Options', 'nosniff');
         $response->headers->set('Referrer-Policy', 'same-origin');
