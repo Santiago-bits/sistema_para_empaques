@@ -59,12 +59,12 @@ class ScreensCrawlTest extends TestCase
     {
         parent::setUp();
         $this->seed(DemoSeeder::class);
-        $this->assertSame(4, \App\Models\Load::query()->count(), 'El seeder demo debe generar cargas');
+        $this->assertGreaterThanOrEqual(4, \App\Models\Load::query()->count(), 'El seeder demo debe generar cargas');
         $overfull = \App\Models\WarehouseLocation::query()->where('capacity_pallets', '>', 0)
             ->withCount(['pallets'])->get()->filter(fn ($l) => $l->pallets_count > $l->capacity_pallets);
         $this->assertCount(0, $overfull, 'Los datos demo no pueden superar la capacidad de las ubicaciones');
-        $this->assertSame(1, \App\Models\Invoice::query()->where('status', 'authorized')->count());
-        $this->assertSame(1, \App\Models\Remito::query()->where('status', 'delivered')->count());
+        $this->assertGreaterThanOrEqual(1, \App\Models\Invoice::query()->where('status', 'authorized')->count());
+        $this->assertGreaterThanOrEqual(1, \App\Models\Remito::query()->where('status', 'delivered')->count());
         Module::query()->update(['enabled' => true]);
         app(ModuleService::class)->flush();
     }

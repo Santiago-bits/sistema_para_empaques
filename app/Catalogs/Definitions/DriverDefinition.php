@@ -21,15 +21,15 @@ class DriverDefinition extends CatalogDefinition
 
     protected string $uri = 'catalogos/choferes';
 
-    protected string $title = 'Choferes';
+    protected string $title = 'Camioneros';
 
-    protected string $singular = 'chofer';
+    protected string $singular = 'camionero';
 
     protected string $icon = 'user-chart';
 
     protected string $group = 'Logística';
 
-    protected string $description = 'Choferes y vencimiento de licencias.';
+    protected string $description = 'Camioneros (choferes), sus datos y el vencimiento del carnet.';
 
     protected array $searchable = ['first_name', 'last_name', 'dni', 'license_number'];
 

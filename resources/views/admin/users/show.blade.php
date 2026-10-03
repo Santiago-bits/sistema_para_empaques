@@ -41,7 +41,7 @@
                 'Teléfono' => $user->phone,
                 'Embalador vinculado' => $user->packer?->full_name,
                 'Galpones' => $user->warehouses->pluck('name')->join(', '),
-                'Modo kiosco' => $user->kiosk_mode ? 'Sí' : 'No',
+                'Puesto fijo de escaneo' => $user->kiosk_mode ? 'Sí' : 'No',
                 'Alta' => fdate($user->created_at, true),
                 'Contraseña' => $user->must_change_password ? 'Temporal (debe cambiarla al ingresar)' : ($user->password_changed_at ? 'Cambiada el '.fdate($user->password_changed_at, true) : null),
                 'Último acceso' => fdate($user->last_login_at, true).($user->last_login_ip ? ' · IP '.$user->last_login_ip : ''),

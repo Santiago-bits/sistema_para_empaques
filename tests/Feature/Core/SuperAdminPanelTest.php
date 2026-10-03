@@ -196,6 +196,32 @@ class SuperAdminPanelTest extends TestCase
         $this->post(route('login.store'), ['login' => 'leonardo', 'password' => 'OtraClave22'])->assertRedirect(route('home'));
     }
 
+    public function test_sample_data_button_loads_at_least_ten_of_everything_once(): void
+    {
+        $this->superAdmin();
+        $users = User::query()->count();
+
+        $this->get(route('superadmin.index'))->assertSee('Cargar datos de ejemplo');
+        $this->post(route('superadmin.sample'))->assertRedirect(route('superadmin.index'))->assertSessionHas('success');
+
+        foreach ([\App\Models\Producer::class, \App\Models\Owner::class, \App\Models\Client::class, \App\Models\Destination::class, \App\Models\Provider::class,
+            \App\Models\Transporter::class, \App\Models\Truck::class, \App\Models\Driver::class, \App\Models\Variety::class, \App\Models\Size::class,
+            \App\Models\ColdRoom::class, \App\Models\Supply::class, \App\Models\Machine::class, \App\Models\Incident::class, \App\Models\Cost::class,
+            \App\Models\ProductionStoppage::class, \App\Models\ContainerType::class, \App\Models\Employee::class, \App\Models\ExchangeRate::class,
+            \App\Models\Check::class, \App\Models\CashMovement::class, \App\Models\Lot::class, \App\Models\Pallet::class, \App\Models\Crate::class,
+            \App\Models\Packer::class, \App\Models\InventoryMovement::class] as $model) {
+            $this->assertGreaterThanOrEqual(10, $model::query()->count(), class_basename($model).' debería tener al menos 10 ejemplos');
+        }
+        $this->assertGreaterThanOrEqual(8, \App\Models\Load::query()->count());
+        $this->assertGreaterThanOrEqual(3, \App\Models\Invoice::query()->count());
+        // No crea usuarios (en un servidor real serían cuentas con contraseña conocida).
+        $this->assertSame($users, User::query()->count());
+
+        // Una sola vez.
+        $this->post(route('superadmin.sample'))->assertSessionHas('error');
+        $this->get(route('superadmin.index'))->assertDontSee('Cargar datos de ejemplo');
+    }
+
     public function test_support_notification_goes_by_email_when_mail_is_configured(): void
     {
         $owner = User::factory()->role('super_admin')->create(['email' => 'duenio@example.com']);

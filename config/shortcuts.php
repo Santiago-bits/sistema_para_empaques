@@ -15,7 +15,7 @@ return [
     'functions' => [
         // Teclas de función de acceso directo (como en el sistema anterior).
         'F1' => ['route' => 'help.shortcuts', 'label' => 'Ayuda y atajos'],
-        'F2' => ['route' => 'production.scan', 'label' => 'Modo escaneo (registrar producción)'],
+        'F2' => ['route' => 'production.scan', 'label' => 'Escanear cajones (registrar producción)'],
         'F3' => ['route' => 'loads.index', 'label' => 'Cargas (egreso de fruta)'],
         'F4' => ['route' => 'pallets.index', 'label' => 'Pallets (ingreso de fruta)'],
         'F8' => ['route' => 'crates.index', 'label' => 'Cajones'],
@@ -46,7 +46,7 @@ return [
             'title' => 'Ir a una sección (G y luego una letra)',
             'items' => [
                 ['keys' => ['G', 'D'], 'description' => 'Tablero', 'go' => 'dashboard'],
-                ['keys' => ['G', 'E'], 'description' => 'Modo escaneo', 'go' => 'production.scan'],
+                ['keys' => ['G', 'E'], 'description' => 'Escanear cajones', 'go' => 'production.scan'],
                 ['keys' => ['G', 'J'], 'description' => 'Cajones', 'go' => 'crates.index'],
                 ['keys' => ['G', 'P'], 'description' => 'Pallets', 'go' => 'pallets.index'],
                 ['keys' => ['G', 'L'], 'description' => 'Lotes', 'go' => 'lots.index'],
@@ -64,7 +64,7 @@ return [
                 ['keys' => ['G', 'S'], 'description' => 'Estadísticas', 'go' => 'stats.index'],
                 ['keys' => ['G', 'A'], 'description' => 'Alertas', 'go' => 'alerts.index'],
                 ['keys' => ['G', 'N'], 'description' => 'Notificaciones', 'go' => 'notifications.index'],
-                ['keys' => ['G', 'K'], 'description' => 'Catálogos (productores, clientes, variedades…)', 'go' => 'catalogs.index'],
+                ['keys' => ['G', 'K'], 'description' => 'Fichas (productores, clientes, variedades…)', 'go' => 'catalogs.index'],
                 ['keys' => ['G', 'H'], 'description' => 'Ayuda y atajos', 'go' => 'help.shortcuts'],
             ],
         ],
@@ -83,7 +83,7 @@ return [
             ],
         ],
         [
-            'title' => 'Modo escaneo y kiosco',
+            'title' => 'Escanear cajones y puesto fijo',
             'items' => [
                 ['keys' => ['Enter'], 'description' => 'Confirmar el campo y pasar al siguiente (cajón → embalador → peso → guardar)'],
                 ['keys' => ['F2'], 'description' => 'Volver al campo «Cajón»'],

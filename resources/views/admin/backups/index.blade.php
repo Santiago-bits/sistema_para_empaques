@@ -2,8 +2,8 @@
     $statusColors = ['success' => 'emerald', 'failed' => 'red', 'running' => 'sky', 'pruned' => 'stone'];
     $restoreWord = \App\Http\Controllers\Admin\BackupController::RESTORE_WORD;
 @endphp
-<x-layouts.app title="Backups">
-    <x-page-header title="Backups" subtitle="Copias de seguridad de la base de datos, comprimidas y verificadas con checksum SHA-256.">
+<x-layouts.app title="Copias de seguridad">
+    <x-page-header title="Copias de seguridad" subtitle="Una copia de todos los datos del sistema, por si se rompe la computadora o se borra algo. Se controla que cada copia esté sana.">
         <x-slot:actions>
             <form method="POST" action="{{ route('backups.store') }}" x-data x-confirm="¿Generar un backup ahora? Puede tardar unos minutos.">
                 @csrf

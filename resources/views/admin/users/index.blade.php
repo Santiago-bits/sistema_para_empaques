@@ -24,7 +24,7 @@
                     <td class="code">{{ $user->username }}</td>
                     <td class="tabular-nums">{{ $user->dni ?? '—' }}</td>
                     <td>{{ $user->role?->name ?? '—' }}</td>
-                    <td><x-status :status="$user->status"/> @if ($user->kiosk_mode)<x-badge color="orange">Kiosco</x-badge>@endif</td>
+                    <td><x-status :status="$user->status"/> @if ($user->kiosk_mode)<x-badge color="orange">Puesto fijo</x-badge>@endif</td>
                     <td class="tabular-nums">{{ fdate($user->last_login_at, true) }}</td>
                     <td class="text-right"><a href="{{ route('admin.users.show', $user) }}" class="link">Ver</a></td>
                 </tr>

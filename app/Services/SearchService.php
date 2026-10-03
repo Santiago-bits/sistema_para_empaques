@@ -138,7 +138,7 @@ class SearchService
                 'map' => fn (Truck $t) => ['title' => $t->plate, 'subtitle' => trim($t->brand.' '.$t->model) ?: null, 'url' => route('catalogs.trucks.show', $t)],
             ],
             'drivers' => [
-                'label' => 'Choferes', 'icon' => 'users', 'permission' => 'catalogs.view',
+                'label' => 'Camioneros', 'icon' => 'users', 'permission' => 'catalogs.view',
                 'query' => fn () => Driver::query()->where(fn ($q) => $byDigits($q->where('last_name', 'like', $like)->orWhere('first_name', 'like', $like), 'dni'))->orderBy('last_name'),
                 'map' => fn (Driver $d) => ['title' => trim($d->last_name.', '.$d->first_name, ', '), 'subtitle' => $d->dni ? 'DNI '.$d->dni : null, 'url' => route('catalogs.drivers.show', $d)],
             ],

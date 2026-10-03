@@ -11,15 +11,16 @@
     ];
     $tag = $href ? 'a' : 'div';
 @endphp
-<{{ $tag }} @if ($href) href="{{ $href }}" @endif {{ $attributes->merge(['class' => 'panel flex items-start gap-3 p-3 sm:p-4'.($href ? ' transition hover:border-brand-400 hover:shadow' : '')]) }}>
+<{{ $tag }} @if ($href) href="{{ $href }}" @endif {{ $attributes->merge(['class' => '@container panel flex items-start gap-3 p-3 sm:p-4'.($href ? ' transition hover:border-brand-400 hover:shadow' : '')]) }}>
     @if ($icon)
-        <span class="grid size-9 shrink-0 place-items-center rounded-lg sm:size-10 {{ $colors[$color] ?? $colors['brand'] }}">
+        <span class="hidden size-9 shrink-0 place-items-center rounded-lg @min-[13rem]:grid sm:size-10 {{ $colors[$color] ?? $colors['brand'] }}">
             <x-icon :name="$icon" class="size-5"/>
         </span>
     @endif
     <div class="min-w-0 flex-1">
         <p class="text-[11px] leading-snug font-medium tracking-wide text-stone-500 uppercase sm:truncate sm:text-xs dark:text-stone-400">{{ $label }}</p>
-        <p class="mt-0.5 text-xl leading-tight font-semibold tabular-nums [overflow-wrap:anywhere] text-stone-900 sm:text-2xl dark:text-white">{{ $value }}</p>
+        {{-- Los importes nunca se cortan a la mitad: si la tarjeta es angosta, la letra se achica. --}}
+        <p class="mt-0.5 text-base leading-tight font-semibold whitespace-nowrap tabular-nums text-stone-900 @min-[11rem]:text-lg @min-[15rem]:text-xl @min-[19rem]:text-2xl dark:text-white">{{ $value }}</p>
         @if ($delta !== null)
             @php $d = (float) $delta; @endphp
             <p @class(['text-xs font-medium tabular-nums', 'text-emerald-600 dark:text-emerald-400' => $d >= 0, 'text-red-600 dark:text-red-400' => $d < 0])>

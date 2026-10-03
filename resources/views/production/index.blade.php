@@ -2,7 +2,7 @@
     <x-page-header title="Registros de producción" subtitle="Quién procesó cada cajón, cuándo, con qué peso y en qué línea.">
         <x-slot:actions>
             @can('production.scan')
-                <a href="{{ route('production.scan') }}" class="btn btn-primary"><x-icon name="scan" class="size-4"/> Modo escaneo</a>
+                <a href="{{ route('production.scan') }}" class="btn btn-primary"><x-icon name="scan" class="size-4"/> Escanear cajocaneo</a>
             @endcan
         </x-slot:actions>
     </x-page-header>

@@ -18,7 +18,7 @@
     </x-filters>
 
     <x-table>
-        <thead><tr><th>Número</th><th>Fecha</th><th>Cliente</th><th>Destino</th><th>Camión</th><th>Chofer</th><th class="num">Cajones</th><th class="num">Kg</th><th>Estado</th><th></th></tr></thead>
+        <thead><tr><th>Número</th><th>Fecha</th><th>Cliente</th><th>Destino</th><th>Camión</th><th>Camionero</th><th class="num">Cajones</th><th class="num">Kg</th><th>Estado</th><th></th></tr></thead>
         <tbody>
             @forelse ($loads as $load)
                 <tr>

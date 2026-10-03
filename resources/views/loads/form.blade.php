@@ -28,7 +28,7 @@
                 <x-select name="owner_id" label="Propietario" :options="$owners" :value="$load->owner_id" placeholder="—"/>
                 <x-select name="transporter_id" label="Transportista" :options="$transporters" :value="$load->transporter_id" placeholder="—"/>
                 <x-select name="truck_id" label="Camión" :options="$trucks" :value="$load->truck_id" placeholder="—"/>
-                <x-select name="driver_id" label="Chofer" :options="$drivers" :value="$load->driver_id" placeholder="—"/>
+                <x-select name="driver_id" label="Camionero" :options="$drivers" :value="$load->driver_id" placeholder="—"/>
                 <x-input name="planned_crates" type="number" min="1" label="Cajones previstos" :value="$load->planned_crates" hint="Opcional: muestra el avance del armado."/>
                 <x-input name="trailer_plate" label="Patente del acoplado" :value="$load->trailer_plate" class="uppercase" maxlength="12" placeholder="AA123BB"/>
                 <x-input name="guide_number" label="N° de guía" :value="$load->guide_number" maxlength="40" hint="Guía de tránsito / DTV."/>

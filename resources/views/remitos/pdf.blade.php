@@ -56,7 +56,7 @@
             </tr>
             <tr>
                 <td><div class="label">Camión</div>{{ $remito->truck?->plate ?? '—' }} {{ $remito->truck ? trim($remito->truck->brand.' '.$remito->truck->model) : '' }}</td>
-                <td><div class="label">Chofer</div>{{ $remito->driver?->full_name ?? '—' }}</td>
+                <td><div class="label">Camionero</div>{{ $remito->driver?->full_name ?? '—' }}</td>
                 <td><div class="label">DNI chofer</div>{{ $remito->driver?->dni ?? '—' }}</td>
             </tr>
             @php $remitoLoad = $remito->loadRecord; @endphp
