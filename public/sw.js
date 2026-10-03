@@ -4,7 +4,7 @@
  * todo se pide siempre al servidor.
  */
 const OFFLINE = '/offline.html';
-const CACHE = 'galpon-offline-v1';
+const CACHE = 'galpon-offline-v2';
 
 self.addEventListener('install', (event) => {
     event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll([OFFLINE, '/icons/icon-192.png'])));

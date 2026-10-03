@@ -44,9 +44,7 @@
             @if (setting('company.logo'))
                 <img src="{{ asset('storage/'.setting('company.logo')) }}" alt="" class="size-8 rounded object-contain">
             @else
-                <span class="grid size-8 place-items-center rounded-lg bg-gradient-to-br from-brand-500 to-brand-700 text-sm font-bold text-white shadow">
-                    <svg viewBox="0 0 24 24" class="size-5" fill="currentColor"><circle cx="12" cy="13" r="7" opacity=".9"/><path d="M12 6c1-2.5 3-3.5 5-3.5-.5 2-2 3.5-5 3.5z" fill="#86efac"/></svg>
-                </span>
+                <x-logo class="size-9 shrink-0 shadow"/>
             @endif
             <span class="min-w-0">
                 <span class="block truncate text-sm font-semibold text-white">{{ $companyName }}</span>

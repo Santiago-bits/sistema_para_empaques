@@ -2,6 +2,12 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versionado semántico.
 
+## [1.9.2] - 2026-10-03
+
+### Cambiado
+- Logo nuevo: rodaja de naranja con hoja sobre verde degradado, en el menú, la pantalla de ingreso, la pestaña del
+  navegador y los íconos de la app instalada (escritorio y celular).
+
 ## [1.9.1] - 2026-10-03
 
 ### Cambiado

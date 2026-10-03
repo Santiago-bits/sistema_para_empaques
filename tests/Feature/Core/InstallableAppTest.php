@@ -25,7 +25,7 @@ class InstallableAppTest extends TestCase
         $this->assertContains('192x192', $sizes);
         $this->assertContains('512x512', $sizes);
         foreach ($manifest['icons'] as $icon) {
-            $this->assertFileExists(public_path(ltrim($icon['src'], '/')));
+            $this->assertFileExists(public_path(ltrim(strtok($icon['src'], '?'), '/')));
         }
         $this->assertFileExists(public_path('sw.js'));
         $this->assertFileExists(public_path('offline.html'));

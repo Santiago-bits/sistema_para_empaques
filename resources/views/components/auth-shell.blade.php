@@ -6,9 +6,7 @@
             <div class="absolute inset-0 opacity-[0.07]" style="background-image: repeating-linear-gradient(90deg, #fff 0 1px, transparent 1px 48px), repeating-linear-gradient(0deg, #fff 0 1px, transparent 1px 48px);"></div>
             <div class="relative flex h-full flex-col justify-between p-12 text-white">
                 <div class="flex items-center gap-3">
-                    <span class="grid size-10 place-items-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 shadow-lg">
-                        <svg viewBox="0 0 24 24" class="size-6" fill="currentColor"><circle cx="12" cy="13" r="7" opacity=".9"/><path d="M12 6c1-2.5 3-3.5 5-3.5-.5 2-2 3.5-5 3.5z" fill="#86efac"/></svg>
-                    </span>
+                    <x-logo class="size-11 shadow-lg"/>
                     <span class="text-lg font-semibold">{{ setting('company.name', 'Galpón de Empaque') }}</span>
                 </div>
                 <div>
