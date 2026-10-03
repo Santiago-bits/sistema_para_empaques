@@ -148,6 +148,33 @@ class InstallerTest extends TestCase
         }
     }
 
+    /** «Sesión expirada» (419) en el instalador: vuelve al formulario con lo cargado, o explica la causa. */
+    public function test_expired_form_returns_to_the_installer_instead_of_419(): void
+    {
+        $render = function (bool $withCookie) {
+            $request = \Illuminate\Http\Request::create(route('install.store'), 'POST', ['company_name' => 'Empaque del Valle', 'admin_password' => 'Clave1234']);
+            if ($withCookie) {
+                $request->cookies->set(config('session.cookie'), 'algo');
+            }
+            $request->setRouteResolver(fn () => app('router')->getRoutes()->match($request));
+            $request->setLaravelSession(app('session.store'));
+            $this->app->instance('request', $request);
+
+            return app(\Illuminate\Contracts\Debug\ExceptionHandler::class)->render($request, new \Illuminate\Session\TokenMismatchException);
+        };
+
+        $response = $render(true);
+        $this->assertSame(302, $response->getStatusCode());
+        $this->assertSame(route('install.show'), $response->headers->get('Location'));
+        $this->assertSame('Empaque del Valle', session()->getOldInput('company_name'));
+        $this->assertNull(session()->getOldInput('admin_password'));
+
+        config(['session.secure' => true]);
+        $response = $render(false);
+        $this->assertSame(419, $response->getStatusCode());
+        $this->assertStringContainsString('https://', $response->getContent());
+    }
+
     public function test_invalid_timezone_is_rejected(): void
     {
         $this->post(route('install.store'), $this->payload(['timezone' => 'Marte/Olympus']))->assertSessionHasErrors('timezone');

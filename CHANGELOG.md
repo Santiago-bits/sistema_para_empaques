@@ -10,6 +10,10 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
   Ahora, al apartarlas, crea en el momento las tablas del sistema (o usa archivos si no puede). Los servidores que
   quedaron con ese error se arreglan solos al actualizar.
 - Al terminar la instalación con la base vacía, el administrador quedaba afuera y tenía que volver a ingresar.
+- **Instalador**: «Sesión expirada» (419) al tocar «Instalar sistema» con la página abierta desde antes de
+  actualizar. Ahora vuelve al formulario con lo cargado y, si el navegador no guarda la sesión, explica la causa.
+- Las páginas no se guardan en la caché de LiteSpeed (Hostinger): una página guardada traería una clave de
+  formulario vieja y daría «Sesión expirada».
 
 ## [1.6.1] - 2026-10-02
 

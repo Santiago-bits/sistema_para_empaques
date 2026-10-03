@@ -85,6 +85,29 @@ return Application::configure(basePath: dirname(__DIR__))
             ErrorReporter::capture($e);
         });
 
+        // Instalador con la página vieja (abierta desde antes de actualizar, o la sesión cambió de lugar al crear
+        // las tablas): en vez de «Sesión expirada», vuelve al formulario con lo cargado. Si el navegador ni
+        // siquiera devuelve la cookie de sesión, explica la causa probable (no tendría sentido reintentar).
+        $exceptions->render(function (HttpExceptionInterface $e, Request $request) {
+            if ($e->getStatusCode() !== 419 || ! $request->routeIs('install.*')) {
+                return null;
+            }
+            if ($request->cookies->has((string) config('session.cookie'))) {
+                return redirect()->route('install.show')
+                    ->withInput($request->except(['_token', 'admin_password', 'admin_password_confirmation', 'users', 'db_password']))
+                    ->withErrors(['install' => 'La página del instalador había quedado vieja (por ejemplo, estaba abierta desde antes de actualizar). '
+                        .'Ya se renovó: revisá los datos, volvé a escribir la contraseña del administrador y tocá «Instalar sistema».']);
+            }
+            $domain = (string) config('session.domain');
+            $hint = match (true) {
+                (bool) config('session.secure') && ! $request->isSecure() => 'Abrí el sistema con https:// adelante de la dirección.',
+                $domain !== '' && $domain !== 'null' && ! str_ends_with($request->getHost(), ltrim($domain, '.')) => 'Abrí el sistema desde su dirección principal (no desde una dirección temporal o alternativa).',
+                default => 'El navegador no está guardando las cookies de este sitio: permitilas o probá en otra ventana o navegador.',
+            };
+
+            return response()->view('errors.419', ['hint' => $hint, 'retry' => route('install.show')], 419);
+        });
+
         // Errores técnicos inesperados: código de referencia en lugar del detalle técnico.
         $exceptions->render(function (Throwable $e, Request $request) {
             if ($e instanceof HttpExceptionInterface || $e instanceof ValidationException
