@@ -2,7 +2,7 @@
 
 return [
     // Versión del sistema (se actualiza en cada release; ver CHANGELOG.md).
-    'version' => '1.8.1',
+    'version' => '1.9.0',
 
     // Identificador de esta instalación (para licencias y soporte).
     'installation_id' => env('GALPON_INSTALLATION_ID', 'local-dev'),

@@ -8,6 +8,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="heartbeat" content="1">
     <title>{{ $title }} · {{ setting('company.name', 'Galpón de Empaque') }}</title>
+    @include('partials.app-head')
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-screen bg-stone-950 text-white" x-data="{ offline: false }"

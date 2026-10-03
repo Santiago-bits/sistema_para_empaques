@@ -14,6 +14,16 @@ Cada usuario ve en el menú sólo lo que su rol permite. Si falta una opción, p
 
 Botón ☰ (arriba a la izquierda) abre el menú en celular/tablet.
 
+## Instalar el sistema como app
+
+- **Computadora (Chrome o Edge):** botón verde «Instalar app» arriba a la derecha (o el ícono de instalar en la
+  barra de direcciones). Queda un ícono en el escritorio y en el menú Inicio y se abre en su propia ventana.
+- **Celular Android:** en Chrome, menú ⋮ → «Instalar app».
+- **iPhone:** en Safari, botón Compartir → «Agregar a inicio».
+
+La app siempre carga desde el servidor: cuando se sube una versión nueva, se ve la próxima vez que se abre.
+Necesita la dirección con `https://` (en Hostinger ya viene) o la red del galpón.
+
 ## Atajos de teclado
 
 Apretá **?** en cualquier pantalla para ver todos los atajos (también en **Sistema → Ayuda y atajos**).

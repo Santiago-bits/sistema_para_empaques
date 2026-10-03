@@ -13,7 +13,7 @@ class RedirectIfNotInstalled
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if ($request->routeIs('install.*') || $request->is('up')) {
+        if ($request->routeIs('install.*', 'app.manifest') || $request->is('up')) {
             return $next($request);
         }
 
