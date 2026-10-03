@@ -2,6 +2,20 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versionado semántico.
 
+## [1.7.0] - 2026-10-03
+
+### Agregado
+- **Administración general** en `/administradorgeneral`, sólo para el Super Administrador y pidiendo de nuevo su
+  contraseña cada 15 minutos (todo queda auditado):
+  - **Usuarios**: todos los datos de cada usuario para ayudarlo; contraseña temporal si se la olvidó (las
+    contraseñas siguen cifradas y no se pueden ver), corregir usuario/email/teléfono con motivo, baja/alta con
+    motivo y cerrar todas sus sesiones.
+  - **Clientes y pagos**: cuota mensual de cada empaque, registro y anulación de pagos, «pagado hasta» y estado
+    (al día, por vencer, vencido, sin pagos), conexión y uso del sistema.
+  - **Soporte**: pedidos pendientes de los clientes; el aviso llega a la campanita y también por email si está
+    configurado el correo.
+  - La gestión de clientes (Panel General) se activa con un botón, sin tocar el `.env`.
+
 ## [1.6.2] - 2026-10-03
 
 ### Corregido

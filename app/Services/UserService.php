@@ -108,6 +108,53 @@ class UserService
     }
 
     /**
+     * Administración general: corrige los datos con los que alguien ingresa o se lo contacta (usuario, email,
+     * teléfono), por ejemplo cuando se olvidó con qué email se registró. Queda auditado con el motivo.
+     *
+     * @param  array{username: string, email: ?string, phone: ?string}  $data
+     */
+    public function updateAccessData(User $user, array $data, User $actor, string $reason): void
+    {
+        $fields = ['username', 'email', 'phone'];
+        $old = $user->only($fields);
+        $new = Arr::only($data, $fields);
+        if ($old == $new) {
+            return;
+        }
+        $user->update($new);
+        $this->audit->log('access_data', $user, $old, $new, 'Corrigió los datos de acceso de '.$user->username, $reason);
+    }
+
+    /** Administración general: activa o da de baja a un usuario (al darlo de baja se cierran sus sesiones). */
+    public function setStatus(User $user, UserStatus $status, User $actor, string $reason): void
+    {
+        if ($user->is($actor)) {
+            throw new BusinessException('No podés cambiar el estado de tu propio usuario.');
+        }
+        $this->guardLastSuperAdmin($user, ['status' => $status->value]);
+
+        DB::transaction(function () use ($user, $status, $reason) {
+            $old = $user->status;
+            $user->update([
+                'status' => $status,
+                'deactivated_at' => $status === UserStatus::Active ? null : ($user->deactivated_at ?? now()),
+            ]);
+            if ($status !== UserStatus::Active) {
+                $this->sessions->terminateAllFor($user);
+            }
+            $this->audit->log('status_changed', $user, ['status' => $old?->value], ['status' => $status->value],
+                $user->username.': '.$status->label(), $reason);
+        });
+    }
+
+    /** Cierra todas las sesiones abiertas y tokens de un usuario (por ejemplo, si perdió el celular). */
+    public function terminateSessions(User $user, User $actor): void
+    {
+        $this->sessions->terminateAllFor($user);
+        $this->audit->log('sessions_closed', $user, description: 'Cerró todas las sesiones de '.$user->username);
+    }
+
+    /**
      * Guarda las excepciones individuales de permisos respecto del rol.
      *
      * @param  array<string, string>  $overrides  slug => 'grant' | 'revoke' | 'inherit'

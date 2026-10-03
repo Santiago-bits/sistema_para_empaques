@@ -79,6 +79,7 @@ return [
     [
         'title' => 'Sistema',
         'items' => [
+            ['label' => 'Administración general', 'route' => 'superadmin.index', 'icon' => 'shield', 'permission' => 'developer', 'module' => 'core'],
             ['label' => 'Usuarios', 'route' => 'admin.users.index', 'icon' => 'users', 'permission' => 'users.view', 'module' => 'core'],
             ['label' => 'Actividad del personal', 'route' => 'admin.activity.index', 'icon' => 'chart-line', 'permission' => 'users.view', 'module' => 'core'],
             ['label' => 'Roles y permisos', 'route' => 'admin.roles.index', 'icon' => 'shield', 'permission' => 'roles.manage', 'module' => 'core'],

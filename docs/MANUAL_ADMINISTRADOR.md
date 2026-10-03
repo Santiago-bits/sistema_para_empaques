@@ -19,6 +19,28 @@
   sin cambiar su rol.
 - Un administrador **no** puede modificar a un Super Administrador.
 
+## Administración general (`/administradorgeneral`)
+
+Sólo para el **Super Administrador** (el dueño del sistema). Se entra desde el menú Sistema → Administración
+general o escribiendo `tu-dominio/administradorgeneral`. Para cualquier otro usuario esa dirección no existe.
+
+- **Seguridad**: pide volver a escribir tu contraseña cada 15 minutos (aunque alguien encuentre tu sesión abierta,
+  no entra). «Salir de la administración» la vuelve a pedir. Cada ingreso, cada intento fallido y cada ficha
+  consultada quedan en la auditoría.
+- **Contraseñas**: se guardan **cifradas** (bcrypt). Nadie puede verlas, ni vos ni quien tenga acceso a la base.
+  Si alguien se olvida la suya, en su ficha tocás **Generar contraseña temporal**: se muestra una sola vez,
+  se cierran sus sesiones y el sistema le pide cambiarla apenas ingresa.
+- **Usuarios**: todos los datos de cada uno (nombre, usuario, email, teléfono, DNI, CUIT, rol, sectores, último
+  ingreso e IP, sesiones abiertas, actividad). Desde la ficha: corregir usuario/email/teléfono (con motivo),
+  dar de baja o reactivar (con motivo) y cerrar todas sus sesiones.
+- **Clientes y pagos** (al tocar **Activar gestión de clientes**): cada empaque cliente con su cuota mensual,
+  **hasta cuándo pagó** (Al día / Por vencer / Vencido / Sin pagos), si se conecta y cuánto usa el sistema
+  (usuarios activos, cajones en 30 días). Registrar un pago suma los meses a continuación de lo ya pagado;
+  un pago mal cargado se **anula** con motivo y la cobertura vuelve atrás sola. El estado de pago es
+  informativo: nunca bloquea los datos del cliente.
+- **Soporte**: los pedidos de los clientes llegan a la campanita y, si tenés email cargado y el envío de correos
+  configurado, también por email. El resumen muestra los pendientes.
+
 ## Usuarios
 
 Administración → Usuarios. Datos: usuario, DNI, CUIT, código interno, email (opcional), galpones,

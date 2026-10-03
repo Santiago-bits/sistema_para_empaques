@@ -56,6 +56,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'ability' => \Laravel\Sanctum\Http\Middleware\CheckForAnyAbility::class,
             'central' => \App\Http\Middleware\EnsureCentralMode::class,
             'installation' => \App\Http\Middleware\AuthenticateInstallation::class,
+            'superadmin' => \App\Http\Middleware\EnsureSuperAdminConfirmed::class,
         ]);
         $middleware->web(append: [SecurityHeaders::class, RedirectIfNotInstalled::class]);
         $middleware->api(prepend: [\App\Http\Middleware\ForceJsonResponse::class], append: [SecurityHeaders::class]);
