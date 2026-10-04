@@ -1,6 +1,6 @@
 <x-auth-shell title="Recuperar contraseña">
     <div class="space-y-5">
-        <div>
+        <div class="text-center">
             <h1 class="text-2xl font-semibold tracking-tight">Recuperar contraseña</h1>
             <p class="mt-1 text-sm text-stone-500">Te enviamos un enlace a tu email para que crees una contraseña nueva. Si no tenés email cargado, le avisamos al administrador para que te asigne una temporal.</p>
         </div>

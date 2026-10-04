@@ -1,6 +1,6 @@
 <x-auth-shell title="Ingresar">
     <div class="space-y-5">
-        <div>
+        <div class="text-center">
             <h1 class="text-2xl font-semibold tracking-tight">Ingresar al sistema</h1>
             <p class="mt-1 text-sm text-stone-500">{{ $google ? 'Ingresá con tus datos de acceso o con tu cuenta de Google.' : 'Ingresá con tus datos de acceso.' }}</p>
         </div>
@@ -24,7 +24,7 @@
                      autofocus autocomplete="username" required class="py-2.5 text-base"/>
             <div>
                 <x-input name="password" type="password" label="Contraseña" autocomplete="current-password" required class="py-2.5 text-base"/>
-                <div class="mt-1.5 text-right">
+                <div class="mt-1.5 text-center">
                     <a href="{{ route('password.request') }}" class="link text-sm">¿Olvidaste tu contraseña?</a>
                 </div>
             </div>
