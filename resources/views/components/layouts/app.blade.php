@@ -11,13 +11,23 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="heartbeat" content="1">
+    <meta name="heartbeat" content="{{ url('api/heartbeat') }}">
     <title>{{ $title ? $title.' · ' : '' }}{{ $companyName }}</title>
     <script>
         (function () {
             var m = document.documentElement.dataset.theme || 'system';
             var dark = m === 'dark' || (m === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
             if (dark) document.documentElement.classList.add('dark');
+        })();
+        // Menú lateral oculto en la computadora (botón ☰): se recuerda al cambiar de pantalla. Se aplica antes de
+        // dibujar la página para que el menú no aparezca y desaparezca en cada carga.
+        (function () {
+            var key = 'galpon.sidebar-collapsed', root = document.documentElement;
+            try { if (localStorage.getItem(key) === '1') root.classList.add('sidebar-collapsed'); } catch (e) {}
+            window.toggleSidebarCollapsed = function () {
+                var collapsed = root.classList.toggle('sidebar-collapsed');
+                try { localStorage.setItem(key, collapsed ? '1' : '0'); } catch (e) {}
+            };
         })();
     </script>
     @include('partials.app-head')
@@ -37,7 +47,7 @@
     {{-- Sidebar --}}
     {{-- Fondo oscuro y desenfocado detrás del menú en celulares/tablets: no se ve el contenido de atrás. --}}
     <div x-cloak x-show="sidebar" x-transition.opacity class="fixed inset-0 z-30 bg-stone-950/80 backdrop-blur-sm lg:hidden" @click="sidebar = false" aria-hidden="true"></div>
-    <aside class="fixed inset-y-0 left-0 z-40 flex w-72 max-w-[85vw] -translate-x-full flex-col bg-stone-900 shadow-2xl transition-transform duration-200 lg:w-64 lg:translate-x-0 lg:shadow-none dark:bg-stone-950 dark:ring-1 dark:ring-white/5"
+    <aside class="app-sidebar fixed inset-y-0 left-0 z-40 flex w-72 max-w-[85vw] -translate-x-full flex-col bg-stone-900 shadow-2xl transition-transform duration-200 lg:w-64 lg:translate-x-0 lg:shadow-none dark:bg-stone-950 dark:ring-1 dark:ring-white/5"
            :class="sidebar && 'translate-x-0'" aria-label="Menú principal">
         <div class="flex h-16 shrink-0 items-center border-b border-white/5 pr-2">
         <a href="{{ route('home') }}" class="flex min-w-0 flex-1 items-center gap-3 px-5">
@@ -53,6 +63,10 @@
         </a>
             <button type="button" class="rounded-lg p-2 text-stone-400 hover:bg-white/10 hover:text-white lg:hidden" @click="sidebar = false" aria-label="Cerrar menú">
                 <x-icon name="x" class="size-5"/>
+            </button>
+            <button type="button" class="hidden rounded-lg p-2 text-stone-400 hover:bg-white/10 hover:text-white lg:block" onclick="toggleSidebarCollapsed()"
+                    aria-label="Ocultar menú" title="Ocultar menú (se vuelve a mostrar con ☰)">
+                <x-icon name="arrow-left" class="size-5"/>
             </button>
         </div>
         <nav class="sidebar-scroll flex-1 space-y-5 overflow-y-auto overscroll-contain px-3 py-4">
@@ -103,9 +117,14 @@
     </aside>
 
     {{-- Contenido --}}
-    <div class="flex min-w-0 flex-1 flex-col lg:pl-64">
+    <div class="app-content flex min-w-0 flex-1 flex-col lg:pl-64">
         <header class="sticky top-0 z-20 flex h-16 items-center gap-2 border-b border-stone-200 bg-white/90 px-4 backdrop-blur sm:px-6 dark:border-stone-800 dark:bg-stone-900/90 no-print">
             <button type="button" class="btn btn-ghost -ml-2 p-2 lg:hidden" @click="sidebar = true" aria-label="Abrir menú">
+                <x-icon name="menu"/>
+            </button>
+            {{-- Computadora: muestra u oculta el menú lateral (más lugar para tablas y planillas). --}}
+            <button type="button" class="btn btn-ghost -ml-2 hidden p-2 lg:inline-flex" onclick="toggleSidebarCollapsed()"
+                    aria-label="Mostrar u ocultar el menú" title="Mostrar u ocultar el menú">
                 <x-icon name="menu"/>
             </button>
 
