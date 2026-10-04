@@ -28,7 +28,8 @@ class LoginController extends Controller
         $intended = (string) session('url.intended', '');
 
         return view('auth.login', [
-            'hint' => LoginIdentifiers::hint(),
+            'label' => LoginIdentifiers::label(),
+            'google' => GoogleLoginController::enabled(),
             'adminArea' => str_contains(parse_url($intended, PHP_URL_PATH) ?? '', '/administradorgeneral'),
         ]);
     }

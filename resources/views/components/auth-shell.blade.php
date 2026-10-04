@@ -9,10 +9,10 @@
                     <x-logo class="size-11 shadow-lg"/>
                     <span class="text-lg font-semibold">{{ setting('company.name', 'Galpón de Empaque') }}</span>
                 </div>
-                <div>
+                <div class="mx-auto max-w-xl text-center">
                     <p class="font-mono text-xs tracking-widest text-brand-400 uppercase">Productor → Lote → Pallet → Cajón → Carga → Remito → Factura</p>
-                    <h2 class="mt-4 max-w-md text-4xl leading-tight font-semibold">Cada cajón, con su historia completa.</h2>
-                    <p class="mt-4 max-w-md text-stone-400">Qué ingresó, de quién es, quién lo embaló, cuánto pesó, dónde está y en qué camión salió.</p>
+                    <h2 class="mt-4 text-4xl leading-tight font-semibold">Cada cajón, con su historia completa.</h2>
+                    <p class="mt-4 text-stone-400">Qué ingresó, de quién es, quién lo embaló, cuánto pesó, dónde está y en qué camión salió.</p>
                 </div>
                 <p class="text-xs text-stone-500">v{{ config('galpon.version') }}</p>
             </div>

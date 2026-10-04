@@ -26,6 +26,14 @@ class LoginIdentifiers
         return collect(self::enabled() ?: ['username'])->map(fn ($i) => self::LABELS[$i])->join(', ', ' o ');
     }
 
+    /** Etiqueta del campo de ingreso: "Usuario, DNI o email" (dice exactamente qué se puede escribir). */
+    public static function label(): string
+    {
+        $hint = self::hint();
+
+        return mb_strtoupper(mb_substr($hint, 0, 1)).mb_substr($hint, 1);
+    }
+
     public static function find(string $login): ?User
     {
         $login = trim($login);
