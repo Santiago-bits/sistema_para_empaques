@@ -4,25 +4,35 @@ namespace App\Services;
 
 use App\Exceptions\BusinessException;
 use App\Models\User;
+use App\Notifications\PasswordResetCode;
 use App\Notifications\PasswordResetRequested;
 use App\Support\ErrorReporter;
 use App\Support\LoginIdentifiers;
+use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
-use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\RateLimiter;
 use Throwable;
 
 /**
  * Recuperación de contraseña en dos caminos:
- *  - Usuario con email: enlace firmado de un solo uso (broker de Laravel, vence en 60 min).
+ *  - Usuario con email: código de 6 dígitos por email → se valida en el sistema → contraseña nueva.
+ *    El código se guarda con hash (nunca en texto plano), vence en CODE_MINUTES y admite CODE_ATTEMPTS intentos.
  *  - Usuario sin email (lo habitual en planta): aviso a los administradores, que le asignan
  *    una contraseña temporal; el sistema obliga a cambiarla en el siguiente ingreso.
  * La respuesta al público es siempre la misma: no revela si el usuario existe.
  */
 class PasswordResetService
 {
+    /** Minutos de validez del código enviado por email. */
+    public const CODE_MINUTES = 15;
+
+    /** Intentos para escribir el código; al agotarlos hay que pedir uno nuevo. */
+    public const CODE_ATTEMPTS = 5;
+
     /** Minutos entre avisos repetidos a los administradores por el mismo usuario. */
     private const ADMIN_NOTICE_COOLDOWN = 15;
 
@@ -32,38 +42,73 @@ class PasswordResetService
     ) {
     }
 
-    public function request(string $login, ?string $ip): void
+    /**
+     * Pedido de recuperación. Devuelve el id del usuario al que se le envió el código (el controlador lo
+     * guarda en la sesión del servidor para el paso siguiente) o null si no corresponde enviarlo.
+     */
+    public function request(string $login, ?string $ip): ?int
     {
         $user = LoginIdentifiers::find($login);
         if (! $user || ! $user->isActive()) {
-            return;
+            return null;
         }
 
-        $channel = $user->email && $this->sendLink($user) ? 'email' : 'admin';
+        $channel = $user->email && $this->sendCode($user) ? 'email' : 'admin';
         if ($channel === 'admin') {
             $this->notifyAdmins($user, $ip);
         }
 
         $this->audit->log('password_reset_requested', $user, null, ['channel' => $channel, 'ip' => $ip],
-            $channel === 'email' ? 'Pidió recuperar la contraseña (enlace por email)' : 'Pidió recuperar la contraseña (aviso al administrador)');
+            $channel === 'email' ? 'Pidió recuperar la contraseña (código por email)' : 'Pidió recuperar la contraseña (aviso al administrador)');
+
+        return $channel === 'email' ? $user->id : null;
     }
 
     /**
-     * Restablece con el enlace del email. Devuelve el estado del broker
-     * (Password::PASSWORD_RESET si salió bien).
+     * Valida el código del email. Es de un solo uso: se borra al acertar, al vencer o al agotar los intentos.
+     *
+     * @throws BusinessException si venció o se agotaron los intentos (hay que pedir uno nuevo)
      */
-    public function resetWithToken(string $email, #[\SensitiveParameter] string $token, #[\SensitiveParameter] string $password): string
+    public function verifyCode(int $userId, #[\SensitiveParameter] string $code): bool
     {
-        return Password::broker()->reset(
-            ['email' => $email, 'token' => $token, 'password' => $password],
-            function (User $user, string $password) {
-                if (! $user->isActive()) {
-                    throw new BusinessException('Tu usuario está inactivo. Contactá al administrador.');
-                }
-                $this->storePassword($user, $password, mustChange: false);
-                $this->audit->log('password_reset', $user, description: 'Restableció su contraseña con el enlace del email');
-            },
-        );
+        $user = User::query()->find($userId);
+        if (! $user?->email || ! $user->isActive()) {
+            return false;
+        }
+
+        $row = $this->codes()->where('email', $user->email)->first();
+        if (! $row || Carbon::parse($row->created_at)->addMinutes(self::CODE_MINUTES)->isPast()) {
+            $this->codes()->where('email', $user->email)->delete();
+            throw new BusinessException('El código venció. Pedí uno nuevo con «Reenviar código».');
+        }
+
+        $attemptsKey = $this->attemptsKey($user);
+        if (! Hash::check($code, $row->token)) {
+            RateLimiter::hit($attemptsKey, self::CODE_MINUTES * 60);
+            if (RateLimiter::attempts($attemptsKey) >= self::CODE_ATTEMPTS) {
+                $this->codes()->where('email', $user->email)->delete();
+                RateLimiter::clear($attemptsKey);
+                throw new BusinessException('Te equivocaste demasiadas veces. Pedí un código nuevo con «Reenviar código».');
+            }
+
+            return false;
+        }
+
+        RateLimiter::clear($attemptsKey);
+        $this->codes()->where('email', $user->email)->delete();
+
+        return true;
+    }
+
+    /** Contraseña nueva después de validar el código. Cierra las sesiones abiertas en otros equipos. */
+    public function resetAfterCode(User $user, #[\SensitiveParameter] string $password): void
+    {
+        if (! $user->isActive()) {
+            throw new BusinessException('Tu usuario está inactivo. Contactá al administrador.');
+        }
+
+        $this->storePassword($user, $password, mustChange: false);
+        $this->audit->log('password_reset', $user, description: 'Restableció su contraseña con el código del email');
     }
 
     /** El administrador asigna una contraseña temporal. Devuelve la contraseña para mostrarla UNA vez. */
@@ -126,19 +171,34 @@ class PasswordResetService
         });
     }
 
-    private function sendLink(User $user): bool
+    /** Genera un código nuevo (reemplaza al anterior), lo guarda con hash y lo envía por email. */
+    private function sendCode(User $user): bool
     {
-        try {
-            $status = Password::broker()->sendResetLink(['email' => $user->email]);
+        $code = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
 
-            // RESET_THROTTLED: ya se envió uno hace instantes; para el usuario es igual de válido.
-            return in_array($status, [Password::RESET_LINK_SENT, Password::RESET_THROTTLED], true);
+        try {
+            $this->codes()->updateOrInsert(['email' => $user->email], ['token' => Hash::make($code), 'created_at' => now()]);
+            RateLimiter::clear($this->attemptsKey($user));
+            $user->notify(new PasswordResetCode($code));
+
+            return true;
         } catch (Throwable $e) {
             // Correo mal configurado: se registra el error y se sigue por el camino del administrador.
             ErrorReporter::capture($e, 'mail');
+            $this->codes()->where('email', $user->email)->delete();
 
             return false;
         }
+    }
+
+    private function codes(): Builder
+    {
+        return DB::table(config('auth.passwords.users.table'));
+    }
+
+    private function attemptsKey(User $user): string
+    {
+        return 'password-reset-code:'.$user->id;
     }
 
     private function notifyAdmins(User $user, ?string $ip): void

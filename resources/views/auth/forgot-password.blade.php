@@ -2,14 +2,14 @@
     <div class="space-y-5">
         <div class="text-center">
             <h1 class="text-2xl font-semibold tracking-tight">Recuperar contraseña</h1>
-            <p class="mt-1 text-sm text-stone-500">Te enviamos un enlace a tu email para que crees una contraseña nueva. Si no tenés email cargado, le avisamos al administrador para que te asigne una temporal.</p>
+            <p class="mt-1 text-sm text-stone-500">Te enviamos un código de 6 números a tu email. Después lo ingresás acá y creás tu contraseña nueva.</p>
         </div>
 
         <form method="POST" action="{{ route('password.email') }}" class="space-y-5">
             @csrf
             <x-input name="login" :label="$label" :value="old('login')" placeholder="Ej.: jperez o 30123456" autofocus autocomplete="username" required maxlength="190" class="py-2.5 text-base"/>
 
-            <button type="submit" class="btn btn-primary w-full py-3 text-base">Enviarme el enlace</button>
+            <button type="submit" class="btn btn-primary w-full py-3 text-base">Enviarme el código</button>
         </form>
 
         @if ($google)

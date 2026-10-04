@@ -5,7 +5,7 @@ namespace Tests\Feature\Core;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Models\User;
 use App\Notifications\PasswordResetRequested;
-use App\Notifications\ResetPasswordLink;
+use App\Notifications\PasswordResetCode;
 use App\Services\PasswordResetService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
@@ -24,16 +24,30 @@ class PasswordResetTest extends TestCase
         $this->get('/recuperar-contrasena')->assertOk()->assertSee('Recuperar contraseña');
     }
 
-    public function test_user_with_email_receives_reset_link(): void
+    /** Pide el código para $login y devuelve el código que se envió por email. */
+    private function requestCode(string $login, User $user): string
+    {
+        $this->post('/recuperar-contrasena', ['login' => $login])->assertRedirect(route('password.code'));
+        $code = null;
+        Notification::assertSentTo($user, PasswordResetCode::class, function (PasswordResetCode $n) use (&$code) {
+            $code = $n->code;
+
+            return true;
+        });
+
+        return $code;
+    }
+
+    public function test_user_with_email_receives_reset_code(): void
     {
         Notification::fake();
         $admin = User::factory()->role('admin')->create();
         $user = User::factory()->role('operator')->create(['username' => 'ana', 'email' => 'ana@galpon.test']);
 
         $this->post('/recuperar-contrasena', ['login' => 'ana'])
-            ->assertRedirect(route('login'))->assertSessionHas('status', PasswordResetController::GENERIC_STATUS);
+            ->assertRedirect(route('password.code'))->assertSessionHas('status', PasswordResetController::GENERIC_STATUS);
 
-        Notification::assertSentTo($user, ResetPasswordLink::class);
+        Notification::assertSentTo($user, PasswordResetCode::class, fn (PasswordResetCode $n) => preg_match('/^\d{6}$/', $n->code) === 1);
         Notification::assertNothingSentTo($admin);
         $this->assertDatabaseHas('audit_logs', ['action' => 'password_reset_requested', 'auditable_id' => $user->id]);
     }
@@ -59,7 +73,8 @@ class PasswordResetTest extends TestCase
 
         foreach (['noexiste', 'baja'] as $login) {
             $this->post('/recuperar-contrasena', ['login' => $login])
-                ->assertRedirect(route('login'))->assertSessionHas('status', PasswordResetController::GENERIC_STATUS);
+                ->assertRedirect(route('password.code'))->assertSessionHas('status', PasswordResetController::GENERIC_STATUS);
+            $this->post(route('password.code.verify'), ['code' => '123456'])->assertSessionHasErrors('code');
         }
         Notification::assertNothingSent();
     }
@@ -74,17 +89,26 @@ class PasswordResetTest extends TestCase
         $this->post('/recuperar-contrasena', ['login' => 'alguien'])->assertStatus(429);
     }
 
-    public function test_reset_link_sets_new_password_and_closes_sessions(): void
+    public function test_code_flow_sets_new_password_and_closes_sessions(): void
     {
-        $user = User::factory()->role('operator')->create(['email' => 'ana@galpon.test']);
+        Notification::fake();
+        $user = User::factory()->role('operator')->create(['username' => 'ana', 'email' => 'ana@galpon.test']);
         $user->createToken('lector');
-        $token = Password::broker()->createToken($user);
 
-        $this->get(route('password.reset', ['token' => $token, 'email' => $user->email]))->assertOk()->assertSee('Crear contraseña nueva');
+        // Sin código validado no se puede llegar a «contraseña nueva».
+        $this->get(route('password.reset'))->assertRedirect(route('password.request'));
 
-        $this->post('/restablecer-contrasena', [
-            'token' => $token, 'email' => $user->email, 'password' => 'NuevaClave2026', 'password_confirmation' => 'NuevaClave2026',
-        ])->assertRedirect(route('login'))->assertSessionHas('status');
+        $code = $this->requestCode('ana', $user);
+        $this->assertDatabaseMissing('password_reset_tokens', ['token' => $code]); // se guarda con hash
+        $this->get(route('password.code'))->assertOk()->assertSee('Ingresá el código');
+
+        $wrong = $code === '111111' ? '222222' : '111111';
+        $this->post(route('password.code.verify'), ['code' => $wrong])->assertSessionHasErrors('code');
+        $this->post(route('password.code.verify'), ['code' => $code])->assertRedirect(route('password.reset'));
+
+        $this->get(route('password.reset'))->assertOk()->assertSee('Crear contraseña nueva');
+        $this->post('/restablecer-contrasena', ['password' => 'NuevaClave2026', 'password_confirmation' => 'NuevaClave2026'])
+            ->assertRedirect(route('login'))->assertSessionHas('status');
 
         $user->refresh();
         $this->assertTrue(Hash::check('NuevaClave2026', $user->password));
@@ -93,22 +117,45 @@ class PasswordResetTest extends TestCase
         $this->assertDatabaseHas('audit_logs', ['action' => 'password_reset', 'auditable_id' => $user->id]);
         $this->assertDatabaseMissing('audit_logs', ['new_values' => 'NuevaClave2026']);
 
-        // El enlace es de un solo uso.
-        $this->post('/restablecer-contrasena', [
-            'token' => $token, 'email' => $user->email, 'password' => 'OtraClave2026', 'password_confirmation' => 'OtraClave2026',
-        ])->assertSessionHasErrors('email');
+        // El código es de un solo uso y el paso 3 no se puede repetir.
+        $this->post(route('password.code.verify'), ['code' => $code])->assertRedirect(route('password.request'));
+        $this->post('/restablecer-contrasena', ['password' => 'OtraClave2026', 'password_confirmation' => 'OtraClave2026'])
+            ->assertRedirect(route('password.request'));
         $this->assertTrue(Hash::check('NuevaClave2026', $user->fresh()->password));
     }
 
-    public function test_invalid_token_and_weak_password_are_rejected(): void
+    public function test_too_many_wrong_codes_invalidate_the_code(): void
     {
-        $user = User::factory()->role('operator')->create(['email' => 'ana@galpon.test']);
-        $token = Password::broker()->createToken($user);
+        Notification::fake();
+        $user = User::factory()->role('operator')->create(['username' => 'ana', 'email' => 'ana@galpon.test']);
+        $code = $this->requestCode('ana', $user);
+        $wrong = $code === '111111' ? '222222' : '111111';
 
-        $this->post('/restablecer-contrasena', ['token' => 'inventado', 'email' => $user->email, 'password' => 'NuevaClave2026', 'password_confirmation' => 'NuevaClave2026'])
-            ->assertSessionHasErrors('email');
-        $this->post('/restablecer-contrasena', ['token' => $token, 'email' => $user->email, 'password' => '123', 'password_confirmation' => '123'])
-            ->assertSessionHasErrors('password');
+        for ($i = 1; $i < PasswordResetService::CODE_ATTEMPTS; $i++) {
+            $this->post(route('password.code.verify'), ['code' => $wrong])->assertSessionHasErrors('code');
+        }
+        $this->post(route('password.code.verify'), ['code' => $wrong])->assertSessionHasErrors(['code' => 'Te equivocaste demasiadas veces. Pedí un código nuevo con «Reenviar código».']);
+
+        // Aunque después escriba el correcto, ya no sirve: hay que pedir otro.
+        $this->post(route('password.code.verify'), ['code' => $code])->assertSessionHasErrors('code');
+        $this->get(route('password.reset'))->assertRedirect(route('password.request'));
+    }
+
+    public function test_expired_code_and_weak_password_are_rejected(): void
+    {
+        Notification::fake();
+        $user = User::factory()->role('operator')->create(['username' => 'ana', 'email' => 'ana@galpon.test']);
+
+        $code = $this->requestCode('ana', $user);
+        $this->travel(PasswordResetService::CODE_MINUTES + 1)->minutes();
+        $this->post(route('password.code.verify'), ['code' => $code])->assertSessionHasErrors('code');
+        $this->travelBack();
+
+        // Reenviar genera un código nuevo que sí funciona.
+        Notification::fake();
+        $code = $this->requestCode('ana', $user);
+        $this->post(route('password.code.verify'), ['code' => $code])->assertRedirect(route('password.reset'));
+        $this->post('/restablecer-contrasena', ['password' => '123', 'password_confirmation' => '123'])->assertSessionHasErrors('password');
         $this->assertTrue(Hash::check('password', $user->fresh()->password));
     }
 
