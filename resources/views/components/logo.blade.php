@@ -3,8 +3,9 @@
 <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" {{ $attributes->merge(['class' => 'size-8']) }} aria-hidden="true">
     <defs>
         <linearGradient id="{{ $gid }}" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stop-color="#22c55e"/>
-            <stop offset="1" stop-color="#15803d"/>
+            {{-- Fondo con el color principal de la empresa (paleta «brand»); verde si no se eligió otro. --}}
+            <stop offset="0" style="stop-color: var(--color-brand-500, #22c55e)"/>
+            <stop offset="1" style="stop-color: var(--color-brand-700, #15803d)"/>
         </linearGradient>
     </defs>
     <rect width="64" height="64" rx="15" fill="url(#{{ $gid }})"/>

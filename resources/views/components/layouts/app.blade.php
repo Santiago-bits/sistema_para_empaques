@@ -42,7 +42,7 @@
         <div class="flex h-16 shrink-0 items-center border-b border-white/5 pr-2">
         <a href="{{ route('home') }}" class="flex min-w-0 flex-1 items-center gap-3 px-5">
             @if (setting('company.logo'))
-                <img src="{{ asset('storage/'.setting('company.logo')) }}" alt="" class="size-8 rounded object-contain">
+                <img src="{{ \App\Http\Controllers\BrandingController::url() }}" alt="" class="size-8 rounded object-contain">
             @else
                 <x-logo class="size-9 shrink-0 shadow"/>
             @endif
