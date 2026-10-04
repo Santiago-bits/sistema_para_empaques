@@ -4,7 +4,7 @@
         'cash.index' => ['Caja', 'currency', 'cash.*'],
         'accounts.index' => ['Cuentas corrientes', 'book', 'accounts.*'],
         'checks.index' => ['Cheques', 'receipt', 'checks.*'],
-        'exchange.index' => ['Cotización del dólar', 'chart-line', 'exchange.*'],
+        'exchange.index' => ['Valor del dólar', 'chart-line', 'exchange.*'],
     ];
 @endphp
 <nav class="mb-6 flex flex-wrap gap-1 border-b border-stone-200 dark:border-stone-800" aria-label="Tesorería">

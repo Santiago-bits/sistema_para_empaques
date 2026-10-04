@@ -74,6 +74,8 @@ class SettingsService
         'treasury.association_fee_per_kg' => [0, 'float', 'treasury'],
         'treasury.post_test_invoices' => [false, 'bool', 'treasury'],
         'treasury.check_warning_days' => [7, 'int', 'treasury'],
+        'treasury.exchange_auto' => [false, 'bool', 'treasury'],
+        'treasury.exchange_type' => ['oficial', 'string', 'treasury'],
         'backup.retention_days' => [30, 'int', 'backup'],
         'backup.daily' => [true, 'bool', 'backup'],
         'backup.weekly' => [true, 'bool', 'backup'],

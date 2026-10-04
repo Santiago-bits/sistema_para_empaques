@@ -83,7 +83,7 @@ return [
             ['label' => 'Caja', 'route' => 'cash.index', 'icon' => 'currency', 'permission' => 'treasury.view', 'module' => 'treasury'],
             ['label' => 'Cuentas corrientes', 'route' => 'accounts.index', 'icon' => 'users', 'permission' => 'treasury.view', 'module' => 'treasury'],
             ['label' => 'Cheques', 'route' => 'checks.index', 'icon' => 'receipt', 'permission' => 'treasury.view', 'module' => 'treasury'],
-            ['label' => 'Cotización del dólar', 'route' => 'exchange.index', 'icon' => 'chart-line', 'permission' => 'treasury.view', 'module' => 'treasury'],
+            ['label' => 'Valor del dólar', 'route' => 'exchange.index', 'icon' => 'chart-line', 'permission' => 'treasury.view', 'module' => 'treasury'],
         ],
     ],
     [
