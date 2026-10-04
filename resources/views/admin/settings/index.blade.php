@@ -34,7 +34,7 @@
                                 <input type="file" name="logo" accept="image/*" class="form-input">
                             </x-field>
                             @if ($s['company.logo'])
-                                <img src="{{ asset('storage/'.$s['company.logo']) }}" alt="Logo" class="h-16 rounded border border-stone-200 object-contain p-1 dark:border-stone-700">
+                                <img src="{{ \App\Http\Controllers\BrandingController::url() }}" alt="Logo" class="h-16 rounded border border-stone-200 object-contain p-1 dark:border-stone-700">
                             @endif
                         </div>
                         @break
