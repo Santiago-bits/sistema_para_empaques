@@ -1,6 +1,7 @@
 @props(['title', 'subtitle' => null, 'back' => null])
-<div class="mb-6 flex flex-wrap items-end justify-between gap-4">
-    <div class="min-w-0">
+{{-- En el celular el título va centrado y los botones ocupan todo el ancho (ver .page-header en app.css). --}}
+<div class="page-header mb-6 flex flex-wrap items-end justify-between gap-4">
+    <div class="page-header-title min-w-0">
         @if ($back)
             <a href="{{ $back }}" class="mb-1 inline-flex items-center gap-1 text-xs font-medium text-stone-500 hover:text-stone-800 dark:hover:text-stone-200">
                 <x-icon name="arrow-left" class="size-3.5"/> Volver
@@ -12,6 +13,6 @@
         @endif
     </div>
     @if (isset($actions))
-        <div class="flex flex-wrap items-center gap-2">{{ $actions }}</div>
+        <div class="page-header-actions flex flex-wrap items-center gap-2">{{ $actions }}</div>
     @endif
 </div>
