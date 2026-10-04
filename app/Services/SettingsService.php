@@ -76,6 +76,8 @@ class SettingsService
         'treasury.check_warning_days' => [7, 'int', 'treasury'],
         'treasury.exchange_auto' => [false, 'bool', 'treasury'],
         'treasury.exchange_type' => ['oficial', 'string', 'treasury'],
+        // A dónde llega por email cada ticket de soporte nuevo (y las respuestas del galpón). Vacío = no se manda.
+        'support.email' => ['holabaseocho@gmail.com', 'string', 'support'],
         'backup.retention_days' => [30, 'int', 'backup'],
         'backup.daily' => [true, 'bool', 'backup'],
         'backup.weekly' => [true, 'bool', 'backup'],

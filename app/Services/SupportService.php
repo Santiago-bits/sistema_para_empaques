@@ -6,6 +6,7 @@ use App\Exceptions\BusinessException;
 use App\Models\SupportTicket;
 use App\Models\SupportTicketReply;
 use App\Models\User;
+use App\Notifications\SupportTicketMail;
 use App\Notifications\SupportTicketUpdated;
 use App\Support\Recipients;
 use Illuminate\Support\Facades\DB;
@@ -43,6 +44,7 @@ class SupportService
             'Nuevo ticket '.$ticket->number.': '.Str::limit($ticket->subject, 80),
             'Prioridad '.mb_strtolower(self::PRIORITIES[$ticket->priority] ?? $ticket->priority).' · '.$user->full_name,
         );
+        $this->mailSupport($ticket, $user);
 
         return $ticket;
     }
@@ -82,6 +84,9 @@ class SupportService
             ($isDeveloper ? 'Respuesta de soporte en ' : 'Nueva respuesta en ').$ticket->number,
             Str::limit($body, 140),
         );
+        if (! $isDeveloper) {
+            $this->mailSupport($ticket, $user, $body);
+        }
 
         return $reply;
     }
@@ -105,6 +110,24 @@ class SupportService
         );
 
         return $ticket;
+    }
+
+    /**
+     * Copia por email al soporte (setting support.email). Si el correo falla, el ticket queda igual creado y el
+     * error se registra: el usuario no tiene por qué enterarse de un problema del servidor de correo.
+     */
+    private function mailSupport(SupportTicket $ticket, User $author, ?string $reply = null): void
+    {
+        $email = trim((string) setting('support.email', ''));
+        if (! filter_var($email, FILTER_VALIDATE_EMAIL) || in_array(config('mail.default'), ['log', 'array', null], true)) {
+            return;
+        }
+
+        try {
+            Notification::route('mail', $email)->notify(new SupportTicketMail($ticket, $author, $reply));
+        } catch (Throwable $e) {
+            report($e);
+        }
     }
 
     private function notify($users, SupportTicket $ticket, string $title, ?string $message): void

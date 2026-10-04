@@ -4,6 +4,7 @@ namespace Tests\Feature\Core;
 
 use App\Models\SupportTicket;
 use App\Models\User;
+use App\Notifications\SupportTicketMail;
 use App\Notifications\SupportTicketUpdated;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
@@ -58,6 +59,39 @@ class SupportTest extends TestCase
         // El dueño sólo puede cerrarlo, no pasarlo a "en desarrollo".
         $this->actingAs($owner);
         $this->post(route('support.status', $ticket), ['status' => 'development'])->assertForbidden();
+    }
+
+    public function test_new_ticket_and_galpon_replies_are_emailed_to_support(): void
+    {
+        Notification::fake();
+        config(['mail.default' => 'smtp']);
+        $developer = User::factory()->role('super_admin')->create();
+        $user = $this->actingAsRole('loads_operator');
+        $user->update(['email' => 'operador@galpon.test']);
+
+        $this->post(route('support.store'), ['subject' => 'No imprime el remito', 'description' => "Paso 1\n\nAparece ERR-20261001-ABCDE", 'priority' => 'high']);
+        $ticket = SupportTicket::query()->firstOrFail();
+
+        Notification::assertSentOnDemand(SupportTicketMail::class, function (SupportTicketMail $n, array $channels, object $notifiable) use ($ticket) {
+            $mail = $n->toMail($notifiable);
+            $text = implode("\n", array_map('strval', [...$mail->introLines, ...$mail->outroLines]));
+
+            return $notifiable->routes['mail'] === 'holabaseocho@gmail.com'
+                && str_contains($mail->subject, $ticket->number) && str_contains($mail->subject, 'No imprime el remito')
+                && str_contains($text, 'ERR-20261001-ABCDE') && str_contains($text, 'Alta')
+                && $mail->replyTo === [['operador@galpon.test', $n->author->full_name]];
+        });
+
+        // La respuesta del galpón también llega; la del soporte no (la escribió quien recibe los correos).
+        $this->post(route('support.reply', $ticket), ['body' => 'Sigue igual']);
+        Notification::assertSentOnDemandTimes(SupportTicketMail::class, 2);
+        $this->actingAs($developer)->post(route('support.reply', $ticket), ['body' => 'Ya está']);
+        Notification::assertSentOnDemandTimes(SupportTicketMail::class, 2);
+
+        // Sin email de soporte configurado no se manda nada.
+        app(\App\Services\SettingsService::class)->set('support.email', '');
+        $this->actingAs($user)->post(route('support.store'), ['subject' => 'Otro', 'description' => 'x', 'priority' => 'low']);
+        Notification::assertSentOnDemandTimes(SupportTicketMail::class, 2);
     }
 
     public function test_validation_and_permission(): void
