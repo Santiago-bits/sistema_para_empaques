@@ -30,7 +30,9 @@ Route::middleware('guest')->group(function () {
 
     Route::get('/recuperar-contrasena', [PasswordResetController::class, 'create'])->name('password.request');
     Route::post('/recuperar-contrasena', [PasswordResetController::class, 'store'])->middleware('throttle:password-reset')->name('password.email');
-    Route::get('/restablecer-contrasena/{token}', [PasswordResetController::class, 'edit'])->where('token', '[A-Za-z0-9]+')->name('password.reset');
+    Route::get('/recuperar-contrasena/codigo', [PasswordResetController::class, 'code'])->name('password.code');
+    Route::post('/recuperar-contrasena/codigo', [PasswordResetController::class, 'verify'])->middleware('throttle:10,1')->name('password.code.verify');
+    Route::get('/restablecer-contrasena', [PasswordResetController::class, 'edit'])->name('password.reset');
     Route::post('/restablecer-contrasena', [PasswordResetController::class, 'update'])->middleware('throttle:10,1')->name('password.store');
 
     // El dueño olvidó el usuario/contraseña del Super Administrador (prueba con la contraseña de la base).

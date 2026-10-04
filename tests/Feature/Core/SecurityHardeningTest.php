@@ -3,7 +3,7 @@
 namespace Tests\Feature\Core;
 
 use App\Models\User;
-use App\Notifications\ResetPasswordLink;
+use App\Notifications\PasswordResetCode;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
@@ -75,10 +75,12 @@ class SecurityHardeningTest extends TestCase
         $this->withHeaders(['Host' => 'pc-atacante', 'X-Forwarded-Host' => 'pc-atacante'])
             ->post('http://pc-atacante/recuperar-contrasena', ['login' => 'ana']);
 
-        Notification::assertSentTo($user, ResetPasswordLink::class, function (ResetPasswordLink $n) use ($user) {
-            $url = $n->toMail($user)->actionUrl;
+        // La recuperación manda un código (sin enlace): no hay URL que un Host falso pueda desviar.
+        Notification::assertSentTo($user, PasswordResetCode::class, function (PasswordResetCode $n) use ($user) {
+            $mail = $n->toMail($user);
+            $text = implode(' ', array_map('strval', [...$mail->introLines, ...$mail->outroLines]));
 
-            return str_starts_with($url, rtrim(config('app.url'), '/').'/') && ! str_contains($url, 'pc-atacante');
+            return $mail->actionUrl === null && ! str_contains($text, 'pc-atacante');
         });
     }
 }
