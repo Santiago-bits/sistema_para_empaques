@@ -37,7 +37,7 @@ class DtvController extends Controller
             return $this->export($request, $lines, $filters['format']);
         }
 
-        $totals = (clone $lines)->reorder()->toBase()
+        $totals = (clone $lines)->toBase()->cloneWithout(['columns', 'orders', 'limit', 'offset'])
             ->selectRaw("SUM(CASE WHEN dtv_documents.direction = 'in' THEN dtv_lines.kg_total ELSE 0 END) as kg_in,
                 SUM(CASE WHEN dtv_documents.direction = 'out' THEN dtv_lines.kg_total ELSE 0 END) as kg_out,
                 COUNT(DISTINCT dtv_documents.id) as documents")->first();

@@ -58,8 +58,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'installation' => \App\Http\Middleware\AuthenticateInstallation::class,
             'superadmin' => \App\Http\Middleware\EnsureSuperAdminConfirmed::class,
         ]);
-        $middleware->web(append: [SecurityHeaders::class, RedirectIfNotInstalled::class]);
-        $middleware->api(prepend: [\App\Http\Middleware\ForceJsonResponse::class], append: [SecurityHeaders::class]);
+        // UpgradeDatabase: después de cada actualización pone la base al día sola (Hostinger no corre migraciones).
+        $middleware->web(append: [SecurityHeaders::class, RedirectIfNotInstalled::class, \App\Http\Middleware\UpgradeDatabase::class]);
+        $middleware->api(prepend: [\App\Http\Middleware\ForceJsonResponse::class], append: [SecurityHeaders::class, \App\Http\Middleware\UpgradeDatabase::class]);
         $middleware->redirectGuestsTo(fn () => route('login'));
         $middleware->redirectUsersTo(fn () => route('home'));
         // Proxies de confianza: SÓLO las IP indicadas en GALPON_TRUSTED_PROXIES (vacío = ninguno).

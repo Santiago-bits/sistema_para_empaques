@@ -21,6 +21,19 @@ abstract class TestCase extends BaseTestCase
         }
     }
 
+    /**
+     * Los tests que arman la base por su cuenta (instalador, backups, actualización de la base) la dejan vacía al
+     * terminar. Con MySQL, los tests con RefreshDatabase que vienen después creerían que las tablas siguen ahí:
+     * se marca que hay que volver a migrar.
+     */
+    protected function tearDown(): void
+    {
+        if (! in_array(\Illuminate\Foundation\Testing\RefreshDatabase::class, class_uses_recursive(static::class), true)) {
+            \Illuminate\Foundation\Testing\RefreshDatabaseState::$migrated = false;
+        }
+        parent::tearDown();
+    }
+
     /** Crea un usuario con el rol indicado y lo autentica. */
     protected function actingAsRole(string $role = 'admin', array $attributes = []): User
     {

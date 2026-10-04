@@ -107,7 +107,11 @@ El Panel General corre en Hostinger, que tiene **`proc_open` deshabilitado**. Po
    y ese archivo manda todo a `public/` (se borró por error en 22120d7 y el sitio dio 404).
 4. `bootstrap/app.php` descarta las cachés de `bootstrap/cache` más viejas que el código (Hostinger las conserva
    entre deploys). Después de cada deploy: `bash scripts/despues-del-deploy.sh` (migraciones y datos base).
-5. Todo lo que use `Symfony\Component\Process` (backups con mysqldump) debe fallar con un mensaje claro y no
+5. **Migraciones**: el deploy no las corre; las aplica solo `UpgradeDatabase` (middleware) + `DatabaseUpgrader` en la
+   primera visita después de actualizar (también sincroniza permisos/módulos con SystemSeeder). Las migraciones tienen
+   que ser aditivas y seguras de correr desde una petición web. Las consultas de totales: `cloneWithout(['columns',
+   'orders', 'limit', 'offset'])` antes de `selectRaw` (MySQL rechaza mezclar columnas del listado con SUM/COUNT).
+6. Todo lo que use `Symfony\Component\Process` (backups con mysqldump) debe fallar con un mensaje claro y no
    romper nada si `proc_open` no está disponible.
 
 ## Git
