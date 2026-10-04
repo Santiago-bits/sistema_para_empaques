@@ -22,7 +22,7 @@
             @csrf
             {{-- text-center centra etiquetas y ayudas; el texto que se escribe queda alineado a la izquierda (text-left). --}}
             <div class="text-center">
-                <x-input name="login" :label="$label" placeholder="Ej.: jperez o 30123456" hint="Cualquiera de estos datos, tal como figura en tu ficha de usuario."
+                <x-input name="login" :label="$label" placeholder="Ej.: jperez o 30123456"
                          autofocus autocomplete="username" required class="py-2.5 text-left text-base"/>
             </div>
             <div class="text-center">
