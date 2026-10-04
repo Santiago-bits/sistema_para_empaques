@@ -29,6 +29,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Galpón">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png?v=2">
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png?v=2">
-<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=2">
+{{-- Con logo de la empresa, los íconos salen de él (cambian al subir otro); si no, los de siempre. --}}
+@php($branding = app(\App\Services\BrandingService::class))
+<link rel="icon" type="image/png" sizes="32x32" href="{{ $branding->iconUrl('favicon-32') }}">
+<link rel="icon" type="image/png" sizes="192x192" href="{{ $branding->iconUrl('icon-192') }}">
+<link rel="apple-touch-icon" href="{{ $branding->iconUrl('apple-touch-icon') }}">
