@@ -43,7 +43,8 @@ class LotController extends Controller
         if (in_array($request->query('format'), ['xlsx', 'csv'], true)) {
             return $this->exportIntakes($request, $query, (string) $request->query('format'));
         }
-        $totals = (clone $query)->reorder()->toBase()->selectRaw('COUNT(*) as n, COALESCE(SUM(bins), 0) as bins, COALESCE(SUM(kg_received), 0) as kg')->first();
+        // Consulta aparte para los totales (sin las columnas del listado: MySQL no admite mezclarlas con SUM/COUNT).
+        $totals = (clone $query)->toBase()->cloneWithout(['columns', 'orders', 'limit', 'offset'])->selectRaw('COUNT(*) as n, COALESCE(SUM(bins), 0) as bins, COALESCE(SUM(kg_received), 0) as kg')->first();
 
         return view('lots.index', ['lots' => $query->paginate($this->perPage($request))->withQueryString(), 'totals' => $totals] + $this->options());
     }

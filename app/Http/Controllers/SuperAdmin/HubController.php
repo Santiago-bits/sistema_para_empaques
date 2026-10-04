@@ -90,6 +90,8 @@ class HubController extends Controller
                 ->orderByDesc('last_message_at')->limit(8)->get() : collect(),
             'openTickets' => $central ? ClientTicket::query()->whereNotIn('status', ['resolved', 'closed'])->count() : 0,
             'failedLogins' => AuditLog::query()->where('action', 'login_failed')->latest('created_at')->limit(6)->get(),
+            'pendingMigrations' => rescue(fn () => app(\App\Services\DatabaseUpgrader::class)->pending(), [], false),
+            'upgradeResult' => app(\App\Services\DatabaseUpgrader::class)->lastResult(),
         ]);
     }
 
@@ -118,6 +120,16 @@ class HubController extends Controller
         return redirect()->route('superadmin.index')->with('success',
             'Listo: se cargaron ejemplos de todo (fichas, cámaras de frío, lotes, pallets, cajones, cargas, remitos, facturas, caja, cheques, '
             .'mantenimiento, incidentes y más). Recorré el menú para verlos.');
+    }
+
+    /** Pone la base de datos al día a mano (por si la actualización automática falló). */
+    public function upgradeDatabase(\App\Services\DatabaseUpgrader $upgrader): RedirectResponse
+    {
+        return match ($upgrader->run()) {
+            'done' => redirect()->route('superadmin.index')->with('success', 'Base de datos actualizada a la versión '.config('galpon.version').'.'),
+            'busy' => redirect()->route('superadmin.index')->with('error', 'Ya se está actualizando. Esperá unos segundos y recargá.'),
+            default => redirect()->route('superadmin.index')->with('error', 'No se pudo actualizar la base: '.($upgrader->lastResult()['error'] ?? 'error desconocido')),
+        };
     }
 
     /** Activa la gestión de clientes (Panel General) en este servidor: clientes, pagos, uso y soporte. */

@@ -18,6 +18,7 @@ Route::prefix('administradorgeneral')->name('superadmin.')->middleware('superadm
     Route::get('/', [HubController::class, 'index'])->name('index');
     Route::put('gestion-de-clientes', [HubController::class, 'centralPanel'])->name('central');
     Route::post('datos-de-ejemplo', [HubController::class, 'sampleData'])->middleware('throttle:3,10')->name('sample');
+    Route::post('actualizar-base', [HubController::class, 'upgradeDatabase'])->middleware('throttle:5,1')->name('upgrade');
 
     Route::get('usuarios', [UserController::class, 'index'])->name('users.index');
     Route::get('usuarios/{user}', [UserController::class, 'show'])->whereNumber('user')->name('users.show');

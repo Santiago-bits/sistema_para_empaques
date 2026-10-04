@@ -9,3 +9,6 @@ schedule-*
 services.json
 tables.ready
 install.lock
+schema.ok
+upgrade.lock
+upgrade.json

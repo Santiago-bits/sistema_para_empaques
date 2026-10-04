@@ -34,6 +34,6 @@ class TreatmentService
     /** Totales por tipo de tratamiento en el período filtrado. */
     public function totalsByType($query)
     {
-        return (clone $query)->reorder()->toBase()->selectRaw('type, COUNT(*) as n, SUM(quantity) as qty')->groupBy('type')->orderBy('type')->get();
+        return (clone $query)->toBase()->cloneWithout(['columns', 'orders', 'limit', 'offset'])->selectRaw('type, COUNT(*) as n, SUM(quantity) as qty')->groupBy('type')->orderBy('type')->get();
     }
 }

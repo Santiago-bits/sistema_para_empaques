@@ -3,6 +3,22 @@
 
     @include('superadmin._nav')
 
+    @if ($pendingMigrations !== [] || ($upgradeResult && ! $upgradeResult['ok']))
+        <div class="panel mb-6 flex flex-wrap items-center justify-between gap-4 border-red-300 bg-red-50 p-5 dark:border-red-900 dark:bg-red-950/40" role="alert">
+            <div class="max-w-2xl text-sm text-red-900 dark:text-red-200">
+                <p class="font-semibold">La base de datos no está al día con la versión {{ config('galpon.version') }}</p>
+                <p class="mt-1">Faltan {{ count($pendingMigrations) }} actualización(es). Mientras tanto, algunas pantallas nuevas pueden dar error.</p>
+                @if ($upgradeResult && ! $upgradeResult['ok'])
+                    <p class="mt-1">Último intento: {{ $upgradeResult['error'] ?? 'error desconocido' }}</p>
+                @endif
+            </div>
+            <form method="POST" action="{{ route('superadmin.upgrade') }}" x-data="{ busy: false }" @submit="busy = true">
+                @csrf
+                <button class="btn btn-primary" :disabled="busy"><x-icon name="refresh" class="size-4"/> <span x-text="busy ? 'Actualizando…' : 'Actualizar base de datos'">Actualizar base de datos</span></button>
+            </form>
+        </div>
+    @endif
+
     <h2 class="mb-3 text-sm font-semibold tracking-wide text-stone-500 uppercase">Usuarios de este sistema</h2>
     <div class="mb-8 grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
         <x-stat label="Usuarios" :value="num($users['total'])" icon="users" :hint="num($users['active']).' activos'" :href="route('superadmin.users.index')"/>

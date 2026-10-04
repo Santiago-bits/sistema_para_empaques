@@ -15,6 +15,15 @@ use Tests\TestCase;
  */
 class InstallerTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+        // Con MySQL la base de tests es compartida: los tests anteriores la dejan con tablas. El instalador arranca vacío.
+        if (\Illuminate\Support\Facades\DB::connection()->getDriverName() !== 'sqlite') {
+            Artisan::call('db:wipe', ['--force' => true]);
+        }
+    }
+
     protected function tearDown(): void
     {
         Artisan::call('migrate:reset', ['--force' => true]);

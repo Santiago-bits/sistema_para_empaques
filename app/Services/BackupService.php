@@ -39,6 +39,7 @@ class BackupService
         'daily' => 'Diario',
         'weekly' => 'Semanal',
         'restore' => 'Previo a restauración',
+        'upgrade' => 'Previo a actualización',
     ];
 
     public const STATUSES = [

@@ -2,6 +2,17 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versionado semántico.
 
+## [1.10.1] - 2026-10-03
+
+### Corregido
+- **Ingresos de fruta (lotes)** y **DTV-e** daban error en MySQL (Hostinger): los totales se calculaban mezclados con
+  las columnas del listado. Ahora se calculan aparte.
+- **La base de datos se pone al día sola después de cada actualización**: el deploy por Git de Hostinger no crea las
+  tablas y columnas nuevas, por eso las pantallas nuevas (rendimiento de cera, DTV-e, etc.) daban error. La
+  primera visita después de actualizar hace una copia de seguridad, crea lo que falta y agrega los permisos y
+  módulos nuevos (sin pisar lo configurado). Si algo falla, el super admin lo ve en la administración general con
+  un botón «Actualizar base de datos».
+
 ## [1.10.0] - 2026-10-03
 
 ### Agregado (lo que el galpón llevaba en la planilla de Excel)
