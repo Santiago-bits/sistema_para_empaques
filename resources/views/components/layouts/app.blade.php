@@ -122,9 +122,9 @@
             <button type="button" class="btn btn-ghost -ml-2 p-2 lg:hidden" @click="sidebar = true" aria-label="Abrir menú">
                 <x-icon name="menu"/>
             </button>
-            {{-- Computadora: muestra u oculta el menú lateral (más lugar para tablas y planillas). --}}
-            <button type="button" class="btn btn-ghost -ml-2 hidden p-2 lg:inline-flex" onclick="toggleSidebarCollapsed()"
-                    aria-label="Mostrar u ocultar el menú" title="Mostrar u ocultar el menú">
+            {{-- Computadora: vuelve a mostrar el menú lateral. Sólo aparece con el menú oculto (abierto se cierra con ←). --}}
+            <button type="button" class="sidebar-open-btn btn btn-ghost -ml-2 hidden p-2 lg:inline-flex" onclick="toggleSidebarCollapsed()"
+                    aria-label="Mostrar el menú" title="Mostrar el menú">
                 <x-icon name="menu"/>
             </button>
 

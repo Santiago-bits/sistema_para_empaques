@@ -47,18 +47,8 @@ return [
             ['label' => 'Seguir un cajón', 'route' => 'traceability.index', 'icon' => 'route', 'permission' => 'traceability.view', 'module' => 'crates'],
         ],
     ],
-    [
-        'title' => 'Galpón',
-        'items' => [
-            ['label' => 'Mapa del galpón', 'route' => 'locations.map', 'icon' => 'map', 'permission' => 'locations.view', 'module' => 'locations'],
-            ['label' => 'Ubicaciones', 'route' => 'locations.index', 'icon' => 'pin', 'permission' => 'locations.view', 'module' => 'locations'],
-            ['label' => 'Cámaras de frío', 'route' => 'cold-rooms.index', 'icon' => 'snow', 'permission' => 'cold_rooms.view', 'module' => 'cold_rooms'],
-            ['label' => 'Insumos', 'route' => 'supplies.index', 'icon' => 'archive', 'permission' => 'supplies.view', 'module' => 'supplies'],
-            ['label' => 'Rendimiento de cera', 'route' => 'yields.index', 'icon' => 'chart-line', 'permission' => 'supplies.view', 'module' => 'supplies'],
-            ['label' => 'Mantenimiento', 'route' => 'machines.index', 'icon' => 'wrench', 'permission' => 'maintenance.view', 'module' => 'maintenance'],
-            ['label' => 'Problemas e incidentes', 'route' => 'incidents.index', 'icon' => 'alert', 'permission' => 'incidents.view', 'module' => 'incidents'],
-        ],
-    ],
+    // La sección «Galpón» (mapa, ubicaciones, cámaras de frío, insumos, rendimiento de cera, mantenimiento e
+    // incidentes) se sacó del menú a pedido del dueño (2026-10-04). Las pantallas y sus datos siguen existiendo.
     [
         'title' => 'Logística',
         'items' => [
