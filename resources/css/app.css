@@ -184,6 +184,11 @@
         @apply text-right tabular-nums;
     }
 
+    /* El título de una columna numérica va alineado con sus números (si no, «.table thead th» lo deja a la izquierda). */
+    .table thead th.num {
+        @apply text-right;
+    }
+
     /* Códigos de cajón, pallet, carga: siempre en monoespaciado. */
     .code {
         @apply font-mono text-[0.92em] font-medium tracking-tight whitespace-nowrap;
