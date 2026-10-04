@@ -56,7 +56,7 @@ class InstallController extends Controller
             return $this->failed($request, $database['message']);
         }
         // Falla CERRADO: con usuarios ya creados el instalador no existe.
-        abort_if($this->installed(), 404);
+        abort_unless($this->installed() === false, 404);
 
         $data = $this->validated($request);
 
@@ -76,7 +76,7 @@ class InstallController extends Controller
                     return $this->failed($request, 'No se pudieron crear las tablas de la base de datos ('.$this->reason($e).').');
                 }
             }
-            abort_if($this->installed(), 404);
+            abort_unless($this->installed() === false, 404);
             $this->install($data, $settings);
             $this->restoreDatabaseSession($request);
         } finally {
@@ -232,12 +232,17 @@ class InstallController extends Controller
      */
     public function archive(Request $request): RedirectResponse
     {
-        abort_if($this->installed(), 404);
+        abort_unless($this->installed() === false, 404);
         $request->validate(['db_password' => ['nullable', 'string', 'max:255'], 'confirm' => ['accepted']], [
             'confirm.accepted' => 'Marcá la casilla para confirmar que querés apartar las tablas existentes.',
         ]);
 
         $expected = (string) config('database.connections.'.config('database.default').'.password');
+        // Sin contraseña cualquiera pasaría la prueba dejando el campo vacío: esta página es pública.
+        if ($expected === '') {
+            return redirect()->route('install.show')->withErrors(['db_password' => 'La base de datos no tiene contraseña, así que no se puede '
+                .'comprobar que seas el dueño del servidor. Poné una contraseña a la base (y en el .env) o apartá las tablas desde phpMyAdmin.']);
+        }
         if (! hash_equals($expected, (string) $request->input('db_password', ''))) {
             return redirect()->route('install.show')->withErrors(['db_password' => 'La contraseña de la base de datos no es correcta.']);
         }
@@ -344,14 +349,15 @@ class InstallController extends Controller
             ->withErrors(['install' => $message]);
     }
 
-    private function installed(): bool
+    /** null = no se pudo verificar (error de base): las acciones que modifican la base lo tratan como instalado. */
+    private function installed(): ?bool
     {
         try {
             return Schema::hasTable('users') && Schema::hasTable('migrations')
                 && DB::table('migrations')->where('migration', self::FIRST_MIGRATION)->exists()
                 && User::query()->exists();
         } catch (Throwable) {
-            return false;
+            return null;
         }
     }
 

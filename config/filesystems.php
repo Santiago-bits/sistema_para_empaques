@@ -33,7 +33,8 @@ return [
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),
-            'serve' => true,
+            // false: sin la ruta /storage/{archivo}. Acá están los backups de la base; nada se sirve desde este disco.
+            'serve' => false,
             'throw' => false,
             'report' => false,
         ],

@@ -6,7 +6,6 @@ use App\Enums\LoadStatus;
 use App\Models\Packer;
 use App\Models\User;
 use App\Services\ReportService;
-use Carbon\CarbonImmutable;
 use Illuminate\Database\Query\Builder;
 
 /**
@@ -458,11 +457,5 @@ class ReportDatasets
             'indicator' => ['label' => 'Indicador', 'type' => 'text'],
             'value' => ['label' => 'Valor', 'type' => 'text'],
         ], $rows);
-    }
-
-    /** Hoy (para etiquetas de nombres de archivo). */
-    public static function stamp(): string
-    {
-        return CarbonImmutable::now()->format('Ymd-His');
     }
 }

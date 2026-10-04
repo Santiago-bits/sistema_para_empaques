@@ -179,12 +179,6 @@ final class ReportFilters
         );
     }
 
-    public function withIds(array $ids): self
-    {
-        return new self($this->from, $this->to, array_merge($this->ids, $ids), $this->group, $this->warehouseId,
-            $this->status, $this->lotCode, $this->loadNumber);
-    }
-
     public function days(): int
     {
         return (int) $this->from->startOfDay()->diffInDays($this->to->startOfDay()) + 1;

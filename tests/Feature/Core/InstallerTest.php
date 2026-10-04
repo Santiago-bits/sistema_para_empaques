@@ -139,9 +139,10 @@ class InstallerTest extends TestCase
         });
         Schema::create('empaques', fn (Blueprint $table) => $table->id());
         config(['session.driver' => 'database', 'cache.default' => 'database']);
+        config(['database.connections.'.config('database.default').'.password' => 'secreta']);
 
         $this->get(route('install.show'))->assertOk()->assertSee('Apartar tablas y continuar');
-        $this->post(route('install.archive'), ['db_password' => '', 'confirm' => 1])
+        $this->post(route('install.archive'), ['db_password' => 'secreta', 'confirm' => 1])
             ->assertRedirect(route('install.show'))->assertSessionHas('success');
 
         $this->assertTrue(Schema::hasTable('viejo_sessions'));
