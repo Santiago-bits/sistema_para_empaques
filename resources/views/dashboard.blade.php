@@ -12,7 +12,7 @@
         </x-slot:actions>
     </x-page-header>
 
-    <div x-data="dashboard({{ \Illuminate\Support\Js::from(['dataUrl' => route('dashboard.data'), 'charts' => $stats['charts']]) }})" x-init="init()" class="space-y-6">
+    <div x-data="dashboard({{ \Illuminate\Support\Js::from(['dataUrl' => route('dashboard.data'), 'charts' => $stats['charts']]) }})" class="space-y-6">
         {{-- Objetivo diario --}}
         @if ($stats['target']['kg'] > 0)
             <div class="panel p-5">
@@ -136,10 +136,12 @@
     @push('scripts')
         <script>
             window.dashboard = function (config) {
+                // Fuera del estado de Alpine: si los gráficos quedan dentro de un Proxy reactivo, Chart.js se rompe al redibujar.
+                const instances = {};
+
                 return {
                     charts: config.charts,
                     live: {{ \Illuminate\Support\Js::from($live->map(fn ($r) => ['crate' => $r->crate?->code, 'packer' => $r->packer?->full_name, 'variety' => $r->variety?->name, 'size' => $r->size?->name, 'weight' => (float) $r->weight, 'time' => $r->recorded_at->format('H:i')])) }},
-                    instances: {},
                     fmt(n, d = 2) { return Number(n || 0).toLocaleString('es-AR', { minimumFractionDigits: d, maximumFractionDigits: d }); },
                     init() {
                         this.draw();
@@ -155,10 +157,10 @@
                         } catch (e) {}
                     },
                     chart(ref, type, labels, datasets, options = {}) {
-                        if (this.instances[ref]) this.instances[ref].destroy();
+                        if (instances[ref]) instances[ref].destroy();
                         const el = this.$refs[ref];
                         if (!el || !window.Chart) return;
-                        this.instances[ref] = new Chart(el, { type, data: { labels, datasets }, options });
+                        instances[ref] = new Chart(el, { type, data: { labels, datasets }, options });
                     },
                     draw() {
                         const c = this.charts, colors = window.chartColors;
