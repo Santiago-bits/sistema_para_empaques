@@ -7,7 +7,9 @@
 
         <form method="POST" action="{{ route('password.email') }}" class="space-y-5">
             @csrf
-            <x-input name="login" :label="$label" :value="old('login')" placeholder="Ej.: jperez o 30123456" autofocus autocomplete="username" required maxlength="190" class="py-2.5 text-base"/>
+            <div class="text-center">
+                <x-input name="login" :label="$label" :value="old('login')" placeholder="Ej.: jperez o 30123456" autofocus autocomplete="username" required maxlength="190" class="py-2.5 text-left text-base"/>
+            </div>
 
             <button type="submit" class="btn btn-primary w-full py-3 text-base">Enviarme el código</button>
         </form>
