@@ -189,6 +189,22 @@
         @apply text-right;
     }
 
+    /* Menú lateral oculto en la computadora (botón ☰, se recuerda): el contenido usa todo el ancho. */
+    @media (min-width: 1024px) {
+        .app-content {
+            transition: padding-left 200ms ease;
+        }
+
+        .sidebar-collapsed .app-sidebar {
+            transform: translateX(-100%);
+        }
+
+        /* !important: la utilidad lg:pl-64 (capa utilities) le gana a esta capa aunque el selector sea más específico. */
+        .sidebar-collapsed .app-content {
+            padding-left: 0 !important;
+        }
+    }
+
     /* Encabezado de cada pantalla en el celular: título centrado y botones de acción a todo el ancho.
        Sólo se estiran los botones (sueltos, dentro de un formulario o de un menú); estados y etiquetas no. */
     @media (max-width: 639px) {

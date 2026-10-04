@@ -11,9 +11,16 @@ function setOnline(value) {
     window.dispatchEvent(new CustomEvent(value ? 'connection-restored' : 'connection-lost'));
 }
 
+// La dirección viene del layout (<meta name="heartbeat">): así funciona también si el sistema está en una
+// subcarpeta (XAMPP: /sistema_para_empaques/public), donde «/api/heartbeat» daba 404 y avisaba «sin conexión».
+const heartbeatUrl = () => {
+    const content = document.querySelector('meta[name=heartbeat]')?.content || '';
+    return content.startsWith('http') ? content : '/api/heartbeat';
+};
+
 async function ping() {
     try {
-        const r = await fetch('/api/heartbeat', { headers: { Accept: 'application/json' }, credentials: 'omit', cache: 'no-store' });
+        const r = await fetch(heartbeatUrl(), { headers: { Accept: 'application/json' }, credentials: 'omit', cache: 'no-store' });
         setOnline(r.ok || r.status === 429);
     } catch (e) {
         setOnline(false);
