@@ -11,7 +11,7 @@ class ExchangeRate extends Model
 {
     use Auditable;
 
-    public const SOURCES = ['BNA' => 'Banco Nación (oficial)', 'BCRA' => 'BCRA (Com. A 3500)', 'MEP' => 'Dólar MEP', 'manual' => 'Otra / manual'];
+    public const SOURCES = ['BNA' => 'Banco Nación (oficial)', 'BLUE' => 'Dólar blue', 'BCRA' => 'BCRA (Com. A 3500)', 'MEP' => 'Dólar MEP', 'manual' => 'Otra / manual'];
 
     protected $fillable = ['date', 'currency', 'buy', 'sell', 'source', 'user_id'];
 

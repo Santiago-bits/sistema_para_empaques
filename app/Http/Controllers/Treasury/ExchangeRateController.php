@@ -12,13 +12,47 @@ use Illuminate\View\View;
 
 class ExchangeRateController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request, ExchangeRateService $service): View
     {
+        // Por si el servidor no tiene el programador de tareas: al abrir la pantalla se actualiza si ya tocaba.
+        $service->autoUpdate();
+
         return view('treasury.exchange.index', [
             'current' => ExchangeRate::current(),
             'rates' => ExchangeRate::query()->where('currency', 'USD')->with('user:id,first_name,last_name')
                 ->latest('date')->paginate($this->perPage($request))->withQueryString(),
+            'autoEnabled' => ExchangeRateService::autoEnabled(),
+            'autoType' => ExchangeRateService::autoType(),
+            'lastFetch' => ExchangeRateService::lastFetch(),
         ]);
+    }
+
+    /** Trae el valor de hoy de internet: dólar oficial (Banco Nación) o blue. */
+    public function fetch(Request $request, ExchangeRateService $service): RedirectResponse
+    {
+        $data = $request->validate(['type' => ['required', Rule::in(array_keys(ExchangeRateService::ONLINE_TYPES))]]);
+
+        $rate = $service->fetchOnline($data['type'], $request->user());
+
+        return redirect()->route('exchange.index')->with('success', ExchangeRateService::TYPE_LABELS[$data['type']].' de hoy actualizado: US$ 1 = '.money($rate->sell).'.');
+    }
+
+    /** Activa o apaga la actualización automática cada 6 horas y elige oficial o blue. */
+    public function auto(Request $request, ExchangeRateService $service): RedirectResponse
+    {
+        $data = $request->validate([
+            'enabled' => ['required', 'boolean'],
+            'type' => ['required', Rule::in(array_keys(ExchangeRateService::ONLINE_TYPES))],
+        ]);
+
+        $service->configureAuto((bool) $data['enabled'], $data['type']);
+        if ($data['enabled']) {
+            $service->autoUpdate();
+        }
+
+        return redirect()->route('exchange.index')->with('success', $data['enabled']
+            ? 'Actualización automática activada: '.ExchangeRateService::TYPE_LABELS[$data['type']].' cada '.ExchangeRateService::AUTO_HOURS.' horas.'
+            : 'Actualización automática apagada. El valor se carga a mano o con los botones.');
     }
 
     public function store(Request $request, ExchangeRateService $rates): RedirectResponse

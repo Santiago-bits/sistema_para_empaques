@@ -52,7 +52,11 @@ Route::middleware(['module:treasury', 'can:treasury.view'])->group(function () {
         Route::put('cheques/{check}', [CheckController::class, 'update'])->whereNumber('check')->name('checks.update');
     });
 
-    // Cotización del dólar
+    // Valor del dólar (manual, traído de internet o automático cada 6 horas)
     Route::get('cotizaciones', [ExchangeRateController::class, 'index'])->name('exchange.index');
-    Route::post('cotizaciones', [ExchangeRateController::class, 'store'])->middleware('can:exchange.manage')->name('exchange.store');
+    Route::middleware('can:exchange.manage')->group(function () {
+        Route::post('cotizaciones', [ExchangeRateController::class, 'store'])->name('exchange.store');
+        Route::post('cotizaciones/traer', [ExchangeRateController::class, 'fetch'])->middleware('throttle:10,1')->name('exchange.fetch');
+        Route::post('cotizaciones/automatica', [ExchangeRateController::class, 'auto'])->name('exchange.auto');
+    });
 });

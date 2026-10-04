@@ -1,6 +1,7 @@
 <?php
 
 use App\Services\Central\CentralSyncService;
+use App\Services\ExchangeRateService;
 use App\Services\SystemInfoService;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
@@ -46,3 +47,7 @@ $artisan('galpon:central-sync')->everyFiveMinutes()->withoutOverlapping(10)
 // Limpieza: enlaces de recuperación de contraseña vencidos y trabajos fallidos viejos.
 $artisan('auth:clear-resets')->daily();
 $artisan('queue:prune-failed --hours=720')->daily();
+
+// Valor del dólar: si está activada la actualización automática (Tesorería → Valor del dólar), lo trae cada 6 horas.
+Schedule::call(fn () => app(ExchangeRateService::class)->autoUpdate())->hourly()->name('valor-dolar')->withoutOverlapping(10)
+    ->when(fn () => ExchangeRateService::autoEnabled());
