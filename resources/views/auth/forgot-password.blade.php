@@ -20,6 +20,8 @@
         @endif
 
         <p class="text-center text-sm"><a href="{{ route('login') }}" class="link">Volver a ingresar</a></p>
-        <p class="text-center text-xs text-stone-500"><a href="{{ route('owner.recovery') }}" class="hover:underline">Opción técnica: recuperar el Super Administrador con la contraseña de la base de datos</a></p>
+        @if (\App\Http\Controllers\Auth\OwnerRecoveryController::available())
+            <p class="text-center text-xs text-stone-500"><a href="{{ route('owner.recovery') }}" class="hover:underline">Opción técnica: recuperar el Super Administrador con la contraseña de la base de datos</a></p>
+        @endif
     </div>
 </x-auth-shell>

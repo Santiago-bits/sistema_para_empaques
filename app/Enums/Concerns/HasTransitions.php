@@ -13,12 +13,6 @@ trait HasTransitions
         return in_array($to, static::transitions()[$this->value] ?? [], true);
     }
 
-    /** @return list<self> */
-    public function allowedTransitions(): array
-    {
-        return static::transitions()[$this->value] ?? [];
-    }
-
     /** @return array<string, string> valor => etiqueta */
     public static function options(): array
     {

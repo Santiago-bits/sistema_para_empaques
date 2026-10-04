@@ -157,10 +157,4 @@ class User extends Authenticatable
     {
         $this->resolvedPermissions = null;
     }
-
-    /** Email de recuperación en español con el enlace del sistema (APP_URL). */
-    public function sendPasswordResetNotification(#[\SensitiveParameter] $token): void
-    {
-        $this->notify(new \App\Notifications\ResetPasswordLink($token));
-    }
 }

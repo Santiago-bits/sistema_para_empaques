@@ -19,16 +19,30 @@ use Illuminate\View\View;
  * compartido). Prueba que es el dueño con la contraseña de la base de datos (sólo la conoce quien administra
  * el servidor, y con ella ya tendría acceso a todos los datos): se le muestra su usuario y elige una contraseña
  * nueva. Pocos intentos por minuto y todo queda auditado.
+ *
+ * Sólo existe fuera de producción y con la base protegida por contraseña: sin contraseña (XAMPP de fábrica)
+ * cualquiera la pasaría dejando el campo vacío, y en producción convertiría la clave de la base en una llave
+ * de entrada desde internet. En esos casos queda el comando `php artisan galpon:create-admin`.
  */
 class OwnerRecoveryController extends Controller
 {
+    public static function available(): bool
+    {
+        return ! app()->isProduction()
+            && (string) config('database.connections.'.config('database.default').'.password') !== '';
+    }
+
     public function show(): View
     {
+        abort_unless(self::available(), 404);
+
         return view('auth.owner-recovery');
     }
 
     public function store(Request $request, AuditService $audit, SessionService $sessions): RedirectResponse
     {
+        abort_unless(self::available(), 404);
+
         $data = $request->validate([
             'db_password' => ['nullable', 'string', 'max:255'],
             'username' => ['nullable', 'alpha_dash', 'max:60'],

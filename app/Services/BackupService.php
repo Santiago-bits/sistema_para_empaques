@@ -7,7 +7,6 @@ use App\Exceptions\BusinessException;
 use App\Models\Backup;
 use App\Models\User;
 use Illuminate\Contracts\Filesystem\Filesystem;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -56,14 +55,6 @@ class BackupService
 
     public function __construct(private readonly AuditService $audit)
     {
-    }
-
-    /** Permite respaldar una conexión distinta de la predeterminada (tests, multi-base). */
-    public function usingConnection(?string $connection): static
-    {
-        $this->connection = $connection;
-
-        return $this;
     }
 
     public function connectionName(): string
@@ -816,12 +807,5 @@ class BackupService
     public static function typeLabel(?string $type): string
     {
         return self::TYPES[$type] ?? (string) $type;
-    }
-
-    public static function lastSuccessfulAt(): ?Carbon
-    {
-        $value = Backup::query()->where('status', 'success')->max('finished_at');
-
-        return $value ? Carbon::parse($value) : null;
     }
 }

@@ -581,21 +581,6 @@ class ReportService
             ])->all();
     }
 
-    /** Cargas por estado (en el período). */
-    public function loadsByStatus(ReportFilters $f): array
-    {
-        return $this->loadsQuery($f)
-            ->selectRaw('l.status, COUNT(*) as n, COALESCE(SUM(l.total_kg), 0) as kg')
-            ->groupBy('l.status')
-            ->get()
-            ->map(fn ($r) => [
-                'status' => $r->status,
-                'label' => LoadStatus::tryFrom($r->status)?->label() ?? $r->status,
-                'loads' => (int) $r->n,
-                'kg' => round((float) $r->kg, 2),
-            ])->all();
-    }
-
     /** Cargas despachadas por día (dispatched_at). */
     public function dispatchesByDay(ReportFilters $f): array
     {

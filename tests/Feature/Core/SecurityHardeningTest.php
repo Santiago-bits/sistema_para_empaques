@@ -66,6 +66,44 @@ class SecurityHardeningTest extends TestCase
         $this->assertSame(18.5, \App\Services\ExportService::neutralizeFormula(18.5));
     }
 
+    public function test_owner_recovery_does_not_exist_without_database_password_or_in_production(): void
+    {
+        $owner = User::factory()->role('super_admin')->create();
+        $attempt = ['db_password' => '', 'password' => 'Atacante2026x', 'password_confirmation' => 'Atacante2026x'];
+
+        // Base sin contraseña (XAMPP de fábrica): dejar el campo vacío no puede alcanzar.
+        config(['database.connections.'.config('database.default').'.password' => '']);
+        $this->get(route('password.request'))->assertOk()->assertDontSee('Opción técnica');
+        $this->get(route('owner.recovery'))->assertNotFound();
+        $this->post(route('owner.recovery.store'), $attempt)->assertNotFound();
+
+        // Producción: la clave de la base no puede funcionar como llave de entrada desde internet.
+        config(['database.connections.'.config('database.default').'.password' => 'clave-db']);
+        $this->app['env'] = 'production';
+        $this->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class)
+            ->post(route('owner.recovery.store'), ['db_password' => 'clave-db'] + $attempt)->assertNotFound();
+        $this->app['env'] = 'testing';
+
+        $this->assertTrue(\Illuminate\Support\Facades\Hash::check('password', $owner->fresh()->password));
+    }
+
+    public function test_private_files_are_not_served_by_url(): void
+    {
+        $this->assertFalse(config('filesystems.disks.local.serve'));
+        $this->assertFalse(\Illuminate\Support\Facades\Route::has('storage.local'));
+    }
+
+    public function test_hsts_in_production_and_php_version_hidden(): void
+    {
+        User::factory()->role('admin')->create();
+        $this->get('/login')->assertHeaderMissing('Strict-Transport-Security')->assertHeaderMissing('X-Powered-By');
+
+        config(['app.url' => 'https://galpon.example']);
+        $this->app['env'] = 'production';
+        $this->get('/login')->assertHeader('Strict-Transport-Security', 'max-age=31536000');
+        $this->app['env'] = 'testing';
+    }
+
     public function test_reset_email_link_ignores_poisoned_host_header(): void
     {
         Notification::fake();

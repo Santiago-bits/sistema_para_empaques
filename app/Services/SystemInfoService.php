@@ -216,15 +216,6 @@ class SystemInfoService
             ->all();
     }
 
-    /** @return list<string> */
-    public function extensions(): array
-    {
-        $list = get_loaded_extensions();
-        sort($list, SORT_NATURAL | SORT_FLAG_CASE);
-
-        return $list;
-    }
-
     /** Extensiones necesarias que faltan (QR y códigos se generan en SVG y ARCA usa HTTP: no requieren gd ni soap). */
     public function missingExtensions(): array
     {
