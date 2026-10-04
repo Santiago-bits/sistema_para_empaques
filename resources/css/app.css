@@ -189,6 +189,32 @@
         @apply text-right;
     }
 
+    /* Encabezado de cada pantalla en el celular: título centrado y botones de acción a todo el ancho.
+       Sólo se estiran los botones (sueltos, dentro de un formulario o de un menú); estados y etiquetas no. */
+    @media (max-width: 639px) {
+        .page-header-title,
+        .page-header-actions {
+            @apply w-full;
+        }
+
+        .page-header-title {
+            @apply text-center;
+        }
+
+        .page-header-actions > .btn,
+        .page-header-actions > form:has(> .btn),
+        .page-header-actions > div:has(> .btn) {
+            /* Partes iguales; si el texto no entra, el botón baja a otra fila en vez de cortarse. */
+            flex: 1 1 0%;
+            min-width: max-content;
+        }
+
+        .page-header-actions > form > .btn,
+        .page-header-actions > div > .btn {
+            @apply w-full;
+        }
+    }
+
     /* Códigos de cajón, pallet, carga: siempre en monoespaciado. */
     .code {
         @apply font-mono text-[0.92em] font-medium tracking-tight whitespace-nowrap;
