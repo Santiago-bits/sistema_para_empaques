@@ -199,6 +199,11 @@
             transform: translateX(-100%);
         }
 
+        /* Con el menú abierto el ☰ del encabezado sobra (se cierra con ← dentro del menú). */
+        html:not(.sidebar-collapsed) .sidebar-open-btn {
+            display: none !important;
+        }
+
         /* !important: la utilidad lg:pl-64 (capa utilities) le gana a esta capa aunque el selector sea más específico. */
         .sidebar-collapsed .app-content {
             padding-left: 0 !important;
