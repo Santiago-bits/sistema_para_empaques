@@ -1,7 +1,7 @@
 <x-auth-shell title="Ingresar">
     <div class="space-y-5">
         <div class="text-center">
-            <h1 class="text-2xl font-semibold tracking-tight">Ingresar al sistema</h1>
+            <h1 class="text-3xl font-semibold tracking-tight">Ingresar al sistema</h1>
             <p class="mt-1 text-sm text-stone-500">{{ $google ? 'Ingresá con tus datos de acceso o con tu cuenta de Google.' : 'Ingresá con tus datos de acceso.' }}</p>
         </div>
 
@@ -20,10 +20,13 @@
 
         <form method="POST" action="{{ route('login.store') }}" class="space-y-5">
             @csrf
-            <x-input name="login" :label="$label" placeholder="Ej.: jperez o 30123456" hint="Cualquiera de estos datos, tal como figura en tu ficha de usuario."
-                     autofocus autocomplete="username" required class="py-2.5 text-base"/>
-            <div>
-                <x-input name="password" type="password" label="Contraseña" autocomplete="current-password" required class="py-2.5 text-base"/>
+            {{-- text-center centra etiquetas y ayudas; el texto que se escribe queda alineado a la izquierda (text-left). --}}
+            <div class="text-center">
+                <x-input name="login" :label="$label" placeholder="Ej.: jperez o 30123456" hint="Cualquiera de estos datos, tal como figura en tu ficha de usuario."
+                         autofocus autocomplete="username" required class="py-2.5 text-left text-base"/>
+            </div>
+            <div class="text-center">
+                <x-input name="password" type="password" label="Contraseña" autocomplete="current-password" required class="py-2.5 text-left text-base"/>
                 <div class="mt-1.5 text-center">
                     <a href="{{ route('password.request') }}" class="link text-sm">¿Olvidaste tu contraseña?</a>
                 </div>
