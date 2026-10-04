@@ -24,7 +24,10 @@ class PasswordResetController extends Controller
 
     public function create(): View
     {
-        return view('auth.forgot-password', ['hint' => LoginIdentifiers::hint()]);
+        return view('auth.forgot-password', [
+            'label' => LoginIdentifiers::label(),
+            'google' => GoogleLoginController::enabled(),
+        ]);
     }
 
     public function store(Request $request): RedirectResponse

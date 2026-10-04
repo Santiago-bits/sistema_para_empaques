@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\ChangePasswordController;
+use App\Http\Controllers\Auth\GoogleLoginController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\HomeController;
@@ -24,6 +25,8 @@ foreach (glob(__DIR__.'/public/*.php') as $file) {
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'show'])->name('login');
     Route::post('/login', [LoginController::class, 'store'])->middleware('throttle:login')->name('login.store');
+    Route::get('/login/google', [GoogleLoginController::class, 'redirect'])->middleware('throttle:10,1')->name('login.google');
+    Route::get('/login/google/callback', [GoogleLoginController::class, 'callback'])->middleware('throttle:10,1')->name('login.google.callback');
 
     Route::get('/recuperar-contrasena', [PasswordResetController::class, 'create'])->name('password.request');
     Route::post('/recuperar-contrasena', [PasswordResetController::class, 'store'])->middleware('throttle:password-reset')->name('password.email');

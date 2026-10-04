@@ -172,7 +172,9 @@ class SuperAdminPanelTest extends TestCase
         $owner = User::factory()->role('super_admin')->create(['username' => 'duenio']);
         config(['database.connections.'.config('database.default').'.password' => 'clave-db']);
 
-        $this->get(route('login'))->assertSee('¿Sos el dueño');
+        // La opción técnica ya no está en el login (confunde a usuarios no técnicos): vive en «¿Olvidaste tu contraseña?».
+        $this->get(route('login'))->assertDontSee('¿Sos el dueño');
+        $this->get(route('password.request'))->assertSee('Opción técnica');
         $this->get(route('owner.recovery'))->assertOk();
         $this->post(route('owner.recovery.store'), ['db_password' => 'otra', 'password' => 'NuevaClave1', 'password_confirmation' => 'NuevaClave1'])
             ->assertSessionHasErrors('db_password');

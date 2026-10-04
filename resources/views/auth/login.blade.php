@@ -1,9 +1,8 @@
 <x-auth-shell title="Ingresar">
-    <form method="POST" action="{{ route('login.store') }}" class="space-y-5">
-        @csrf
+    <div class="space-y-5">
         <div>
             <h1 class="text-2xl font-semibold tracking-tight">Ingresar al sistema</h1>
-            <p class="mt-1 text-sm text-stone-500">Usá tu {{ $hint }}.</p>
+            <p class="mt-1 text-sm text-stone-500">{{ $google ? 'Ingresá con tus datos de acceso o con tu cuenta de Google.' : 'Ingresá con tus datos de acceso.' }}</p>
         </div>
 
         @if ($adminArea)
@@ -19,16 +18,23 @@
             </div>
         @endif
 
-        <x-input name="login" label="Usuario" autofocus autocomplete="username" required class="py-2.5 text-base"/>
-        <div>
-            <x-input name="password" type="password" label="Contraseña" autocomplete="current-password" required class="py-2.5 text-base"/>
-            <div class="mt-1.5 text-right">
-                <a href="{{ route('password.request') }}" class="link text-sm">¿Olvidaste tu contraseña?</a>
+        <form method="POST" action="{{ route('login.store') }}" class="space-y-5">
+            @csrf
+            <x-input name="login" :label="$label" placeholder="Ej.: jperez o 30123456" hint="Cualquiera de estos datos, tal como figura en tu ficha de usuario."
+                     autofocus autocomplete="username" required class="py-2.5 text-base"/>
+            <div>
+                <x-input name="password" type="password" label="Contraseña" autocomplete="current-password" required class="py-2.5 text-base"/>
+                <div class="mt-1.5 text-right">
+                    <a href="{{ route('password.request') }}" class="link text-sm">¿Olvidaste tu contraseña?</a>
+                </div>
             </div>
-        </div>
-        <x-checkbox name="remember" label="Mantener la sesión iniciada en esta computadora" no-hidden/>
+            <x-checkbox name="remember" label="Mantener la sesión iniciada en esta computadora" no-hidden/>
 
-        <button type="submit" class="btn btn-primary w-full py-3 text-base">Ingresar</button>
-        <p class="text-center text-xs text-stone-500"><a href="{{ route('owner.recovery') }}" class="hover:underline">¿Sos el dueño y no recordás el usuario o la contraseña?</a></p>
-    </form>
+            <button type="submit" class="btn btn-primary w-full py-3 text-base">Ingresar</button>
+        </form>
+
+        @if ($google)
+            @include('auth.partials.google-button')
+        @endif
+    </div>
 </x-auth-shell>
