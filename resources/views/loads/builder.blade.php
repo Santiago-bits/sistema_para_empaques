@@ -7,7 +7,7 @@
         </x-slot:actions>
     </x-page-header>
 
-    <div x-data="loadBuilder({{ \Illuminate\Support\Js::from($config) }})" x-init="init()" class="grid gap-6 xl:grid-cols-2">
+    <div x-data="loadBuilder({{ \Illuminate\Support\Js::from($config) }})" class="grid gap-6 xl:grid-cols-2">
         {{-- Disponibles --}}
         <section class="space-y-4">
             <div class="panel p-4">

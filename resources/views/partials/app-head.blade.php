@@ -2,6 +2,7 @@
 <link rel="manifest" href="{{ route('app.manifest') }}">
 <meta name="theme-color" content="#16a34a">
 <meta name="application-name" content="{{ setting('company.name', 'Galpón de Empaque') }}">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Galpón">
 <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png?v=2">

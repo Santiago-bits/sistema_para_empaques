@@ -1,7 +1,7 @@
 <x-layouts.app title="Mover pallets y cajones">
     <x-page-header title="Mover pallets y cajones" subtitle="Escaneá el pallet o cajón, después la ubicación de destino y confirmá con Enter." :back="route('locations.index')"/>
 
-    <div x-data="moveScreen({{ \Illuminate\Support\Js::from(['lookupUrl' => route('locations.lookup'), 'moveUrl' => route('locations.move'), 'initialCode' => $initialCode]) }})" x-init="init()"
+    <div x-data="moveScreen({{ \Illuminate\Support\Js::from(['lookupUrl' => route('locations.lookup'), 'moveUrl' => route('locations.move'), 'initialCode' => $initialCode]) }})"
          class="grid gap-6 lg:grid-cols-3">
         <div class="space-y-4 lg:col-span-2">
             {{-- Resultado arriba de todo: visible sin desplazarse mientras se escanea. --}}
