@@ -89,7 +89,9 @@ class DatabaseUpgrader
                         report($e); // la copia es una precaución: si no se puede, se actualiza igual
                     }
                 }
-                @set_time_limit(300);
+                if (! app()->runningInConsole()) {
+                    @set_time_limit(300); // en la web; en consola y en los tests no hay límite
+                }
                 Artisan::call('migrate', ['--force' => true]);
             }
             // Permisos, roles y módulos nuevos de esta versión (no pisa lo que el galpón configuró).

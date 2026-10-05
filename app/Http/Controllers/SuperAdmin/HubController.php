@@ -104,7 +104,9 @@ class HubController extends Controller
         if ($loaded = setting('system.sample_data_at')) {
             return back()->with('error', 'Los datos de ejemplo ya se cargaron el '.fdate(\Illuminate\Support\Carbon::parse($loaded), true).'.');
         }
-        @set_time_limit(300);
+        if (! app()->runningInConsole()) {
+            @set_time_limit(300); // en la web; en consola y en los tests no hay límite
+        }
         @ignore_user_abort(true);
 
         try {
