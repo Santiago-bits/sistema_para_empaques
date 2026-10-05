@@ -15,6 +15,9 @@ class BrandingTest extends TestCase
 
     public function test_logo_is_served_without_public_storage_link_and_color_tints_the_interface(): void
     {
+        if (! extension_loaded('gd')) {
+            $this->markTestSkipped('Necesita la extensión GD de PHP (para crear la imagen de prueba).');
+        }
         Storage::fake('public');
         $this->actingAsRole('admin');
 
