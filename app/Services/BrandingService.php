@@ -73,6 +73,10 @@ class BrandingService
             return $target;
         }
 
+        // Sin la extensión GD de PHP no se puede generar: se usa el ícono de siempre (en vez de un error 500).
+        if (! function_exists('imagecreatefromstring')) {
+            return null;
+        }
         $source = @imagecreatefromstring((string) $disk->get($logo));
         if (! $source instanceof GdImage) {
             return null;
