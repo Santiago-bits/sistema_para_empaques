@@ -75,6 +75,9 @@
                     @if ($section['title'])
                         <p class="mb-1.5 px-3 text-[11px] font-semibold tracking-wider text-stone-500 uppercase">{{ $section['title'] }}</p>
                     @endif
+                    @if ($section['note'] ?? null)
+                        <p class="mb-1.5 px-3 text-xs text-stone-400"><span class="code">{{ $section['note'] }}</span></p>
+                    @endif
                     <div class="space-y-0.5">
                         @foreach ($section['items'] as $item)
                             <a href="{{ route($item['route']) }}" @class(['nav-item', 'active' => $item['active']]) @click="sidebar = false" @if ($item['active']) aria-current="page" @endif>

@@ -263,7 +263,9 @@ class SettingController extends Controller
             'point_of_sale' => ['required', 'integer', 'min:1', 'max:99999'],
             'cuit' => ['nullable', 'digits:11'],
             'emitter_condition' => ['required', Rule::in(['RI', 'MT'])],
+            'warehouse_code' => ['nullable', 'string', 'max:30'],
         ]);
+        $data['warehouse_code'] = trim((string) ($data['warehouse_code'] ?? ''));
         foreach ($data as $key => $value) {
             $this->settings->set("arca.$key", $value);
         }

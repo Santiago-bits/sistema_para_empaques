@@ -51,7 +51,6 @@ return [
                 ['keys' => ['G', 'P'], 'description' => 'Pallets', 'go' => 'pallets.index'],
                 ['keys' => ['G', 'L'], 'description' => 'Lotes', 'go' => 'lots.index'],
                 ['keys' => ['G', 'Q'], 'description' => 'Calidad', 'go' => 'quality.index'],
-                ['keys' => ['G', 'U'], 'description' => 'Mapa del galpón (ubicaciones)', 'go' => 'locations.map'],
                 ['keys' => ['G', 'C'], 'description' => 'Cargas', 'go' => 'loads.index'],
                 ['keys' => ['G', 'R'], 'description' => 'Remitos', 'go' => 'remitos.index'],
                 ['keys' => ['G', 'F'], 'description' => 'Facturación', 'go' => 'invoices.index'],
