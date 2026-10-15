@@ -5,6 +5,8 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 ## [Sin publicar]
 
 ### Cambiado
+- El menú lateral ahora se despliega por secciones (Fichas, Producción, Galpón, Logística, …): la sección de la
+  pantalla en la que estás queda abierta y las demás se abren o cierran con un clic; cada usuario la deja como prefiere.
 - Se sacaron del menú **Mapa del galpón** y **Ubicaciones** (y su atajo G U). En su lugar, la sección **Galpón** del
   menú muestra el **código del galpón en ARCA**, que carga el dueño en Configuración → ARCA → «Código del galpón (ARCA)».
 
