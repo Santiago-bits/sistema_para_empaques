@@ -69,16 +69,25 @@
                 <x-icon name="arrow-left" class="size-5"/>
             </button>
         </div>
-        <nav class="sidebar-scroll flex-1 space-y-5 overflow-y-auto overscroll-contain px-3 py-4">
+        <nav class="sidebar-scroll flex-1 space-y-2 overflow-y-auto overscroll-contain px-3 py-4">
             @foreach ($menu as $section)
-                <div>
+                @php
+                    // Secciones desplegables: la de la pantalla actual siempre abierta; las demás recuerdan lo que eligió el usuario.
+                    $sectionActive = collect($section['items'])->contains('active', true);
+                    $sectionKey = 'galpon.menu.'.\Illuminate\Support\Str::slug((string) $section['title']);
+                @endphp
+                <div @if ($section['title']) x-data="{ open: (() => { if ({{ $sectionActive ? 'true' : 'false' }}) return true; try { return localStorage.getItem('{{ $sectionKey }}') === '1'; } catch (e) { return false; } })(), toggle() { this.open = ! this.open; try { localStorage.setItem('{{ $sectionKey }}', this.open ? '1' : '0'); } catch (e) {} } }" @endif>
                     @if ($section['title'])
-                        <p class="mb-1.5 px-3 text-[11px] font-semibold tracking-wider text-stone-500 uppercase">{{ $section['title'] }}</p>
+                        <button type="button" @click="toggle()" :aria-expanded="open.toString()" aria-expanded="{{ $sectionActive ? 'true' : 'false' }}"
+                                class="mb-1 flex w-full items-center gap-2 rounded-md px-3 py-1 text-[11px] font-semibold tracking-wider text-stone-500 uppercase hover:bg-white/5 hover:text-white">
+                            <span class="truncate">{{ $section['title'] }}</span>
+                            <x-icon name="chevron-right" class="ml-auto size-3.5 shrink-0 transition-transform" ::class="open && 'rotate-90'"/>
+                        </button>
                     @endif
                     @if ($section['note'] ?? null)
                         <p class="mb-1.5 px-3 text-xs text-stone-400"><span class="code">{{ $section['note'] }}</span></p>
                     @endif
-                    <div class="space-y-0.5">
+                    <div class="space-y-0.5" @if ($section['title']) x-show="open" @unless ($sectionActive) x-cloak @endunless @endif>
                         @foreach ($section['items'] as $item)
                             <a href="{{ route($item['route']) }}" @class(['nav-item', 'active' => $item['active']]) @click="sidebar = false" @if ($item['active']) aria-current="page" @endif>
                                 <x-icon :name="$item['icon']" class="size-[18px] shrink-0 {{ ($item['highlight'] ?? false) ? 'text-accent-400' : 'text-stone-400' }}"/>
