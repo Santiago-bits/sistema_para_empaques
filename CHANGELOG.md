@@ -2,6 +2,12 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versionado semántico.
 
+## [Sin publicar]
+
+### Cambiado
+- Se sacaron del menú **Mapa del galpón** y **Ubicaciones** (y su atajo G U). En su lugar, la sección **Galpón** del
+  menú muestra el **código del galpón en ARCA**, que carga el dueño en Configuración → ARCA → «Código del galpón (ARCA)».
+
 ## [1.10.1] - 2026-10-03
 
 ### Corregido

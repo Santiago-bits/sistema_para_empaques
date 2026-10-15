@@ -42,7 +42,13 @@ class Menu
                 $items[] = $item;
             }
             if ($items !== []) {
-                $sections[] = ['title' => $section['title'], 'items' => $items];
+                $sections[] = [
+                    'title' => $section['title'],
+                    'items' => $items,
+                    'note' => ($section['show_warehouse_code'] ?? false) && filled(setting('arca.warehouse_code'))
+                        ? 'Código ARCA: '.setting('arca.warehouse_code')
+                        : null,
+                ];
             }
         }
 

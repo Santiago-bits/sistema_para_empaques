@@ -62,6 +62,7 @@ class SettingsService
         'arca.point_of_sale' => [1, 'int', 'arca'],
         'arca.cuit' => ['', 'string', 'arca'],
         'arca.emitter_condition' => ['RI', 'string', 'arca'], // RI = Responsable Inscripto (A/B), MT = Monotributo (C)
+        'arca.warehouse_code' => ['', 'string', 'arca'], // código del galpón en ARCA; lo carga el dueño
         // Etiqueta de la caja (datos oficiales del empaque, como la etiqueta impresa del envase).
         'label.show_company' => [true, 'bool', 'label'],
         'label.show_regulatory' => [false, 'bool', 'label'],

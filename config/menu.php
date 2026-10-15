@@ -49,9 +49,9 @@ return [
     ],
     [
         'title' => 'Galpón',
+        // Debajo del título se muestra el código del galpón en ARCA (Configuración → ARCA).
+        'show_warehouse_code' => true,
         'items' => [
-            ['label' => 'Mapa del galpón', 'route' => 'locations.map', 'icon' => 'map', 'permission' => 'locations.view', 'module' => 'locations'],
-            ['label' => 'Ubicaciones', 'route' => 'locations.index', 'icon' => 'pin', 'permission' => 'locations.view', 'module' => 'locations'],
             ['label' => 'Cámaras de frío', 'route' => 'cold-rooms.index', 'icon' => 'snow', 'permission' => 'cold_rooms.view', 'module' => 'cold_rooms'],
             ['label' => 'Insumos', 'route' => 'supplies.index', 'icon' => 'archive', 'permission' => 'supplies.view', 'module' => 'supplies'],
             ['label' => 'Rendimiento de cera', 'route' => 'yields.index', 'icon' => 'chart-line', 'permission' => 'supplies.view', 'module' => 'supplies'],

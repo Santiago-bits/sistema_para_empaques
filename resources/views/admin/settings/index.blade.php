@@ -202,6 +202,8 @@
                             <x-input name="cuit" label="CUIT emisor" :value="$s['arca.cuit']" hint="11 dígitos"/>
                             <x-select name="emitter_condition" label="Condición del emisor" :value="$s['arca.emitter_condition']"
                                       :options="['RI' => 'Responsable Inscripto (Factura A / B)', 'MT' => 'Monotributo (Factura C)']"/>
+                            <x-input name="warehouse_code" label="Código del galpón (ARCA)" :value="$s['arca.warehouse_code']"
+                                     maxlength="30" hint="El que figura en ARCA. Se muestra en el menú, en la sección Galpón."/>
                         </div>
                         @break
                 @endswitch
