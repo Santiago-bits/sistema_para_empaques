@@ -5,7 +5,7 @@ namespace Tests\Feature\Core;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-/** Las secciones del menú lateral se despliegan: la de la pantalla actual abierta, las demás cerradas hasta que el usuario las abra. */
+/** Menú en acordeón: apartados desplegables; el de la pantalla actual abierto, los demás cerrados. */
 class SidebarSectionsTest extends TestCase
 {
     use RefreshDatabase;
@@ -16,12 +16,12 @@ class SidebarSectionsTest extends TestCase
 
         $html = $this->get(route('loads.index'))->assertOk()->getContent();
 
-        // Cada sección con título tiene su botón para desplegar y recuerda la elección del usuario.
-        $this->assertStringContainsString("localStorage.getItem('galpon.menu.administracion')", $html);
-        $this->assertStringContainsString("localStorage.getItem('galpon.menu.logistica')", $html);
-        $this->assertMatchesRegularExpression('/aria-expanded="true"[^>]*>\s*<span class="truncate">Logística<\/span>/u', $html);
-        $this->assertMatchesRegularExpression('/aria-expanded="false"[^>]*>\s*<span class="truncate">Administración<\/span>/u', $html);
-        // Los enlaces siguen en la página (se ocultan, no se quitan).
+        $this->assertStringContainsString('data-menu-section="logistica"', $html);
+        $this->assertStringContainsString('data-menu-section="administracion"', $html);
+        $this->assertMatchesRegularExpression('/aria-expanded="true" aria-controls="menu-logistica"/', $html);
+        $this->assertMatchesRegularExpression('/aria-expanded="false" aria-controls="menu-administracion"/', $html);
+        // Las opciones siguen en la página (se ocultan, no se quitan) y hay acceso directo a las etiquetas.
         $this->assertStringContainsString(route('loads.index'), $html);
+        $this->assertStringContainsString(route('labels.crates'), $html);
     }
 }

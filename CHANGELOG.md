@@ -5,6 +5,10 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 ## [Sin publicar]
 
 ### Cambiado
+- Menú lateral en acordeón: se ven sólo los apartados (Fichas, Producción, Logística, …) y al tocar uno se despliegan
+  sus opciones. Se agregó «Imprimir etiquetas» en Producción.
+- Listas con búsqueda: en las listas largas (clientes, camioneros, transportistas, empleados, variedades, …) se
+  escribe para filtrar y se elige con ↑ ↓ y Enter.
 - El menú lateral ahora se despliega por secciones (Fichas, Producción, Galpón, Logística, …): la sección de la
   pantalla en la que estás queda abierta y las demás se abren o cierran con un clic; cada usuario la deja como prefiere.
 - Se sacaron del menú **Mapa del galpón** y **Ubicaciones** (y su atajo G U). En su lugar, la sección **Galpón** del
