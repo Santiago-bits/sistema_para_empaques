@@ -6,6 +6,8 @@
     $portfolioOptions = $portfolio->mapWithKeys(fn ($c) => [$c->id => $c->bank.' N° '.$c->number.' · '.money($c->amount).' · cobro '.fdate($c->payment_date)])->all();
     $period = ['from' => $from->toDateString(), 'to' => $to->toDateString()];
 @endphp
+{{-- En la ficha del titular sólo van el filtro y los movimientos; el saldo, los formularios y los totales están en su cuenta corriente. --}}
+@if ($withForms ?? true)
 <div class="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
     <div @class(['panel col-span-2 p-4', 'ring-2 ring-emerald-500/40' => $balance > 0.004, 'ring-2 ring-red-500/40' => $balance < -0.004])>
         <p class="text-xs font-semibold tracking-wide text-stone-500 uppercase">Saldo actual</p>
@@ -99,6 +101,7 @@
         </x-panel>
     </div>
 @endcan
+@endif
 
 <form method="GET" class="panel mb-4 flex flex-wrap items-end gap-3 p-4" data-filters data-allow-resubmit>
     <x-input name="from" type="date" label="Desde" :value="$from->toDateString()"/>
