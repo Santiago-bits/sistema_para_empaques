@@ -50,4 +50,15 @@ class AccountOnHolderPageTest extends TestCase
         $this->actingWithPermissions(['catalogs.view']);
         $this->get(route('catalogs.clients.show', $client))->assertOk()->assertDontSee('Saldo actual')->assertDontSee('Registrar cobro o pago');
     }
+
+    public function test_client_list_opens_the_page_by_clicking_the_name_or_the_row(): void
+    {
+        $this->actingAsRole('admin');
+        $client = Client::query()->create(['business_name' => 'Avana SRL', 'cuit' => '30712345671', 'tax_condition' => 'RI']);
+        $url = route('catalogs.clients.show', $client);
+
+        $this->get(route('catalogs.clients.index'))->assertOk()
+            ->assertSee('data-href="'.$url.'"', false)
+            ->assertSee('<a href="'.$url.'" class="font-medium', false);
+    }
 }

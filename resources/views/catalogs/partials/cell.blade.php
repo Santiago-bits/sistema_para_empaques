@@ -2,7 +2,11 @@
 @php $value = $column->resolve($record); @endphp
 @switch($column->type)
     @case('strong')
-        <span class="font-medium text-stone-900 dark:text-white">{{ $value ?? '—' }}</span>
+        @if ($href ?? null)
+            <a href="{{ $href }}" class="font-medium text-stone-900 hover:text-brand-700 hover:underline dark:text-white dark:hover:text-brand-400">{{ $value ?? '—' }}</a>
+        @else
+            <span class="font-medium text-stone-900 dark:text-white">{{ $value ?? '—' }}</span>
+        @endif
         @break
     @case('code')
         <span class="code">{{ $value ?? '—' }}</span>
