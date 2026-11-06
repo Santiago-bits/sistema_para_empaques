@@ -21,7 +21,11 @@ class AccountOnHolderPageTest extends TestCase
 
         $page = route('catalogs.clients.show', $client);
         $this->get($page)->assertOk()
-            ->assertSeeInOrder(['Cuenta corriente', 'Saldo actual', money(80000), 'nos debe', 'Registrar cobro o pago', 'Saldo anterior', 'Deuda anterior', 'Datos']);
+            ->assertSeeInOrder(['Cuenta corriente', 'Desde', 'Saldo anterior', 'Deuda anterior', money(80000), 'Datos'])
+            // En la ficha sólo van el filtro y los movimientos: sin recuadros de saldo ni formularios (están en la cuenta corriente).
+            ->assertDontSee('Saldo actual')->assertDontSee('Registrar cobro o pago')->assertDontSee('Ajuste o saldo inicial');
+        $this->get(route('accounts.show', ['client', $client->id]))->assertOk()
+            ->assertSee('Registrar cobro o pago')->assertSee('Ajuste o saldo inicial');
 
         // Cobro desde la ficha: vuelve a la ficha con el saldo actualizado.
         $this->from($page)->post(route('accounts.payments.store', ['client', $client->id]), [
@@ -41,14 +45,14 @@ class AccountOnHolderPageTest extends TestCase
     {
         $this->actingAsRole('admin');
         $producer = Producer::query()->create(['code' => 'P1', 'name' => 'Finca Uno']);
-        $this->get(route('catalogs.producers.show', $producer))->assertOk()->assertSee('Cuenta corriente')->assertSee('Cuenta saldada');
+        $this->get(route('catalogs.producers.show', $producer))->assertOk()->assertSee('Cuenta corriente')->assertSee('Sin movimientos en el período.');
     }
 
     public function test_without_treasury_permission_the_account_is_not_shown(): void
     {
         $client = Client::query()->create(['business_name' => 'Avana SRL', 'cuit' => '30712345671', 'tax_condition' => 'RI']);
         $this->actingWithPermissions(['catalogs.view']);
-        $this->get(route('catalogs.clients.show', $client))->assertOk()->assertDontSee('Saldo actual')->assertDontSee('Registrar cobro o pago');
+        $this->get(route('catalogs.clients.show', $client))->assertOk()->assertDontSee('Saldo anterior')->assertDontSee('Registrar cobro o pago');
     }
 
     public function test_client_list_opens_the_page_by_clicking_the_name_or_the_row(): void

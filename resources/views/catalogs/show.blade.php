@@ -31,7 +31,7 @@
     @if ($account ?? null)
         <section class="mb-8" aria-labelledby="cuenta-corriente">
             <h2 id="cuenta-corriente" class="mb-3 text-lg font-semibold text-stone-900 dark:text-white">Cuenta corriente</h2>
-            @include('treasury.accounts._statement', $account)
+            @include('treasury.accounts._statement', $account + ['withForms' => false])
         </section>
     @endif
 
