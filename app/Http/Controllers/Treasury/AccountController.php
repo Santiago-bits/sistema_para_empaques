@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Treasury;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Treasury\PaymentRequest;
 use App\Models\AccountMovement;
-use App\Models\Check;
 use App\Models\Lot;
 use App\Services\AccountService;
 use App\Services\ExportService;
@@ -58,17 +57,7 @@ class AccountController extends Controller
             return $this->exportStatement($request, $type, $model, $statement, $from, $to, $request->query('format'));
         }
 
-        return view('treasury.accounts.show', [
-            'type' => $type,
-            'holder' => $model,
-            'label' => AccountMovement::holderLabel($model),
-            'statement' => $statement,
-            'balance' => $this->accounts->balance($model),
-            'from' => $from,
-            'to' => $to,
-            'portfolio' => Check::query()->where('kind', 'third_party')->where('status', 'in_portfolio')->orderBy('payment_date')->get(),
-            'cashOpen' => app(\App\Services\CashService::class)->current() !== null,
-        ]);
+        return view('treasury.accounts.show', $this->accounts->viewData($model, $from, $to, $request->boolean('anulados')));
     }
 
     public function print(Request $request, string $type, int $holder): View
@@ -92,7 +81,7 @@ class AccountController extends Controller
         $movement = $this->accounts->registerPayment($model, $request->validated(), $request->user());
         $what = $movement->credit > 0 ? 'Cobro' : ($movement->type === 'advance' ? 'Adelanto' : 'Pago');
 
-        return redirect()->route('accounts.show', [$type, $holder])
+        return redirect()->back(302, [], route('accounts.show', [$type, $holder]))
             ->with('success', $what.' de '.money($movement->credit > 0 ? $movement->credit : $movement->debit).' registrado.');
     }
 
@@ -109,7 +98,7 @@ class AccountController extends Controller
 
         $this->accounts->adjust($model, $data['kind'], (float) $data['amount'], $data['description'], $data['date'], $request->user());
 
-        return redirect()->route('accounts.show', [$type, $holder])->with('success', 'Movimiento registrado.');
+        return redirect()->back(302, [], route('accounts.show', [$type, $holder]))->with('success', 'Movimiento registrado.');
     }
 
     public function void(Request $request, AccountMovement $movement): RedirectResponse

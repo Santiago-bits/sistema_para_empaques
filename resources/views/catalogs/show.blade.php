@@ -27,6 +27,14 @@
         </x-slot:actions>
     </x-page-header>
 
+    {{-- La cuenta corriente se ve apenas se abre la ficha (sin tener que entrar a otra pantalla). --}}
+    @if ($account ?? null)
+        <section class="mb-8" aria-labelledby="cuenta-corriente">
+            <h2 id="cuenta-corriente" class="mb-3 text-lg font-semibold text-stone-900 dark:text-white">Cuenta corriente</h2>
+            @include('treasury.accounts._statement', $account)
+        </section>
+    @endif
+
     <div class="grid gap-6 lg:grid-cols-3">
         <div class="space-y-6 lg:col-span-2">
             <x-panel title="Datos">

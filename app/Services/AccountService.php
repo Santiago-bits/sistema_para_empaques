@@ -423,6 +423,22 @@ class AccountService
         return ['previous' => $previous, 'rows' => $rows, 'debit' => round($debit, 2), 'credit' => round($credit, 2), 'balance' => $running];
     }
 
+    /** Datos para mostrar la cuenta corriente (en su pantalla y en la ficha del titular). */
+    public function viewData(Model $holder, CarbonInterface $from, CarbonInterface $to, bool $withVoided = false): array
+    {
+        return [
+            'type' => $holder->getMorphClass(),
+            'holder' => $holder,
+            'label' => AccountMovement::holderLabel($holder),
+            'statement' => $this->statement($holder, $from, $to, $withVoided),
+            'balance' => $this->balance($holder),
+            'from' => $from,
+            'to' => $to,
+            'portfolio' => Check::query()->where('kind', 'third_party')->where('status', 'in_portfolio')->orderBy('payment_date')->get(),
+            'cashOpen' => app(CashService::class)->current() !== null,
+        ];
+    }
+
     /**
      * Saldos por titular de un tipo (consulta de saldos). `only`: debtors (nos deben) | creditors (les debemos) | nonzero.
      *
