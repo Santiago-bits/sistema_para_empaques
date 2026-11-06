@@ -6,6 +6,7 @@
 |--------------------------------------------------------------------------
 | Cada ítem se muestra sólo si: la ruta existe, el módulo está activo y el
 | usuario tiene el permiso. `permission` puede ser un array (alcanza con uno).
+| Cada sección con título se muestra como un apartado desplegable (con su `icon`).
 */
 
 return [
@@ -20,6 +21,7 @@ return [
     [
         // Lo que se carga una vez y se usa todos los días: a la vista, sin buscarlo adentro de otra pantalla.
         'title' => 'Fichas',
+        'icon' => 'users',
         'items' => [
             ['label' => 'Clientes', 'route' => 'catalogs.clients.index', 'icon' => 'users', 'permission' => 'catalogs.view', 'module' => 'catalogs'],
             ['label' => 'Productos (variedades)', 'route' => 'catalogs.varieties.index', 'icon' => 'layers', 'permission' => 'catalogs.view', 'module' => 'catalogs'],
@@ -35,6 +37,7 @@ return [
     ],
     [
         'title' => 'Producción',
+        'icon' => 'scan',
         'items' => [
             ['label' => 'Escanear cajones', 'route' => 'production.scan', 'icon' => 'scan', 'permission' => 'production.scan', 'module' => 'production', 'highlight' => true],
             ['label' => 'Pallets', 'route' => 'pallets.index', 'icon' => 'pallet', 'permission' => 'pallets.view', 'module' => 'pallets'],
@@ -44,11 +47,13 @@ return [
             ['label' => 'Paradas de línea', 'route' => 'stoppages.index', 'icon' => 'pause', 'permission' => 'stoppages.manage', 'module' => 'production'],
             ['label' => 'Calidad', 'route' => 'quality.index', 'icon' => 'check-badge', 'permission' => 'quality.view', 'module' => 'quality'],
             ['label' => 'Rechazos y merma', 'route' => 'rejects.index', 'icon' => 'trash', 'permission' => 'quality.view', 'module' => 'quality'],
+            ['label' => 'Imprimir etiquetas', 'route' => 'labels.crates', 'icon' => 'printer', 'permission' => 'labels.print', 'module' => 'crates'],
             ['label' => 'Seguir un cajón', 'route' => 'traceability.index', 'icon' => 'route', 'permission' => 'traceability.view', 'module' => 'crates'],
         ],
     ],
     [
         'title' => 'Galpón',
+        'icon' => 'archive',
         // Debajo del título se muestra el código del galpón en ARCA (Configuración → ARCA).
         'show_warehouse_code' => true,
         'items' => [
@@ -61,6 +66,7 @@ return [
     ],
     [
         'title' => 'Logística',
+        'icon' => 'truck',
         'items' => [
             ['label' => 'Cargas', 'route' => 'loads.index', 'icon' => 'truck', 'permission' => 'loads.view', 'module' => 'loads'],
             ['label' => 'Remitos', 'route' => 'remitos.index', 'icon' => 'document', 'permission' => 'remitos.view', 'module' => 'remitos'],
@@ -71,6 +77,7 @@ return [
     ],
     [
         'title' => 'Administración',
+        'icon' => 'receipt',
         'items' => [
             ['label' => 'Facturación', 'route' => 'invoices.index', 'icon' => 'receipt', 'permission' => 'billing.view', 'module' => 'billing'],
             ['label' => 'ARCA (ex AFIP)', 'route' => 'arca.index', 'icon' => 'bank', 'permission' => 'arca.manage', 'module' => 'arca'],
@@ -79,6 +86,7 @@ return [
     ],
     [
         'title' => 'Tesorería',
+        'icon' => 'currency',
         'items' => [
             ['label' => 'Caja', 'route' => 'cash.index', 'icon' => 'currency', 'permission' => 'treasury.view', 'module' => 'treasury'],
             ['label' => 'Cuentas corrientes', 'route' => 'accounts.index', 'icon' => 'users', 'permission' => 'treasury.view', 'module' => 'treasury'],
@@ -88,6 +96,7 @@ return [
     ],
     [
         'title' => 'Informes',
+        'icon' => 'chart-bar',
         'items' => [
             ['label' => 'Reportes', 'route' => 'reports.index', 'match' => ['reports.index', 'reports.show', 'reports.downloads.*'], 'icon' => 'chart-bar', 'permission' => 'reports.view', 'module' => 'reports'],
             ['label' => 'Rendimiento por quinta', 'route' => 'reports.quintas', 'icon' => 'chart-line', 'permission' => 'reports.view', 'module' => 'reports'],
@@ -97,6 +106,7 @@ return [
     ],
     [
         'title' => 'Sistema',
+        'icon' => 'cog',
         'items' => [
             ['label' => 'Administración general', 'route' => 'superadmin.index', 'icon' => 'shield', 'permission' => 'developer', 'module' => 'core'],
             ['label' => 'Usuarios', 'route' => 'admin.users.index', 'icon' => 'users', 'permission' => 'users.view', 'module' => 'core'],
@@ -118,6 +128,7 @@ return [
     [
         // Sólo en el servidor del proveedor (GALPON_CENTRAL_MODE=true).
         'title' => 'Panel general',
+        'icon' => 'briefcase',
         'central' => true,
         'items' => [
             ['label' => 'Clientes y uso', 'route' => 'central.clients.index', 'icon' => 'briefcase', 'permission' => 'developer', 'module' => 'core'],

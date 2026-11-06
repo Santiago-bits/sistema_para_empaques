@@ -9,6 +9,7 @@ import { openCameraScanner, scanInto } from './lib/camera-scanner';
 import { initShortcuts } from './lib/shortcuts';
 import { labelTables } from './lib/responsive-tables';
 import { registerApp } from './lib/install-app';
+import { initSearchableSelects, watchSearchableSelects } from './lib/searchable-select';
 
 window.Alpine = Alpine;
 window.Chart = Chart;
@@ -79,6 +80,10 @@ document.addEventListener('submit', (event) => {
 registerApp(Alpine);
 
 Alpine.start();
+
+// Listas largas (clientes, camioneros, variedades, …): escribir para buscar y elegir con ↑ ↓ y Enter.
+initSearchableSelects();
+watchSearchableSelects();
 
 // Tablas como tarjetas en el celular: nombre de columna en cada celda.
 labelTables();

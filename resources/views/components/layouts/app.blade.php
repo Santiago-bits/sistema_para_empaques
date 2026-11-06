@@ -69,35 +69,42 @@
                 <x-icon name="arrow-left" class="size-5"/>
             </button>
         </div>
-        <nav class="sidebar-scroll flex-1 space-y-2 overflow-y-auto overscroll-contain px-3 py-4">
+        @php
+            // Menú en acordeón: se ve una lista corta de apartados y al tocar uno se despliegan sus opciones.
+            // Abierto: el apartado de la pantalla actual o, si no hay, el último que abrió el usuario.
+            $openSection = collect($menu)->first(fn ($s) => $s['title'] && collect($s['items'])->contains('active', true));
+            $openSection = $openSection ? \Illuminate\Support\Str::slug($openSection['title']) : null;
+        @endphp
+        <nav class="sidebar-scroll flex-1 space-y-1 overflow-y-auto overscroll-contain px-3 py-4"
+             x-data="{ open: (() => { const a = @js($openSection); if (a) return a; try { return localStorage.getItem('galpon.menu.open') || ''; } catch (e) { return ''; } })(), toggle(key) { this.open = this.open === key ? '' : key; try { localStorage.setItem('galpon.menu.open', this.open); } catch (e) {} } }">
             @foreach ($menu as $section)
                 @php
-                    // Secciones desplegables: la de la pantalla actual siempre abierta; las demás recuerdan lo que eligió el usuario.
-                    $sectionActive = collect($section['items'])->contains('active', true);
-                    $sectionKey = 'galpon.menu.'.\Illuminate\Support\Str::slug((string) $section['title']);
+                    $sectionKey = \Illuminate\Support\Str::slug((string) $section['title']);
+                    $sectionActive = $section['title'] && $sectionKey === $openSection;
                 @endphp
-                <div @if ($section['title']) x-data="{ open: (() => { if ({{ $sectionActive ? 'true' : 'false' }}) return true; try { return localStorage.getItem('{{ $sectionKey }}') === '1'; } catch (e) { return false; } })(), toggle() { this.open = ! this.open; try { localStorage.setItem('{{ $sectionKey }}', this.open ? '1' : '0'); } catch (e) {} } }" @endif>
-                    @if ($section['title'])
-                        <button type="button" @click="toggle()" :aria-expanded="open.toString()" aria-expanded="{{ $sectionActive ? 'true' : 'false' }}"
-                                class="mb-1 flex w-full items-center gap-2 rounded-md px-3 py-1 text-[11px] font-semibold tracking-wider text-stone-500 uppercase hover:bg-white/5 hover:text-white">
-                            <span class="truncate">{{ $section['title'] }}</span>
-                            <x-icon name="chevron-right" class="ml-auto size-3.5 shrink-0 transition-transform" ::class="open && 'rotate-90'"/>
-                        </button>
-                    @endif
-                    @if ($section['note'] ?? null)
-                        <p class="mb-1.5 px-3 text-xs text-stone-400"><span class="code">{{ $section['note'] }}</span></p>
-                    @endif
-                    <div class="space-y-0.5" @if ($section['title']) x-show="open" @unless ($sectionActive) x-cloak @endunless @endif>
+                @if (! $section['title'])
+                    <div class="mb-3 space-y-0.5">
                         @foreach ($section['items'] as $item)
-                            <a href="{{ route($item['route']) }}" @class(['nav-item', 'active' => $item['active']]) @click="sidebar = false" @if ($item['active']) aria-current="page" @endif>
-                                <x-icon :name="$item['icon']" class="size-[18px] shrink-0 {{ ($item['highlight'] ?? false) ? 'text-accent-400' : 'text-stone-400' }}"/>
-                                <span class="truncate">{{ $item['label'] }}</span>
-                                @if ($item['route'] === 'alerts.index' && $openAlertsCount > 0)
-                                    <span class="ml-auto rounded-full bg-accent-500 px-1.5 text-[11px] font-semibold text-white">{{ $openAlertsCount }}</span>
-                                @elseif ($fkey = $shortcuts['routeKeys'][$item['route']] ?? null)
-                                    <span class="ml-auto hidden rounded border border-white/10 px-1 font-mono text-[10px] text-stone-500 lg:inline" title="Atajo de teclado">{{ $fkey }}</span>
-                                @endif
-                            </a>
+                            @include('components.layouts._nav-item', ['item' => $item])
+                        @endforeach
+                    </div>
+                    @continue
+                @endif
+                <div data-menu-section="{{ $sectionKey }}">
+                    <button type="button" @click="toggle('{{ $sectionKey }}')" :aria-expanded="(open === '{{ $sectionKey }}').toString()"
+                            aria-expanded="{{ $sectionActive ? 'true' : 'false' }}" aria-controls="menu-{{ $sectionKey }}"
+                            @class(['nav-item w-full text-left', 'text-white' => $sectionActive]) :class="open === '{{ $sectionKey }}' && 'bg-white/5 text-white'">
+                        <x-icon :name="$section['icon'] ?? 'folder'" class="size-[18px] shrink-0 text-stone-400"/>
+                        <span class="truncate font-medium">{{ $section['title'] }}</span>
+                        <x-icon name="chevron-right" class="ml-auto size-4 shrink-0 text-stone-500 transition-transform" ::class="open === '{{ $sectionKey }}' && 'rotate-90'"/>
+                    </button>
+                    <div id="menu-{{ $sectionKey }}" class="mt-0.5 mb-2 ml-5 space-y-0.5 border-l border-white/10 pl-2"
+                         x-show="open === '{{ $sectionKey }}'" @unless ($sectionActive) x-cloak @endunless>
+                        @if ($section['note'] ?? null)
+                            <p class="px-3 py-1 text-xs text-stone-400"><span class="code">{{ $section['note'] }}</span></p>
+                        @endif
+                        @foreach ($section['items'] as $item)
+                            @include('components.layouts._nav-item', ['item' => $item])
                         @endforeach
                     </div>
                 </div>
