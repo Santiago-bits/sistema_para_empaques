@@ -6,10 +6,14 @@ use App\Catalogs\CatalogDefinition;
 use App\Catalogs\CatalogRegistry;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Catalogs\CatalogRequest;
+use App\Models\AccountMovement;
 use App\Models\AuditLog;
+use App\Services\AccountService;
 use App\Services\CatalogService;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\View\View;
 
 /**
@@ -87,12 +91,27 @@ class CatalogController extends Controller
         return view($definition->showView(), array_merge([
             'definition' => $definition,
             'record' => $model,
+            'account' => $this->accountData($request, $model),
             'history' => $request->user()->can('audit.view')
                 ? AuditLog::query()->visibleToViewer()->with('user:id,first_name,last_name,role_id')
                     ->where('auditable_type', $model->getMorphClass())->where('auditable_id', $model->getKey())
                     ->latest('created_at')->latest('id')->limit(15)->get()
                 : collect(),
         ], $definition->showData($model)));
+    }
+
+    /** Cuenta corriente del titular (cliente, productor…) para verla directo en su ficha. */
+    private function accountData(Request $request, Model $model): ?array
+    {
+        if (! array_key_exists($model->getMorphClass(), AccountMovement::HOLDERS) || ! module_enabled('treasury')
+            || ! $request->user()->can('treasury.view')) {
+            return null;
+        }
+        $request->validate(['from' => ['nullable', 'date'], 'to' => ['nullable', 'date', 'after_or_equal:from']]);
+        $from = $request->filled('from') ? Carbon::parse($request->query('from')) : today()->subMonths(3)->startOfMonth();
+        $to = $request->filled('to') ? Carbon::parse($request->query('to')) : today();
+
+        return app(AccountService::class)->viewData($model, $from->startOfDay(), $to->endOfDay(), $request->boolean('anulados'));
     }
 
     public function edit(Request $request): View
