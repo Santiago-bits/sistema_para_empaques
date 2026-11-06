@@ -44,16 +44,18 @@
             </thead>
             <tbody>
                 @forelse ($records as $record)
-                    <tr>
+                    @php $showUrl = $definition->hasShow() ? $definition->route('show', $record->getKey()) : null; @endphp
+                    {{-- Toda la fila abre la ficha (salvo los botones, enlaces y casillas que tiene adentro). --}}
+                    <tr @if ($showUrl) class="cursor-pointer" data-href="{{ $showUrl }}" @click="if (! $event.target.closest('a, button, input, label, select')) window.location.href = $el.dataset.href" @endif>
                         @if ($bulk)
                             <td><input type="checkbox" name="ids[]" value="{{ $record->getKey() }}" x-model="selected" class="size-4 rounded border-stone-300 text-brand-600" aria-label="Seleccionar"></td>
                         @endif
                         @foreach ($definition->columns() as $column)
-                            <td @class(['num' => $column->type === 'num'])>@include('catalogs.partials.cell', ['column' => $column, 'record' => $record])</td>
+                            <td @class(['num' => $column->type === 'num'])>@include('catalogs.partials.cell', ['column' => $column, 'record' => $record, 'href' => $showUrl])</td>
                         @endforeach
                         <td class="text-right whitespace-nowrap">
                             @if ($definition->hasShow())
-                                <a href="{{ $definition->route('show', $record->getKey()) }}" class="link">Ver</a>
+                                <a href="{{ $showUrl }}" class="link">Ver</a>
                             @endif
                             @if ($canManage)
                                 <a href="{{ $definition->route('edit', $record->getKey()) }}" class="link ml-3">Editar</a>

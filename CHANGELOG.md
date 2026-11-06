@@ -5,6 +5,8 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 ## [Sin publicar]
 
 ### Agregado
+- En los listados de clientes, productores, etc. se entra a la ficha **tocando el nombre o cualquier parte de la fila**
+  (ya no hace falta el «Ver»).
 - Al abrir la ficha de un cliente, productor, transportista, proveedor o empleado se ve **directo su cuenta corriente**
   (saldo, cobro o pago, ajustes y movimientos), sin entrar a otra pantalla. El cobro hecho desde ahí vuelve a la ficha.
 - **Movimientos de cada cliente, productor, camionero, transportista, proveedor y empleado** (botón «Movimientos» en
