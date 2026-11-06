@@ -64,6 +64,7 @@ class AppServiceProvider extends ServiceProvider
             'transporter' => \App\Models\Transporter::class,
             'truck' => \App\Models\Truck::class,
             'driver' => \App\Models\Driver::class,
+            'container_movement' => \App\Models\ContainerMovement::class,
             'variety' => \App\Models\Variety::class,
             'size' => \App\Models\Size::class,
             'shift' => \App\Models\Shift::class,
