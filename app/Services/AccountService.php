@@ -182,6 +182,11 @@ class AccountService
                 Lot::query()->whereKey($locked->source_id)->update(['settled_at' => null, 'settled_by' => null]);
             }
 
+            // Pago con envases: se anula también el movimiento de envases (vuelve el saldo de bines).
+            if ($locked->source_type === 'container_movement') {
+                app(ContainerMovementService::class)->markVoided((int) $locked->source_id, $reason, $by);
+            }
+
             foreach ($related as $item) {
                 $this->markVoided($item, $reason, $by);
                 // El movimiento de caja asociado se anula también (la caja debe estar abierta).
@@ -205,7 +210,8 @@ class AccountService
             if ($locked->isVoided()) {
                 throw new BusinessException('El movimiento está anulado.');
             }
-            $origin = ['check' => 'el cheque', 'invoice' => 'el comprobante', 'lot' => 'el lote', 'load' => 'la carga'][$locked->source_type] ?? null;
+            $origin = ['check' => 'el cheque', 'invoice' => 'el comprobante', 'lot' => 'el lote', 'load' => 'la carga',
+                'container_movement' => 'el movimiento de envases (anulalo y cargalo de nuevo)'][$locked->source_type] ?? null;
             if ($origin) {
                 throw new BusinessException('Este movimiento se generó desde '.$origin.': corregilo ahí y la cuenta se actualiza sola.');
             }

@@ -39,6 +39,7 @@ class AccountMovement extends Model
         'check_rejected' => 'Cheque rechazado',
         'debit_note' => 'Cargo / nota de débito',
         'credit_adjustment' => 'Ajuste a favor del titular',
+        'containers' => 'Pago con envases',
     ];
 
     public const METHODS = ['cash' => 'Efectivo', 'transfer' => 'Transferencia', 'check' => 'Cheque', 'other' => 'Otro'];

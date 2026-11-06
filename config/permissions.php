@@ -41,6 +41,8 @@ return [
             'lots.manage' => 'Gestionar lotes',
             'staff.view' => 'Ver empleados y cuadrillas',
             'staff.manage' => 'Gestionar empleados y cuadrillas',
+            'containers.view' => 'Ver movimientos de cada cliente, productor y camionero (plata, bines, cargas)',
+            'containers.manage' => 'Registrar y anular entregas y devoluciones de bines y envases',
         ],
         'pallets' => [
             'pallets.view' => 'Ver pallets',
@@ -167,6 +169,7 @@ return [
                 'pallets.view', 'pallets.create', 'pallets.update', 'crates.view', 'crates.create', 'crates.update',
                 'labels.print', 'traceability.view', 'production.scan', 'production.view', 'stoppages.manage',
                 'locations.view', 'locations.move', 'support.use', 'alerts.view', 'incidents.view', 'incidents.manage',
+                'containers.view', 'containers.manage',
             ],
         ],
         'packer' => [
@@ -183,6 +186,7 @@ return [
                 'loads.dispatch', 'remitos.view', 'remitos.create', 'remitos.deliver', 'documents.view',
                 'documents.manage', 'support.use', 'alerts.view', 'incidents.view', 'incidents.manage',
                 'dtv.view', 'dtv.manage', 'treatments.view', 'treatments.manage',
+                'containers.view', 'containers.manage',
             ],
         ],
         'quality' => [
@@ -204,6 +208,7 @@ return [
                 'costs.manage', 'support.use', 'alerts.view', 'supplies.view', 'supplies.manage',
                 'lots.view', 'staff.view', 'treasury.view', 'cash.manage', 'accounts.manage', 'checks.manage',
                 'exchange.manage', 'lots.settle', 'dtv.view', 'treatments.view',
+                'containers.view', 'containers.manage',
             ],
         ],
         'supervisor' => [
@@ -217,6 +222,7 @@ return [
                 'audit.view', 'closings.manage', 'alerts.view', 'alerts.manage', 'incidents.view', 'incidents.manage',
                 'supplies.view', 'maintenance.view', 'cold_rooms.view', 'support.use', 'staff.view', 'treasury.view',
                 'dtv.view', 'treatments.view',
+                'containers.view',
             ],
         ],
         'employee' => [

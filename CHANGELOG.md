@@ -4,6 +4,14 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 
 ## [Sin publicar]
 
+### Agregado
+- **Movimientos de cada cliente, productor, camionero, transportista, proveedor y empleado** (botón «Movimientos» en
+  su ficha): en una sola lista se ve la plata (cuenta corriente), los bines y envases, la fruta que ingresó y las
+  cargas, con filtros por tipo y fechas, y un resumen arriba (cuánto debe, cuántos bines tiene, kilos, cargas).
+- **Bines y envases**: se registra cuántos se le entregan o devuelve cada uno. Si es **como parte de pago**, se
+  descuenta (o se suma) en su cuenta corriente al valor que se indique; al anular uno se anula también el otro.
+  Permisos nuevos: «Ver movimientos…» (`containers.view`) y «Registrar y anular… bines y envases» (`containers.manage`).
+
 ### Cambiado
 - Menú lateral en acordeón: se ven sólo los apartados (Fichas, Producción, Logística, …) y al tocar uno se despliegan
   sus opciones. Se agregó «Imprimir etiquetas» en Producción.

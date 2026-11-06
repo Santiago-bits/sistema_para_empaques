@@ -140,7 +140,7 @@
                     <td class="num">{{ (float) $row->credit ? money($row->credit) : '' }}</td>
                     <td class="num font-medium">{{ $row->isVoided() ? '' : money($row->running_balance) }}</td>
                     <td class="text-right">
-                        @if (! $row->isVoided() && ! in_array($row->source_type, ['check', 'invoice', 'lot', 'load'], true))
+                        @if (! $row->isVoided() && ! in_array($row->source_type, ['check', 'invoice', 'lot', 'load', 'container_movement'], true))
                             @can('accounts.manage')
                                 <div x-data="{ open: false }" class="mb-1 inline-block text-left" @keydown.escape.stop="open = false">
                                     <button type="button" class="link text-sm" @click="open = ! open">Corregir</button>
