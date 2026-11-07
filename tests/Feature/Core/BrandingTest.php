@@ -31,7 +31,7 @@ class BrandingTest extends TestCase
         ])->assertSessionHas('success');
 
         $page = $this->get(route('dashboard'))->assertOk();
-        $page->assertSee('--color-brand-600: #a21616', false)->assertSee('<meta name="theme-color" content="#a21616">', false);
+        $page->assertSee('--color-brand-600: color-mix(in oklab, #a21616 88%, #78716c)', false)->assertSee('<meta name="theme-color" content="#a21616">', false);
 
         // El logo sale de una ruta propia (Hostinger no permite el enlace public/storage).
         $page->assertSee(route('branding.logo', [], false), false)->assertDontSee('/storage/branding', false);

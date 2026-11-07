@@ -90,8 +90,19 @@ proyecto manda todo a la carpeta `public/` y bloquea los archivos sensibles: **n
    DB_PASSWORD=la-contraseña-de-la-base
    GALPON_INSTALLATION_ID=panel-central
    GALPON_CENTRAL_MODE=true
-   MAIL_MAILER=log
+   # Correo (para recibir los tickets de soporte y los avisos de errores). Crear antes una casilla en
+   # hPanel → Correos (por ejemplo sistema@TU-DOMINIO) y usar sus datos:
+   MAIL_MAILER=smtp
+   MAIL_HOST=smtp.hostinger.com
+   MAIL_PORT=465
+   MAIL_SCHEME=smtps
+   MAIL_USERNAME=sistema@TU-DOMINIO
+   MAIL_PASSWORD=la-contraseña-de-esa-casilla
+   MAIL_FROM_ADDRESS=sistema@TU-DOMINIO
+   MAIL_FROM_NAME="Sistema de empaque"
    ```
+   Después de configurarlo, probalo en **Herramientas técnicas → Avisos por correo → Mandar correo de prueba**
+   (ahí también se elige a qué correo llegan los avisos de errores y los tickets de soporte).
    y después:
    ```bash
    php artisan key:generate

@@ -47,6 +47,13 @@ class ScreensCrawlTest extends TestCase
         'license' => \App\Models\License::class,
         'closing' => \App\Models\DailyClosing::class,
         'cost' => \App\Models\Cost::class,
+        'error' => \App\Models\SystemError::class,
+        'dtv' => \App\Models\DtvDocument::class,
+        'treatment' => \App\Models\Treatment::class,
+        'reject' => \App\Models\Reject::class,
+        'yield' => \App\Models\SupplyYield::class,
+        'session' => \App\Models\CashSession::class,
+        'check' => \App\Models\Check::class,
     ];
 
     /** Rutas que no son pantallas navegables (descargas, JSON de soporte, impresión directa). */
@@ -138,8 +145,33 @@ class ScreensCrawlTest extends TestCase
                 $params[$param] = $id;
                 continue;
             }
+            // Cuenta corriente y movimientos de un titular: {type}/{holder} → un cliente.
+            if ($param === 'type' && in_array('holder', $route->parameterNames(), true)) {
+                $params['type'] = 'client';
+                continue;
+            }
+            if ($param === 'holder') {
+                $id = \App\Models\Client::query()->value('id');
+                if (! $id) {
+                    return null;
+                }
+                $params[$param] = $id;
+                continue;
+            }
             if ($param === 'type') {
                 $params[$param] = 'producers';
+                continue;
+            }
+            if ($param === 'report') {
+                $params[$param] = 'production';
+                continue;
+            }
+            if ($param === 'token') {
+                $token = \App\Models\Remito::query()->whereNotNull('public_token')->value('public_token');
+                if (! $token) {
+                    return null;
+                }
+                $params[$param] = $token;
                 continue;
             }
             $model = self::PARAMS[$param] ?? null;

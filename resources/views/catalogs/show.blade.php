@@ -19,7 +19,7 @@
             @endif
             {{ $extraActions ?? '' }}
             @if (array_key_exists($record->getMorphClass(), \App\Models\ContainerMovement::HOLDERS) && auth()->user()->can('containers.view') && Route::has('holders.activity'))
-                <a href="{{ route('holders.activity', [$record->getMorphClass(), $record->getKey()]) }}" class="btn btn-primary"><x-icon name="list" class="size-4"/> Movimientos</a>
+                <a href="{{ route('holders.activity', [$record->getMorphClass(), $record->getKey()]) }}" class="btn btn-secondary"><x-icon name="list" class="size-4"/> Movimientos</a>
             @endif
             @if (array_key_exists($record->getMorphClass(), \App\Models\AccountMovement::HOLDERS) && auth()->user()->can('treasury.view') && Route::has('accounts.show'))
                 <a href="{{ route('accounts.show', [$record->getMorphClass(), $record->getKey()]) }}" class="btn btn-secondary"><x-icon name="book" class="size-4"/> Cuenta corriente</a>

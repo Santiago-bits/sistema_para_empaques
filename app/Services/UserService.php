@@ -166,6 +166,11 @@ class UserService
 
             // Los permisos reservados al super administrador sólo los cambia un super administrador.
             $actor = auth()->user();
+            if ($actor) {
+                // Sólo se pueden conceder permisos que quien edita también tiene.
+                $grants = array_keys(array_filter($overrides, fn ($m) => $m === 'grant'));
+                Permission::assertCanGrant($grants, array_keys(array_filter($before, fn ($m) => $m === 'grant')), $actor);
+            }
             if ($actor && ! $actor->isSuperAdmin()) {
                 $overrides = array_diff_key($overrides, array_flip(Permission::SUPER_ADMIN_ONLY))
                     + array_intersect_key($before, array_flip(Permission::SUPER_ADMIN_ONLY));

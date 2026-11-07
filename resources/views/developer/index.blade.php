@@ -37,6 +37,43 @@
         <div class="mb-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">{{ $warning }}</div>
     @endforeach
 
+    {{-- Avisos de errores y soporte por correo. --}}
+    <x-panel title="Avisos por correo (errores y soporte)" class="mb-6">
+        @if (! $alerts['mail_configured'])
+            <div class="mb-4 border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200" role="alert">
+                <strong>El servidor todavía no puede mandar correos</strong> (<span class="code">MAIL_MAILER={{ $alerts['mailer'] }}</span>): ni los avisos de errores ni los tickets de soporte te van a llegar.
+                En el <span class="code">.env</span> completá <span class="code">MAIL_MAILER=smtp</span>, <span class="code">MAIL_HOST</span>, <span class="code">MAIL_PORT</span>,
+                <span class="code">MAIL_USERNAME</span>, <span class="code">MAIL_PASSWORD</span> y <span class="code">MAIL_FROM_ADDRESS</span> (en Hostinger: los datos del correo creado en hPanel → Correos).
+                Después probalo con «Mandar correo de prueba».
+            </div>
+        @endif
+        <div class="grid gap-6 lg:grid-cols-2">
+            <form method="POST" action="{{ route('developer.alerts.update') }}" class="space-y-4">
+                @csrf @method('PUT')
+                <x-input name="email" type="email" label="Correo del desarrollador" :value="$alerts['recipient']" required
+                         hint="Acá llegan los avisos de errores y los tickets de soporte."/>
+                <x-checkbox name="enabled" label="Avisarme por correo cuando haya errores" :checked="$alerts['enabled']"
+                            hint="Se revisa cada 5 minutos (errores registrados y el log). Como mucho, un correo cada 15 minutos."/>
+                <button class="btn btn-primary">Guardar</button>
+            </form>
+            <div class="space-y-4">
+                <x-dl :items="[
+                    'Correo del servidor' => $alerts['mail_configured'] ? 'Configurado ('.$alerts['mailer'].')' : 'Sin configurar',
+                    'Última revisión' => $alerts['last_check_at'] ? fdate(\Illuminate\Support\Carbon::parse($alerts['last_check_at']), true) : 'Todavía no',
+                    'Último aviso enviado' => $alerts['last_sent_at'] ? fdate(\Illuminate\Support\Carbon::parse($alerts['last_sent_at']), true) : 'Ninguno',
+                    'Errores sin avisar' => num($alerts['pending']),
+                    'Última limpieza (cada 7 días)' => $alerts['last_reset_at'] ? fdate(\Illuminate\Support\Carbon::parse($alerts['last_reset_at']), true) : 'Todavía no',
+                    'Tamaño de los logs' => $backupService->humanSize($alerts['log_bytes']),
+                ]"/>
+                <div class="flex flex-wrap gap-2">
+                    <form method="POST" action="{{ route('developer.alerts.test') }}">@csrf<button class="btn btn-secondary btn-sm"><x-icon name="bell" class="size-4"/> Mandar correo de prueba</button></form>
+                    <form method="POST" action="{{ route('developer.alerts.check') }}">@csrf<button class="btn btn-secondary btn-sm"><x-icon name="refresh" class="size-4"/> Revisar errores ahora</button></form>
+                    <form method="POST" action="{{ route('developer.alerts.cleanup') }}" x-data x-confirm="¿Borrar los errores de más de 7 días y vaciar los logs?">@csrf<button class="btn btn-ghost btn-sm"><x-icon name="trash" class="size-4"/> Limpiar ahora</button></form>
+                </div>
+            </div>
+        </div>
+    </x-panel>
+
     <div class="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
         <x-stat label="Errores hoy" :value="num($errorsToday)" icon="alert" :color="$errorsToday ? 'red' : 'stone'" :href="route('developer.errors')"/>
         <x-stat label="Cola pendiente / fallida" :value="($queue['pending'] ?? '—').' / '.($queue['failed'] ?? '—')" icon="layers" :color="($queue['failed'] ?? 0) > 0 ? 'red' : 'sky'"/>

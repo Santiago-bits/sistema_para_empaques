@@ -79,6 +79,8 @@ class SettingsService
         'treasury.exchange_type' => ['oficial', 'string', 'treasury'],
         // A dónde llega por email cada ticket de soporte nuevo (y las respuestas del galpón). Vacío = no se manda.
         'support.email' => ['holabaseocho@gmail.com', 'string', 'support'],
+        // Avisos automáticos de errores del sistema por correo (al mismo email de soporte).
+        'support.error_alerts' => [true, 'bool', 'support'],
         'backup.retention_days' => [30, 'int', 'backup'],
         'backup.daily' => [true, 'bool', 'backup'],
         'backup.weekly' => [true, 'bool', 'backup'],

@@ -120,7 +120,7 @@
         @forelse ($statement['rows'] as $row)
             <tr @class(['opacity-50' => $row->isVoided()])>
                 <td class="whitespace-nowrap">{{ fdate($row->date) }}</td>
-                <td><x-badge :color="$row->debit > 0 ? 'amber' : 'emerald'">{{ $types[$row->type] ?? $row->type }}</x-badge></td>
+                <td><x-badge :color="$row->debit > 0 ? 'red' : 'emerald'">{{ $types[$row->type] ?? $row->type }}</x-badge></td>
                 <td class="min-w-56">
                     <span @class(['font-medium text-stone-900 dark:text-white', 'line-through' => $row->isVoided()])>{{ $row->description }}</span>
                     <span class="block text-xs text-stone-500">
@@ -131,8 +131,8 @@
                     @endif
                     @include('treasury.accounts._source', ['row' => $row])
                 </td>
-                <td class="num">{{ (float) $row->debit ? money($row->debit) : '' }}</td>
-                <td class="num">{{ (float) $row->credit ? money($row->credit) : '' }}</td>
+                <td class="num font-semibold text-red-600 dark:text-red-400">{{ (float) $row->debit ? money($row->debit) : '' }}</td>
+                <td class="num font-semibold text-emerald-600 dark:text-emerald-400">{{ (float) $row->credit ? money($row->credit) : '' }}</td>
                 <td class="num font-medium">{{ $row->isVoided() ? '' : money($row->running_balance) }}</td>
                 <td class="text-right">
                     @if (! $row->isVoided() && ! in_array($row->source_type, ['check', 'invoice', 'lot', 'load', 'container_movement'], true))
@@ -164,8 +164,8 @@
     </tbody>
     <x-slot:footer>
         <div class="flex flex-wrap justify-end gap-6 text-sm tabular-nums">
-            <span>Debe <strong>{{ money($statement['debit']) }}</strong></span>
-            <span>Haber <strong>{{ money($statement['credit']) }}</strong></span>
+            <span>Debe <strong class="text-red-600 dark:text-red-400">{{ money($statement['debit']) }}</strong></span>
+            <span>Haber <strong class="text-emerald-600 dark:text-emerald-400">{{ money($statement['credit']) }}</strong></span>
             <span>Saldo al {{ fdate($to) }} <strong>{{ money($statement['balance']) }}</strong></span>
         </div>
     </x-slot:footer>

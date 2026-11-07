@@ -44,6 +44,12 @@ $artisan('galpon:backup --type=weekly')->weeklyOn(0, '03:00')->withoutOverlappin
 $artisan('galpon:central-sync')->everyFiveMinutes()->withoutOverlapping(10)
     ->when(fn () => app(CentralSyncService::class)->enabled());
 
+// Errores: aviso por correo al desarrollador (agrupado, como mucho uno cada 15 minutos).
+$artisan('galpon:errors-watch')->everyFiveMinutes()->withoutOverlapping(10);
+
+// Cada 7 días se limpian los errores técnicos y los logs viejos (la auditoría del negocio no se toca).
+$artisan('galpon:cleanup-logs')->weeklyOn(1, '04:10')->withoutOverlapping(30);
+
 // Limpieza: enlaces de recuperación de contraseña vencidos y trabajos fallidos viejos.
 $artisan('auth:clear-resets')->daily();
 $artisan('queue:prune-failed --hours=720')->daily();
