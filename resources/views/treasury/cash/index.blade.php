@@ -34,8 +34,8 @@
     @else
         <div class="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
             <x-stat label="Saldo anterior" :value="money($session->opening_balance)" icon="archive" color="stone"/>
-            <x-stat label="Ingresos" :value="money($totals['in'])" icon="arrow-down" color="brand"/>
-            <x-stat label="Egresos" :value="money($totals['out'])" icon="arrow-up" color="red"/>
+            <x-stat label="Ingresos" :value="money($totals['in'])" icon="arrow-down" color="emerald" tone="in"/>
+            <x-stat label="Egresos" :value="money($totals['out'])" icon="arrow-up" color="red" tone="out"/>
             <x-stat label="Saldo actual" :value="money($totals['balance'])" icon="currency" color="sky" hint="Efectivo que debería haber"/>
         </div>
 
@@ -47,7 +47,7 @@
                         @csrf
                         <div class="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Tipo de movimiento">
                             <label class="cursor-pointer rounded-lg border px-3 py-2 text-center text-sm font-semibold"
-                                   :class="direction === 'in' ? 'border-brand-500 bg-brand-50 text-brand-800 dark:bg-brand-950/40 dark:text-brand-300' : 'border-stone-200 dark:border-stone-700'">
+                                   :class="direction === 'in' ? 'border-emerald-500 bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300' : 'border-stone-200 dark:border-stone-700'">
                                 <input type="radio" name="direction" value="in" x-model="direction" class="sr-only"> Ingreso
                             </label>
                             <label class="cursor-pointer rounded-lg border px-3 py-2 text-center text-sm font-semibold"
@@ -83,8 +83,8 @@
                                 @endif
                                 <span class="block text-xs text-stone-500">{{ $m->user?->full_name }}@if ($m->voided_at) · Anulado: {{ $m->void_reason }}@endif</span>
                             </td>
-                            <td class="num text-emerald-700 dark:text-emerald-400">{{ $m->direction === 'in' ? money($m->amount) : '' }}</td>
-                            <td class="num text-red-700 dark:text-red-400">{{ $m->direction === 'out' ? money($m->amount) : '' }}</td>
+                            <td class="num font-semibold text-emerald-600 dark:text-emerald-400">{{ $m->direction === 'in' ? money($m->amount) : '' }}</td>
+                            <td class="num font-semibold text-red-600 dark:text-red-400">{{ $m->direction === 'out' ? money($m->amount) : '' }}</td>
                             <td class="text-right">
                                 @if (! $m->voided_at && ! $m->account_movement_id)
                                     @can('cash.manage')

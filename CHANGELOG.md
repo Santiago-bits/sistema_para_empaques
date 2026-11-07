@@ -5,6 +5,15 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 ## [Sin publicar]
 
 ### Agregado
+- **Avisos de errores por correo** al desarrollador: cada 5 minutos se revisan los errores registrados y el log; se mandan
+  agrupados por causa (como mucho un correo cada 15 minutos). Se configura en Herramientas técnicas → Avisos por correo,
+  con botones para mandar un correo de prueba, revisar ahora y limpiar.
+- **Limpieza semanal**: cada 7 días se borran los errores técnicos viejos y se vacían los logs (la auditoría no se toca).
+
+### Seguridad
+- Nadie que no sea el Super Administrador puede dar permisos que él mismo no tiene (ni editando un rol, ni con
+  permisos individuales): evita que alguien con «Roles y permisos» se suba de rango solo.
+
 - En los listados de clientes, productores, etc. se entra a la ficha **tocando el nombre o cualquier parte de la fila**
   (ya no hace falta el «Ver»).
 - Al abrir la ficha de un cliente, productor, transportista, proveedor o empleado se ven **directo sus movimientos de
@@ -17,6 +26,9 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
   Permisos nuevos: «Ver movimientos…» (`containers.view`) y «Registrar y anular… bines y envases» (`containers.manage`).
 
 ### Cambiado
+- Campos de formulario con esquinas rectas; colores de la marca un poco más suaves; importes en verde (entra) y rojo
+  (sale) en caja y cuentas corrientes, siempre en un solo renglón.
+- Guía de Hostinger: cómo configurar el correo (SMTP) para recibir soporte y avisos.
 - Menú lateral en acordeón: se ven sólo los apartados (Fichas, Producción, Logística, …) y al tocar uno se despliegan
   sus opciones. Se agregó «Imprimir etiquetas» en Producción.
 - Listas con búsqueda: en las listas largas (clientes, camioneros, transportistas, empleados, variedades, …) se

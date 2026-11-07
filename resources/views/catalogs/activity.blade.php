@@ -156,8 +156,8 @@
                             <a href="{{ route('loads.show', $row->ref_id) }}" class="link block text-xs">Ver carga</a>
                         @endif
                     </td>
-                    <td class="num">{{ (float) $row->debit ? money($row->debit) : '' }}</td>
-                    <td class="num">{{ (float) $row->credit ? money($row->credit) : '' }}</td>
+                    <td class="num font-semibold text-red-600 dark:text-red-400">{{ (float) $row->debit ? money($row->debit) : '' }}</td>
+                    <td class="num font-semibold text-emerald-600 dark:text-emerald-400">{{ (float) $row->credit ? money($row->credit) : '' }}</td>
                     <td class="num whitespace-nowrap">
                         @if ($row->kind === 'containers')
                             <span @class(['font-semibold', 'text-amber-700 dark:text-amber-400' => $row->qty > 0, 'text-emerald-700 dark:text-emerald-400' => $row->qty < 0])>{{ $row->qty > 0 ? '+' : '−' }}{{ num(abs($row->qty)) }}</span>

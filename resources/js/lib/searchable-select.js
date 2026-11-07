@@ -49,7 +49,7 @@ function enhance(select) {
     const list = document.createElement('ul');
     list.id = uid;
     list.setAttribute('role', 'listbox');
-    list.className = 'fixed z-50 max-h-72 overflow-y-auto rounded-lg border border-stone-200 bg-white py-1 text-sm shadow-lg dark:border-stone-700 dark:bg-stone-900';
+    list.className = 'fixed z-50 max-h-72 overflow-y-auto rounded-none border border-stone-200 bg-white py-1 text-sm shadow-lg dark:border-stone-700 dark:bg-stone-900';
     list.hidden = true;
     document.body.appendChild(list);
 

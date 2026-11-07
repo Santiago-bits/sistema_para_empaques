@@ -40,6 +40,7 @@ class DeveloperController extends Controller
             'backupService' => $backups,
             'recentErrors' => SystemError::query()->latest('created_at')->limit(8)->get(['id', 'code', 'category', 'message', 'created_at']),
             'errorsToday' => SystemError::query()->where('created_at', '>=', today())->count(),
+            'alerts' => app(\App\Services\ErrorMonitorService::class)->status(),
         ]);
     }
 
