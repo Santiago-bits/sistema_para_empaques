@@ -26,7 +26,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
   Permisos nuevos: «Ver movimientos…» (`containers.view`) y «Registrar y anular… bines y envases» (`containers.manage`).
 
 ### Cambiado
-- Campos de formulario con esquinas rectas; colores de la marca un poco más suaves; importes en verde (entra) y rojo
+- Todo con esquinas rectas (tarjetas, botones, campos, etiquetas, barras; sólo los círculos quedan redondos); colores de la marca un poco más suaves; importes en verde (entra) y rojo
   (sale) en caja y cuentas corrientes, siempre en un solo renglón.
 - Guía de Hostinger: cómo configurar el correo (SMTP) para recibir soporte y avisos.
 - Menú lateral en acordeón: se ven sólo los apartados (Fichas, Producción, Logística, …) y al tocar uno se despliegan

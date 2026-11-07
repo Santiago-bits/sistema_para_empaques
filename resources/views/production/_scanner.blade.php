@@ -46,7 +46,7 @@
             <div class="md:col-span-2">
                 <div class="flex items-center justify-between">
                     <label for="scan-packer" class="{{ $label }}">Embalador</label>
-                    <label class="flex items-center gap-1.5 text-xs text-stone-500"><input type="checkbox" x-model="pin.packer" class="rounded"> Fijar</label>
+                    <label class="flex items-center gap-1.5 text-xs text-stone-500"><input type="checkbox" x-model="pin.packer" class="rounded-none"> Fijar</label>
                 </div>
                 <div class="mt-1 flex gap-2">
                 <div class="relative min-w-0 flex-1">
@@ -74,7 +74,7 @@
             <div>
                 <div class="flex items-center justify-between">
                     <label for="scan-variety" class="{{ $label }}">Variedad</label>
-                    <label class="flex items-center gap-1.5 text-xs text-stone-500"><input type="checkbox" x-model="pin.variety" class="rounded"> Fijar</label>
+                    <label class="flex items-center gap-1.5 text-xs text-stone-500"><input type="checkbox" x-model="pin.variety" class="rounded-none"> Fijar</label>
                 </div>
                 <select id="scan-variety" x-ref="variety" x-model="form.variety_id" @keydown.enter.prevent="afterSelect('variety')"
                         class="{{ $field }} mt-1 border-stone-300 font-sans dark:border-stone-700">
@@ -88,7 +88,7 @@
             <div>
                 <div class="flex items-center justify-between">
                     <label for="scan-size" class="{{ $label }}">Tamaño</label>
-                    <label class="flex items-center gap-1.5 text-xs text-stone-500"><input type="checkbox" x-model="pin.size" class="rounded"> Fijar</label>
+                    <label class="flex items-center gap-1.5 text-xs text-stone-500"><input type="checkbox" x-model="pin.size" class="rounded-none"> Fijar</label>
                 </div>
                 <select id="scan-size" x-ref="size" x-model="form.size_id" @keydown.enter.prevent="afterSelect('size')"
                         class="{{ $field }} mt-1 border-stone-300 font-sans dark:border-stone-700">

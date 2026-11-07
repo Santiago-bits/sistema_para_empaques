@@ -50,7 +50,7 @@
                             'Observaciones' => $remito->delivery_notes,
                         ]"/>
                         @if ($remito->signature_path)
-                            <img src="{{ route('remitos.signature', $remito) }}" alt="Firma del receptor" class="h-28 rounded border border-stone-200 bg-white p-1 dark:border-stone-700">
+                            <img src="{{ route('remitos.signature', $remito) }}" alt="Firma del receptor" class="h-28 rounded-none border border-stone-200 bg-white p-1 dark:border-stone-700">
                         @endif
                     </div>
                 </x-panel>
@@ -60,7 +60,7 @@
 
         <div class="space-y-6">
             <x-panel title="QR de consulta">
-                <img src="{{ $qr }}" alt="QR del remito" class="mx-auto size-40 rounded bg-white p-2">
+                <img src="{{ $qr }}" alt="QR del remito" class="mx-auto size-40 rounded-none bg-white p-2">
                 <p class="mt-2 text-center text-xs break-all text-stone-500">{{ $publicUrl }}</p>
                 <p class="mt-1 text-center text-xs text-stone-500">Muestra sólo número, carga, estado, fecha y destino.</p>
             </x-panel>

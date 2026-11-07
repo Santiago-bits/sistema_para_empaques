@@ -36,7 +36,7 @@
                 @forelse ($pallets as $pallet)
                     <tr>
                         @can('labels.print')
-                            <td><input type="checkbox" name="ids[]" value="{{ $pallet->id }}" x-model="selected" class="size-4 rounded border-stone-300 text-brand-600" aria-label="Seleccionar {{ $pallet->code }}"></td>
+                            <td><input type="checkbox" name="ids[]" value="{{ $pallet->id }}" x-model="selected" class="size-4 rounded-none border-stone-300 text-brand-600" aria-label="Seleccionar {{ $pallet->code }}"></td>
                         @endcan
                         <td><a href="{{ route('pallets.show', $pallet) }}" class="code link">{{ $pallet->code }}</a></td>
                         <td class="tabular-nums whitespace-nowrap">{{ fdate($pallet->received_at, true) }}</td>

@@ -37,7 +37,7 @@
             @forelse ($areas as $area => $count)
                 <div class="mb-2">
                     <div class="flex justify-between text-sm"><span>{{ $area }}</span><span class="tabular-nums text-stone-500">{{ num($count) }}</span></div>
-                    <div class="mt-1 h-1.5 rounded-full bg-stone-100 dark:bg-stone-800"><div class="h-1.5 rounded-full bg-brand-500" style="width: {{ round($count / $maxArea * 100) }}%"></div></div>
+                    <div class="mt-1 h-1.5 rounded-none bg-stone-100 dark:bg-stone-800"><div class="h-1.5 rounded-none bg-brand-500" style="width: {{ round($count / $maxArea * 100) }}%"></div></div>
                 </div>
             @empty
                 <p class="text-sm text-stone-500">Sin datos.</p>

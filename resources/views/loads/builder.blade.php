@@ -64,13 +64,13 @@
                 <div class="max-h-[50vh] overflow-y-auto">
                     <table class="table">
                         <thead><tr>
-                            <th class="w-8"><input type="checkbox" @change="toggleAll($event)" aria-label="Seleccionar todos" class="size-4 rounded"></th>
+                            <th class="w-8"><input type="checkbox" @change="toggleAll($event)" aria-label="Seleccionar todos" class="size-4 rounded-none"></th>
                             <th>Cajón</th><th>Variedad</th><th>Tamaño</th><th>Lote</th><th class="num">Kg</th>
                         </tr></thead>
                         <tbody>
                             <template x-for="c in available.data" :key="c.id">
                                 <tr>
-                                    <td><input type="checkbox" :value="c.id" x-model.number="selected" class="size-4 rounded" :aria-label="'Seleccionar ' + c.code"></td>
+                                    <td><input type="checkbox" :value="c.id" x-model.number="selected" class="size-4 rounded-none" :aria-label="'Seleccionar ' + c.code"></td>
                                     <td class="code" x-text="c.code"></td>
                                     <td x-text="c.variety || '—'"></td>
                                     <td x-text="c.size || '—'"></td>
@@ -103,7 +103,7 @@
                 <template x-if="content.planned">
                     <div class="mt-3">
                         <div class="mb-1 flex justify-between text-xs text-stone-500"><span>Avance sobre lo previsto (<span x-text="fmtInt(content.planned)"></span>)</span><span x-text="Math.min(100, Math.round(content.total_crates / content.planned * 100)) + ' %'"></span></div>
-                        <div class="h-2.5 overflow-hidden rounded-full bg-stone-200 dark:bg-stone-800"><div class="h-full rounded-full bg-brand-600" :style="`width: ${Math.min(100, content.total_crates / content.planned * 100)}%`"></div></div>
+                        <div class="h-2.5 overflow-hidden rounded-none bg-stone-200 dark:bg-stone-800"><div class="h-full rounded-none bg-brand-600" :style="`width: ${Math.min(100, content.total_crates / content.planned * 100)}%`"></div></div>
                     </div>
                 </template>
                 <div class="mt-3 grid gap-3 text-xs sm:grid-cols-2" x-show="content.summary">
@@ -123,7 +123,7 @@
                         <tbody>
                             <template x-for="c in content.crates" :key="c.id">
                                 <tr>
-                                    <td><input type="checkbox" :value="c.id" x-model.number="toRemove" class="size-4 rounded" :aria-label="'Quitar ' + c.code"></td>
+                                    <td><input type="checkbox" :value="c.id" x-model.number="toRemove" class="size-4 rounded-none" :aria-label="'Quitar ' + c.code"></td>
                                     <td class="code" x-text="c.code"></td>
                                     <td x-text="c.variety || '—'"></td>
                                     <td x-text="c.size || '—'"></td>

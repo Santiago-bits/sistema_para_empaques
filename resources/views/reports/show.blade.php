@@ -13,11 +13,11 @@
                     <button type="button" class="btn btn-secondary" @click="open = !open"><x-icon name="download" class="size-4"/> {{ $variantLabel }}</button>
                     <div x-cloak x-show="open" @click.outside="open = false" class="panel absolute right-0 z-10 mt-1 w-40 p-1 text-sm">
                         @can('reports.export_excel')
-                            <a href="{{ $exportUrl('xlsx', $variant) }}" class="block rounded px-3 py-1.5 hover:bg-stone-100 dark:hover:bg-stone-800">Excel (.xlsx)</a>
-                            <a href="{{ $exportUrl('csv', $variant) }}" class="block rounded px-3 py-1.5 hover:bg-stone-100 dark:hover:bg-stone-800">CSV</a>
+                            <a href="{{ $exportUrl('xlsx', $variant) }}" class="block rounded-none px-3 py-1.5 hover:bg-stone-100 dark:hover:bg-stone-800">Excel (.xlsx)</a>
+                            <a href="{{ $exportUrl('csv', $variant) }}" class="block rounded-none px-3 py-1.5 hover:bg-stone-100 dark:hover:bg-stone-800">CSV</a>
                         @endcan
                         @can('reports.export_pdf')
-                            <a href="{{ $exportUrl('pdf', $variant) }}" class="block rounded px-3 py-1.5 hover:bg-stone-100 dark:hover:bg-stone-800">PDF</a>
+                            <a href="{{ $exportUrl('pdf', $variant) }}" class="block rounded-none px-3 py-1.5 hover:bg-stone-100 dark:hover:bg-stone-800">PDF</a>
                         @endcan
                     </div>
                 </div>

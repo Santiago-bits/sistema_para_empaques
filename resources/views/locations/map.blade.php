@@ -17,9 +17,9 @@
         <x-panel :padding="false">
             <x-slot:actions>
                 <div class="flex items-center gap-3 text-xs text-stone-500">
-                    <span class="flex items-center gap-1"><span class="size-3 rounded bg-emerald-500/70"></span> &lt; 60 %</span>
-                    <span class="flex items-center gap-1"><span class="size-3 rounded bg-amber-500/70"></span> 60–90 %</span>
-                    <span class="flex items-center gap-1"><span class="size-3 rounded bg-red-500/70"></span> &gt; 90 %</span>
+                    <span class="flex items-center gap-1"><span class="size-3 rounded-none bg-emerald-500/70"></span> &lt; 60 %</span>
+                    <span class="flex items-center gap-1"><span class="size-3 rounded-none bg-amber-500/70"></span> 60–90 %</span>
+                    <span class="flex items-center gap-1"><span class="size-3 rounded-none bg-red-500/70"></span> &gt; 90 %</span>
                     <template x-if="canEdit">
                         <button type="button" class="btn btn-secondary btn-sm" @click="editing = !editing" x-text="editing ? 'Terminar edición' : 'Editar mapa'"></button>
                     </template>

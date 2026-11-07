@@ -12,7 +12,7 @@
             @foreach ($steps as $i => $label)
                 <li>
                     <button type="button" @click="step = {{ $i }}" class="w-full text-left">
-                        <span class="block h-1.5 rounded-full" :class="step >= {{ $i }} ? 'bg-brand-600' : 'bg-stone-300 dark:bg-stone-700'"></span>
+                        <span class="block h-1.5 rounded-none" :class="step >= {{ $i }} ? 'bg-brand-600' : 'bg-stone-300 dark:bg-stone-700'"></span>
                         <span class="mt-1.5 block text-[11px] leading-tight" :class="step === {{ $i }} ? 'font-semibold text-stone-900 dark:text-white' : 'text-stone-500'">{{ $i + 1 }}. {{ $label }}</span>
                     </button>
                 </li>
@@ -40,7 +40,7 @@
                             <input type="password" name="db_password" id="db_password" class="form-input mt-1 w-full" autocomplete="off">
                             <p class="mt-1 text-xs text-stone-500">La misma que se puso al crear la base en hPanel. Se pide para confirmar que sos el dueño del servidor.</p>
                             <label class="mt-3 flex items-start gap-2 text-sm">
-                                <input type="checkbox" name="confirm" value="1" class="mt-0.5 size-4 rounded border-stone-300 text-red-600" required>
+                                <input type="checkbox" name="confirm" value="1" class="mt-0.5 size-4 rounded-none border-stone-300 text-red-600" required>
                                 <span>Entiendo que las {{ $database['foreign'] }} tabla(s) existentes se renombran con «viejo_» y no las usa ningún otro sistema.</span>
                             </label>
                         </div>
@@ -110,7 +110,7 @@
                     @foreach ($modules as $key => [$name, $description, $default])
                         <label class="flex items-start gap-3 rounded-lg border border-stone-200 p-3 dark:border-stone-800">
                             <input type="checkbox" name="modules[]" value="{{ $key }}" @checked(in_array($key, old('modules', $default ? [$key] : []), true))
-                                   class="mt-0.5 size-4 rounded border-stone-300 text-brand-600">
+                                   class="mt-0.5 size-4 rounded-none border-stone-300 text-brand-600">
                             <span><span class="block text-sm font-medium">{{ $name }}</span><span class="text-xs text-stone-500">{{ $description }}</span></span>
                         </label>
                     @endforeach
