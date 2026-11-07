@@ -24,7 +24,7 @@
                         @foreach ($items as $permission)
                             <label class="flex items-center gap-2 text-sm">
                                 <input type="checkbox" name="permissions[]" value="{{ $permission->slug }}" data-group="{{ $module }}"
-                                       class="size-4 rounded border-stone-300 text-brand-600 dark:border-stone-600 dark:bg-stone-900"
+                                       class="size-4 rounded-none border-stone-300 text-brand-600 dark:border-stone-600 dark:bg-stone-900"
                                        @checked(in_array($permission->slug, $selected, true))>
                                 {{ $permission->name }}
                             </label>

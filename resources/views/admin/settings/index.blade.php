@@ -34,7 +34,7 @@
                                 <input type="file" name="logo" accept="image/*" class="form-input">
                             </x-field>
                             @if ($s['company.logo'])
-                                <img src="{{ \App\Http\Controllers\BrandingController::url() }}" alt="Logo" class="h-16 rounded border border-stone-200 object-contain p-1 dark:border-stone-700">
+                                <img src="{{ \App\Http\Controllers\BrandingController::url() }}" alt="Logo" class="h-16 rounded-none border border-stone-200 object-contain p-1 dark:border-stone-700">
                             @endif
                         </div>
                         @break
@@ -124,7 +124,7 @@
                                 @foreach (['username' => 'Usuario', 'dni' => 'DNI', 'cuit' => 'CUIT', 'internal_code' => 'Código interno', 'email' => 'Email'] as $key => $label)
                                     <label class="inline-flex items-center gap-2 text-sm">
                                         <input type="checkbox" name="login_identifiers[]" value="{{ $key }}" @checked(in_array($key, $s['login.identifiers'], true))
-                                               class="size-4 rounded border-stone-300 text-brand-600"> {{ $label }}
+                                               class="size-4 rounded-none border-stone-300 text-brand-600"> {{ $label }}
                                     </label>
                                 @endforeach
                             </div>
@@ -134,7 +134,7 @@
                                 @foreach ($modules as $key => $name)
                                     <label class="inline-flex items-center gap-2 text-sm">
                                         <input type="checkbox" name="lan_only_modules[]" value="{{ $key }}" @checked(in_array($key, $s['network.lan_only_modules'], true))
-                                               class="size-4 rounded border-stone-300 text-brand-600"> {{ $name }}
+                                               class="size-4 rounded-none border-stone-300 text-brand-600"> {{ $name }}
                                     </label>
                                 @endforeach
                             </div>

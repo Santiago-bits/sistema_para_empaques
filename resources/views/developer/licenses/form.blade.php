@@ -21,7 +21,7 @@
                 <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
                     @foreach (\App\Services\ModuleService::CATALOG as $key => $module)
                         <label class="flex items-center gap-2 text-sm">
-                            <input type="checkbox" name="modules[]" value="{{ $key }}" @checked(in_array($key, $selectedModules, true)) class="rounded border-stone-300 dark:border-stone-600 dark:bg-stone-900">
+                            <input type="checkbox" name="modules[]" value="{{ $key }}" @checked(in_array($key, $selectedModules, true)) class="rounded-none border-stone-300 dark:border-stone-600 dark:bg-stone-900">
                             {{ $module[0] }}
                         </label>
                     @endforeach

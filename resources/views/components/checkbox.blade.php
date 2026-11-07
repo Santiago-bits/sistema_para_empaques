@@ -4,7 +4,7 @@
         <input type="hidden" name="{{ $name }}" value="0">
     @endif
     <input type="checkbox" name="{{ $name }}" value="{{ $value }}" @checked(old(str_replace(['[', ']'], ['.', ''], $name), $checked))
-           {{ $attributes->except('no-hidden')->merge(['class' => 'mt-0.5 size-4 rounded border-stone-300 text-brand-600 focus:ring-brand-500 dark:border-stone-600 dark:bg-stone-900']) }}>
+           {{ $attributes->except('no-hidden')->merge(['class' => 'mt-0.5 size-4 rounded-none border-stone-300 text-brand-600 focus:ring-brand-500 dark:border-stone-600 dark:bg-stone-900']) }}>
     <span>
         <span class="font-medium text-stone-800 dark:text-stone-200">{{ $label }}</span>
         @if ($hint)

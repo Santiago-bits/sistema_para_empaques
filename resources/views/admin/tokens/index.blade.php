@@ -64,7 +64,7 @@
                     <div class="space-y-2">
                         @foreach ($abilities as $key => $label)
                             <label class="flex items-start gap-2 text-sm">
-                                <input type="checkbox" name="abilities[]" value="{{ $key }}" @checked(in_array($key, old('abilities', []), true)) class="mt-0.5 rounded border-stone-300 dark:border-stone-600 dark:bg-stone-900">
+                                <input type="checkbox" name="abilities[]" value="{{ $key }}" @checked(in_array($key, old('abilities', []), true)) class="mt-0.5 rounded-none border-stone-300 dark:border-stone-600 dark:bg-stone-900">
                                 <span>{{ $label }}</span>
                             </label>
                         @endforeach

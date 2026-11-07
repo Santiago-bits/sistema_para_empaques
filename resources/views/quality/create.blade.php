@@ -73,7 +73,7 @@
 
                 <template x-if="target && target.type !== 'crate' && form.result !== 'observed'">
                     <label class="mt-5 flex items-start gap-3 rounded-lg border border-stone-200 p-3 text-sm dark:border-stone-700">
-                        <input type="checkbox" x-model="form.apply_to_crates" class="mt-0.5 size-4 rounded border-stone-300 dark:border-stone-600 dark:bg-stone-900">
+                        <input type="checkbox" x-model="form.apply_to_crates" class="mt-0.5 size-4 rounded-none border-stone-300 dark:border-stone-600 dark:bg-stone-900">
                         <span>
                             <span class="font-medium text-stone-800 dark:text-stone-200">Aplicar el resultado a todos los cajones elegibles</span>
                             <span class="block text-xs text-stone-500" x-text="'Cajones procesados o en control: ' + (target.eligible_crates ?? 0) + ' de ' + (target.total_crates ?? 0)"></span>
@@ -84,7 +84,7 @@
                 <template x-if="form.result === 'rejected'">
                     <div class="mt-5 rounded-lg border border-red-200 bg-red-50/50 p-4 dark:border-red-900 dark:bg-red-950/20">
                         <label class="flex items-center gap-3 text-sm font-medium text-stone-800 dark:text-stone-200">
-                            <input type="checkbox" x-model="form.register_reject" class="size-4 rounded border-stone-300 dark:border-stone-600 dark:bg-stone-900">
+                            <input type="checkbox" x-model="form.register_reject" class="size-4 rounded-none border-stone-300 dark:border-stone-600 dark:bg-stone-900">
                             Registrar rechazo (merma)
                         </label>
                         <div x-show="form.register_reject" class="mt-3 grid gap-4 md:grid-cols-2">
