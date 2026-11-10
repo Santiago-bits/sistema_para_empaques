@@ -29,10 +29,29 @@ class UserFactory extends Factory
         ];
     }
 
+    /**
+     * Multigalpón: el usuario queda en el galpón activo; el Super Administrador no tiene galpón.
+     */
+    public function configure(): static
+    {
+        return $this->afterMaking(function (User $user) {
+            if ($user->warehouse_id === null && \App\Support\Tenancy::ready()
+                && Role::query()->whereKey($user->role_id)->value('slug') !== Role::SUPER_ADMIN) {
+                $user->warehouse_id = \App\Support\CurrentWarehouse::id();
+            }
+        });
+    }
+
     /** Asigna un rol por slug (debe existir: ejecutar SystemSeeder antes). */
     public function role(string $slug): static
     {
         return $this->state(fn () => ['role_id' => Role::query()->where('slug', $slug)->value('id')]);
+    }
+
+    /** Usuario de un galpón determinado. */
+    public function inWarehouse(int $warehouseId): static
+    {
+        return $this->afterMaking(fn (User $user) => $user->warehouse_id = $warehouseId);
     }
 
     public function inactive(): static

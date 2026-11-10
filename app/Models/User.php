@@ -90,16 +90,27 @@ class User extends Authenticatable
     */
     public const HIDDEN_NAME = 'Soporte del sistema';
 
-    /** Usuarios visibles para quien está mirando (por defecto, el usuario conectado). */
+    /**
+     * Usuarios visibles para quien está mirando (por defecto, el usuario conectado): sólo los del galpón activo.
+     * El Super Administrador ve además a los otros Super Administradores (no tienen galpón).
+     */
     public function scopeVisibleTo(\Illuminate\Database\Eloquent\Builder $query, ?User $viewer = null): \Illuminate\Database\Eloquent\Builder
     {
         $viewer ??= auth()->user();
+        $warehouseId = \App\Support\Tenancy::ready() ? \App\Support\CurrentWarehouse::id() : null;
         if ($viewer?->isSuperAdmin()) {
-            return $query;
+            return $warehouseId === null ? $query
+                : $query->where(fn ($q) => $q->where('users.warehouse_id', $warehouseId)->orWhereNull('users.warehouse_id'));
         }
 
-        return $query->where(fn ($q) => $q->whereNull('role_id')
-            ->orWhereNotIn('role_id', Role::query()->where('slug', Role::SUPER_ADMIN)->select('id')));
+        return $query->when($warehouseId !== null, fn ($q) => $q->where('users.warehouse_id', $warehouseId))
+            ->where(fn ($q) => $q->whereNull('role_id')
+                ->orWhereNotIn('role_id', Role::query()->where('slug', Role::SUPER_ADMIN)->select('id')));
+    }
+
+    public function warehouse(): BelongsTo
+    {
+        return $this->belongsTo(Warehouse::class);
     }
 
     /** IDs que el usuario conectado no debe ver (vacío para un Super Administrador). */

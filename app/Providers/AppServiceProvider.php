@@ -188,6 +188,13 @@ class AppServiceProvider extends ServiceProvider
     private function registerGates(): void
     {
         // Orden de evaluación: módulo desactivado → usuario inactivo → super admin → permiso granular.
+        // Multigalpón: por URL ({user}) sólo se llega a usuarios del propio galpón; el Super Administrador llega a todos.
+        \Illuminate\Support\Facades\Route::bind('user', function (string $value) {
+            $viewer = auth()->user();
+            abort_unless(ctype_digit($value), 404);
+
+            return User::query()->when($viewer && ! $viewer->isSuperAdmin(), fn ($q) => $q->visibleTo($viewer))->findOrFail((int) $value);
+        });
         // Multigalpón: al cambiar el usuario (ingreso, salida) se vuelve a resolver el galpón activo.
         \Illuminate\Support\Facades\Event::listen(
             [\Illuminate\Auth\Events\Authenticated::class, \Illuminate\Auth\Events\Login::class, \Illuminate\Auth\Events\Logout::class],

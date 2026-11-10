@@ -28,8 +28,8 @@ class HiddenSuperAdminTest extends TestCase
         // Usuarios, ficha, filtros de rol.
         $this->get(route('admin.users.index'))->assertOk()->assertSee('santi')->assertDontSee('leomover')->assertDontSee('Zarlenga')
             ->assertDontSee('Super Administrador');
-        $this->get(route('admin.users.show', $super))->assertForbidden();
-        $this->get(route('admin.users.edit', $super))->assertForbidden();
+        $this->get(route('admin.users.show', $super))->assertNotFound();
+        $this->get(route('admin.users.edit', $super))->assertNotFound();
         $this->get(route('admin.roles.index'))->assertOk()->assertDontSee('Super Administrador');
 
         // Historial de cambios: lo suyo no aparece, ni en la lista ni abriendo el registro.
