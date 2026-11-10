@@ -31,7 +31,7 @@
                 <x-select name="status" label="Cambiar estado a" :options="\App\Models\SupportTicket::STATUSES" placeholder="Sin cambios"/>
                 <button class="btn btn-primary w-full">Enviar respuesta</button>
             </form>
-            <p class="form-hint mt-3">El empaque recibe la respuesta en su próxima sincronización (cada 5 minutos, si tiene internet).</p>
+            <p class="form-hint mt-3">El galpón recibe la respuesta en su próxima sincronización (cada 5 minutos, si tiene internet).</p>
         </x-panel>
     </div>
 </x-layouts.app>

@@ -14,7 +14,10 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
-/** Panel General: alta de empaques clientes, su licencia y cuánto usan el sistema. */
+/**
+ * Panel General → Galpones: alta de cada galpón (con su propio sistema), su licencia y cuánto lo usa.
+ * El administrador general de cada galpón lo crea el desarrollador a mano en ese sistema; ese admin carga a sus empleados.
+ */
 class ClientController extends Controller
 {
     public function index(Request $request): View
@@ -25,7 +28,8 @@ class ClientController extends Controller
             ->with('latestReport')
             ->withCount(['tickets as open_tickets_count' => fn ($q) => $q->whereNotIn('status', ['resolved', 'closed'])])
             ->when($request->query('q'), fn ($q, $term) => $q->where(fn ($w) => $w->where('client_name', 'like', '%'.addcslashes($term, '%_\\').'%')
-                ->orWhere('installation_id', 'like', '%'.addcslashes($term, '%_\\').'%')->orWhere('locality', 'like', '%'.addcslashes($term, '%_\\').'%')))
+                ->orWhere('installation_id', 'like', '%'.addcslashes($term, '%_\\').'%')->orWhere('locality', 'like', '%'.addcslashes($term, '%_\\').'%')
+                ->orWhere('cuit', 'like', '%'.preg_replace('/\D/', '', $term).'%')))
             ->when($request->query('status'), fn ($q, $status) => $q->where('status', $status))
             ->orderBy('client_name')
             ->paginate($this->perPage($request))->withQueryString();
@@ -59,7 +63,7 @@ class ClientController extends Controller
         ]);
 
         return redirect()->route('central.clients.show', $license)
-            ->with('success', 'Cliente creado. Copiá los datos de conexión en el .env de su servidor.');
+            ->with('success', 'Galpón creado. Copiá los datos de conexión en el .env de su sistema y creá ahí su administrador general.');
     }
 
     public function show(License $license): View
@@ -90,13 +94,15 @@ class ClientController extends Controller
         }
         $license->update($data);
 
-        return redirect()->route('central.clients.show', $license)->with('success', 'Cliente actualizado. El empaque lo verá en su próxima sincronización.');
+        return redirect()->route('central.clients.show', $license)->with('success', 'Galpón actualizado. Lo verá en su próxima sincronización.');
     }
 
     private function validated(Request $request, ?License $license = null): array
     {
         $data = $request->validate([
             'client_name' => ['required', 'string', 'max:255'],
+            'cuit' => ['nullable', new \App\Rules\Cuit],
+            'admin_username' => ['nullable', 'string', 'max:60'],
             'installation_id' => ['nullable', 'string', 'max:64', 'regex:/^[A-Za-z0-9._\-]+$/', Rule::unique('licenses')->ignore($license?->id)],
             'contact_name' => ['nullable', 'string', 'max:120'],
             'contact_phone' => ['nullable', 'string', 'max:50'],
@@ -109,9 +115,10 @@ class ClientController extends Controller
             'modules' => ['nullable', 'array'],
             'modules.*' => [Rule::in(array_keys(ModuleService::CATALOG))],
             'notes' => ['nullable', 'string', 'max:2000'],
-        ], [], ['client_name' => 'empaque', 'installation_id' => 'ID de instalación', 'contact_name' => 'contacto', 'contact_phone' => 'teléfono',
+        ], [], ['client_name' => 'nombre del galpón', 'admin_username' => 'usuario del administrador', 'installation_id' => 'ID de instalación', 'contact_name' => 'contacto', 'contact_phone' => 'teléfono',
             'contact_email' => 'email', 'locality' => 'localidad', 'starts_on' => 'inicio', 'expires_on' => 'vencimiento']);
         $data['modules'] = array_values($data['modules'] ?? []);
+        $data['cuit'] = filled($data['cuit'] ?? null) ? preg_replace('/\D/', '', (string) $data['cuit']) : null;
 
         return $data;
     }

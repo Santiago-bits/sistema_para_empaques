@@ -1,6 +1,6 @@
 @php $statuses = ['pending' => 'Pendientes'] + \App\Models\SupportTicket::STATUSES; @endphp
-<x-layouts.app title="Soporte de clientes">
-    <x-page-header title="Soporte de clientes" subtitle="Pedidos de los empaques: problemas, cambios y mejoras que piden agregar."/>
+<x-layouts.app title="Soporte de los galpones">
+    <x-page-header title="Soporte de los galpones" subtitle="Pedidos de los galpones: problemas, cambios y mejoras que piden agregar."/>
 
     <nav class="mb-4 flex flex-wrap gap-1" aria-label="Estado">
         @foreach ($statuses as $key => $name)
@@ -15,7 +15,7 @@
     </x-filters>
 
     <x-table>
-        <thead><tr><th>Empaque</th><th>N°</th><th>Asunto</th><th>Prioridad</th><th>Estado</th><th>Pidió</th><th>Último mensaje</th></tr></thead>
+        <thead><tr><th>Galpón</th><th>N°</th><th>Asunto</th><th>Prioridad</th><th>Estado</th><th>Pidió</th><th>Último mensaje</th></tr></thead>
         <tbody>
             @forelse ($tickets as $t)
                 <tr>

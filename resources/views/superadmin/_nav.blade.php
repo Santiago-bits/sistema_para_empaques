@@ -7,7 +7,7 @@
         ['superadmin.users.index', 'Usuarios', 'users', 'superadmin.users.*', null],
     ];
     if ($central) {
-        $tabs[] = ['superadmin.clients.index', 'Clientes y pagos', 'briefcase', 'superadmin.clients.*', null];
+        $tabs[] = ['superadmin.clients.index', 'Galpones y pagos', 'briefcase', 'superadmin.clients.*', null];
         $tabs[] = ['central.tickets.index', 'Soporte', 'lifebuoy', 'central.tickets.*', $openTickets];
     }
 @endphp

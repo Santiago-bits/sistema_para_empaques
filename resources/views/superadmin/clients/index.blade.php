@@ -1,19 +1,19 @@
-<x-layouts.app title="Administración general · Clientes">
-    <x-page-header title="Clientes y pagos" subtitle="Si cada empaque pagó, hasta cuándo y cuánto usa el sistema.">
+<x-layouts.app title="Administración general · Galpones">
+    <x-page-header title="Galpones y pagos" subtitle="Si cada galpón pagó, hasta cuándo y cuánto usa el sistema.">
         <x-slot:actions>
-            <a href="{{ route('central.clients.create') }}" class="btn btn-primary"><x-icon name="plus" class="size-4"/> Nuevo cliente</a>
+            <a href="{{ route('central.clients.create') }}" class="btn btn-primary"><x-icon name="plus" class="size-4"/> Nuevo galpón</a>
         </x-slot:actions>
     </x-page-header>
 
     @include('superadmin._nav')
 
     <x-filters>
-        <x-input name="q" label="Buscar" :value="request('q')" placeholder="Empaque, contacto, localidad"/>
+        <x-input name="q" label="Buscar" :value="request('q')" placeholder="Galpón, contacto, localidad"/>
         <x-select name="payment" label="Pago" :options="collect(\App\Models\License::PAYMENT_STATUSES)->map(fn ($s) => $s[0])->all()" :value="request('payment')" placeholder="Todos"/>
     </x-filters>
 
     <x-table>
-        <thead><tr><th>Empaque</th><th>Contacto</th><th>Pago</th><th class="num">Cuota</th><th>Uso del sistema</th><th class="num">Soporte</th></tr></thead>
+        <thead><tr><th>Galpón</th><th>Contacto</th><th>Pago</th><th class="num">Cuota</th><th>Uso del sistema</th><th class="num">Soporte</th></tr></thead>
         <tbody>
             @forelse ($clients as $client)
                 @php $r = $client->latestReport; @endphp
@@ -54,7 +54,7 @@
                     </td>
                 </tr>
             @empty
-                <x-empty :colspan="6" message="Todavía no cargaste clientes. Tocá «Nuevo cliente» para dar de alta el primer empaque."/>
+                <x-empty :colspan="6" message="Todavía no cargaste galpones. Tocá «Nuevo galpón» para dar de alta el primero."/>
             @endforelse
         </tbody>
     </x-table>

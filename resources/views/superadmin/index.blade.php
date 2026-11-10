@@ -1,5 +1,5 @@
 <x-layouts.app title="Administración general">
-    <x-page-header title="Administración general" subtitle="Usuarios, clientes, pagos y soporte del sistema completo."/>
+    <x-page-header title="Administración general" subtitle="Usuarios, galpones, pagos y soporte del sistema completo."/>
 
     @include('superadmin._nav')
 
@@ -29,7 +29,7 @@
     </div>
 
     @if ($central)
-        <h2 class="mb-3 text-sm font-semibold tracking-wide text-stone-500 uppercase">Clientes</h2>
+        <h2 class="mb-3 text-sm font-semibold tracking-wide text-stone-500 uppercase">Galpones</h2>
         <div class="mb-6 grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
             <x-stat label="Empaques clientes" :value="num($clients['total'])" icon="briefcase" :href="route('superadmin.clients.index')"/>
             <x-stat label="Conectados (24 h)" :value="num($clients['online'])" icon="signal" color="sky"/>
@@ -51,7 +51,7 @@
                             </span>
                         </li>
                     @empty
-                        <li class="py-2 text-stone-500">Todos los clientes con cuota están al día.</li>
+                        <li class="py-2 text-stone-500">Todos los galpones con cuota están al día.</li>
                     @endforelse
                 </ul>
             </x-panel>
@@ -78,7 +78,7 @@
                             <span class="text-xs text-stone-500">{{ $client->last_seen_at ? $client->last_seen_at->diffForHumans() : 'Nunca se conectó' }}</span>
                         </li>
                     @empty
-                        <li class="py-2 text-stone-500">Todos los clientes usaron el sistema en las últimas 24 horas.</li>
+                        <li class="py-2 text-stone-500">Todos los galpones usaron el sistema en las últimas 24 horas.</li>
                     @endforelse
                 </ul>
             </x-panel>
@@ -86,16 +86,16 @@
     @else
         <div class="panel mb-8 flex flex-wrap items-center justify-between gap-4 p-5">
             <div class="max-w-2xl">
-                <p class="font-semibold">Gestión de clientes</p>
+                <p class="font-semibold">Gestión de galpones</p>
                 <p class="mt-1 text-sm text-stone-600 dark:text-stone-400">
-                    Activala si desde este sistema vas a administrar a tus clientes: cargar cada empaque, registrar sus pagos,
+                    Activala si desde este sistema vas a administrar tus galpones: cargar cada galpón, registrar sus pagos,
                     ver si usan el sistema y recibir sus pedidos de soporte (con aviso en la campanita y por email).
                 </p>
             </div>
-            <form method="POST" action="{{ route('superadmin.central') }}" x-data x-confirm="¿Activar la gestión de clientes en este sistema?">
+            <form method="POST" action="{{ route('superadmin.central') }}" x-data x-confirm="¿Activar la gestión de galpones en este sistema?">
                 @csrf @method('PUT')
                 <input type="hidden" name="enable" value="1">
-                <button class="btn btn-primary"><x-icon name="briefcase" class="size-4"/> Activar gestión de clientes</button>
+                <button class="btn btn-primary"><x-icon name="briefcase" class="size-4"/> Activar gestión de galpones</button>
             </form>
         </div>
     @endif
@@ -107,7 +107,7 @@
                 <p class="mt-1 text-sm text-stone-600 dark:text-stone-400">
                     Carga al menos 10 ejemplos de todo: productores, clientes, proveedores, camioneros, camiones, cámaras de frío, lotes,
                     pallets, cajones con etiqueta, cargas, remitos, facturas, caja, cheques, mantenimiento, incidentes y más. Sirve para ver
-                    cómo se ve cada pantalla y probarla. Úsalo en un sistema de prueba, no en el de un cliente real.
+                    cómo se ve cada pantalla y probarla. Úsalo en un sistema de prueba, no en el de un galpón real.
                 </p>
             </div>
             <form method="POST" action="{{ route('superadmin.sample') }}" x-data="{ busy: false }" x-confirm="¿Cargar los datos de ejemplo? Tarda alrededor de un minuto." @submit="busy = true">

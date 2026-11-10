@@ -19,7 +19,7 @@ use Illuminate\View\View;
 
 /**
  * Administración general del sistema (/administradorgeneral): un solo lugar para el dueño del sistema con
- * los usuarios, los clientes (si pagaron y si usan el sistema) y los pedidos de soporte.
+ * los usuarios, los galpones (si pagaron y si usan el sistema) y los pedidos de soporte.
  */
 class HubController extends Controller
 {
@@ -134,16 +134,16 @@ class HubController extends Controller
         };
     }
 
-    /** Activa la gestión de clientes (Panel General) en este servidor: clientes, pagos, uso y soporte. */
+    /** Activa la gestión de galpones (Panel General) en este servidor: galpones, pagos, uso y soporte. */
     public function centralPanel(Request $request, SettingsService $settings): RedirectResponse
     {
         $enable = $request->boolean('enable');
         $settings->set('system.central_panel', $enable);
         $this->audit->log('settings', null, null, ['system.central_panel' => $enable],
-            $enable ? 'Activó la gestión de clientes (Panel General)' : 'Desactivó la gestión de clientes (Panel General)');
+            $enable ? 'Activó la gestión de galpones (Panel General)' : 'Desactivó la gestión de galpones (Panel General)');
 
         return redirect()->route('superadmin.index')->with('success', $enable
-            ? 'Gestión de clientes activada: ya podés cargar empaques clientes, sus pagos y recibir sus pedidos de soporte.'
-            : 'Gestión de clientes desactivada. Los datos cargados se conservan.');
+            ? 'Gestión de galpones activada: ya podés cargar tus galpones, sus pagos y recibir sus pedidos de soporte.'
+            : 'Gestión de galpones desactivada. Los datos cargados se conservan.');
     }
 }
