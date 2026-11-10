@@ -55,6 +55,7 @@ class AppServiceProvider extends ServiceProvider
             'setting' => \App\Models\Setting::class,
             'company' => \App\Models\Company::class,
             'warehouse' => \App\Models\Warehouse::class,
+            'association' => \App\Models\Association::class,
             'season' => \App\Models\Season::class,
             'producer' => \App\Models\Producer::class,
             'owner' => \App\Models\Owner::class,

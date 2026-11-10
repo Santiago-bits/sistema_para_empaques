@@ -5,6 +5,7 @@
     $tabs = [
         ['superadmin.index', 'Resumen', 'chart-bar', 'superadmin.index', null],
         ['superadmin.warehouses.index', 'Galpones', 'home', 'superadmin.warehouses.*', null],
+        ['superadmin.associations.index', 'Asociaciones', 'users', 'superadmin.associations.*', null],
         ['superadmin.users.index', 'Usuarios', 'users', 'superadmin.users.*', null],
     ];
     if ($central) {

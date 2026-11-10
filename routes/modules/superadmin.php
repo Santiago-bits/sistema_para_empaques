@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\SuperAdmin\AssociationController;
 use App\Http\Controllers\SuperAdmin\ClientController;
 use App\Http\Controllers\SuperAdmin\HubController;
 use App\Http\Controllers\SuperAdmin\UserController;
@@ -29,6 +30,12 @@ Route::prefix('administradorgeneral')->name('superadmin.')->middleware('superadm
     Route::get('galpones/{warehouse}/editar', [WarehouseController::class, 'edit'])->whereNumber('warehouse')->name('warehouses.edit');
     Route::put('galpones/{warehouse}', [WarehouseController::class, 'update'])->whereNumber('warehouse')->name('warehouses.update');
     Route::post('galpones/{warehouse}/administrador', [WarehouseController::class, 'storeAdmin'])->whereNumber('warehouse')->middleware('throttle:20,1')->name('warehouses.admin');
+    // Asociaciones de citricultores (lista común; cada galpón se vincula desde su ficha).
+    Route::get('asociaciones', [AssociationController::class, 'index'])->name('associations.index');
+    Route::get('asociaciones/nueva', [AssociationController::class, 'create'])->name('associations.create');
+    Route::post('asociaciones', [AssociationController::class, 'store'])->name('associations.store');
+    Route::get('asociaciones/{association}/editar', [AssociationController::class, 'edit'])->whereNumber('association')->name('associations.edit');
+    Route::put('asociaciones/{association}', [AssociationController::class, 'update'])->whereNumber('association')->name('associations.update');
     Route::get('usuarios', [UserController::class, 'index'])->name('users.index');
     Route::get('usuarios/{user}', [UserController::class, 'show'])->whereNumber('user')->name('users.show');
     Route::post('usuarios/{user}/contrasena-temporal', [UserController::class, 'resetPassword'])->whereNumber('user')->middleware('throttle:10,1')->name('users.password');

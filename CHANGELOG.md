@@ -2,6 +2,14 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versionado semántico.
 
+## [1.12.0] - 2026-11-10
+
+### Agregado
+- **Asociaciones de citricultores** (Administración general → Asociaciones): lista común a todo el sistema
+  (nombre, nombre corto, CUIT, localidad, provincia, activa). Cada galpón se vincula a **una o a varias** desde su
+  ficha. Las asociaciones del galpón salen impresas en sus **etiquetas de pallets y cajones**, **facturas**,
+  **remitos**, **romaneos** y **resúmenes de cuenta**. El administrador del galpón las ve en Configuración → Empresa.
+
 ## [1.11.1] - 2026-11-10
 
 ### Cambiado

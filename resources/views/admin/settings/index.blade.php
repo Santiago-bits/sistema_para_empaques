@@ -16,6 +16,11 @@
             <x-panel :title="$groups[$group]">
                 @switch($group)
                     @case('company')
+                        <div class="mb-4 bg-stone-50 p-3 text-sm dark:bg-stone-900/60" data-associations>
+                            <span class="font-medium">Asociaciones de citricultores:</span>
+                            {{ \App\Support\CurrentWarehouse::associationsLine() ?? 'ninguna' }}
+                            <span class="block text-xs text-stone-500">Salen impresas en las etiquetas, facturas y remitos. Las vincula el administrador del sistema.</span>
+                        </div>
                         <div class="grid gap-4 md:grid-cols-2">
                             <x-input name="name" label="Nombre del galpón" :value="$s['company.name']" required/>
                             <x-input name="legal_name" label="Razón social" :value="$s['company.legal_name']"/>
