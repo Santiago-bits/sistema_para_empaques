@@ -14,7 +14,7 @@ class License extends Model
     use Auditable;
 
     protected $fillable = [
-        'installation_id', 'client_name', 'license_key', 'plan', 'starts_on', 'expires_on', 'status',
+        'installation_id', 'client_name', 'cuit', 'admin_username', 'license_key', 'plan', 'starts_on', 'expires_on', 'status',
         'modules', 'version', 'last_seen_at', 'notes', 'contact_name', 'contact_phone', 'contact_email', 'locality',
         'monthly_fee', 'fee_currency', 'paid_until',
     ];

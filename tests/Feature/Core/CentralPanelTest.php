@@ -155,17 +155,32 @@ class CentralPanelTest extends TestCase
         $this->actingAsRole('super_admin');
         config(['galpon.central.mode' => false]);
         $this->get(route('central.clients.index'))->assertNotFound();
-        $this->get(route('dashboard'))->assertDontSee('Clientes y uso');
+        $this->get(route('dashboard'))->assertDontSee(route('central.clients.index'), false);
 
         config(['galpon.central.mode' => true]);
-        $this->get(route('dashboard'))->assertSee('Clientes y uso');
+        $this->get(route('dashboard'))->assertSee(route('central.clients.index'), false)->assertSee('Soporte de los galpones');
         $this->get(route('central.clients.index'))->assertOk()->assertSee('Empaque del Sur');
         $this->get(route('central.clients.create'))->assertOk();
         $this->post(route('central.clients.store'), ['client_name' => 'Citrícola Norte', 'plan' => 'pro', 'status' => 'active', 'starts_on' => today()->toDateString(),
             'contact_name' => 'Raúl', 'modules' => ['loads', 'treasury']])->assertRedirect();
         $new = License::query()->where('client_name', 'Citrícola Norte')->firstOrFail();
         $this->assertStringStartsWith('citricola-norte-', $new->installation_id);
-        $this->get(route('central.clients.show', $new))->assertOk()->assertSee('GALPON_LICENSE_KEY='.$new->license_key);
+        $this->get(route('central.clients.show', $new))->assertOk()->assertSee('GALPON_LICENSE_KEY='.$new->license_key)
+            ->assertSee('Puesta en marcha')->assertSee('Crealo en su sistema');
+        $this->get(route('central.clients.index'))->assertSee('Falta crearlo');
+
+        // Cada galpón con su CUIT y el usuario de su administrador general (que se crea a mano en su sistema).
+        $this->get(route('central.clients.edit', $new))->assertOk()->assertSee('Administrador general del galpón');
+        $this->put(route('central.clients.update', $new), ['client_name' => 'Citrícola Norte', 'cuit' => '30-50000173-5', 'admin_username' => 'admin.norte',
+            'plan' => 'pro', 'status' => 'active', 'starts_on' => today()->toDateString()])->assertRedirect()->assertSessionHasNoErrors();
+        $this->assertSame(['30500001735', 'admin.norte'], [$new->fresh()->cuit, $new->fresh()->admin_username]);
+        $this->get(route('central.clients.index', ['q' => '30500001735']))->assertSee('Citrícola Norte')->assertSee('admin.norte')->assertDontSee('Empaque del Sur');
+        $this->put(route('central.clients.update', $new), ['client_name' => 'X', 'cuit' => '123', 'plan' => 'pro', 'status' => 'active',
+            'starts_on' => today()->toDateString()])->assertSessionHasErrors('cuit');
+
+        // Las direcciones viejas («clientes») siguen llevando al lugar correcto.
+        $this->get('/panel-general/clientes')->assertRedirect('/panel-general/galpones');
+        $this->get('/panel-general/clientes/'.$new->id)->assertRedirect('/panel-general/galpones/'.$new->id);
 
         // Un administrador del galpón (no super admin) no entra al Panel General.
         $this->actingAsRole('admin');

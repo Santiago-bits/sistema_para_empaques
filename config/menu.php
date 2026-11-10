@@ -131,8 +131,8 @@ return [
         'icon' => 'briefcase',
         'central' => true,
         'items' => [
-            ['label' => 'Clientes y uso', 'route' => 'central.clients.index', 'icon' => 'briefcase', 'permission' => 'developer', 'module' => 'core'],
-            ['label' => 'Soporte de clientes', 'route' => 'central.tickets.index', 'icon' => 'lifebuoy', 'permission' => 'developer', 'module' => 'core'],
+            ['label' => 'Galpones', 'route' => 'central.clients.index', 'icon' => 'briefcase', 'permission' => 'developer', 'module' => 'core'],
+            ['label' => 'Soporte de los galpones', 'route' => 'central.tickets.index', 'icon' => 'lifebuoy', 'permission' => 'developer', 'module' => 'core'],
         ],
     ],
 ];

@@ -1,14 +1,14 @@
 @php $statuses = \App\Http\Controllers\Developer\LicenseController::STATUSES; @endphp
-<x-layouts.app title="Panel general · Clientes">
-    <x-page-header title="Clientes y uso" subtitle="Empaques que usan el sistema, cuánto lo usan y su licencia.">
+<x-layouts.app title="Panel general · Galpones">
+    <x-page-header title="Galpones" subtitle="Cada galpón con su propio sistema: su administrador, cuánto lo usa y su licencia.">
         <x-slot:actions>
             <a href="{{ route('central.tickets.index') }}" class="btn btn-secondary"><x-icon name="lifebuoy" class="size-4"/> Soporte ({{ $stats['open_tickets'] }})</a>
-            <a href="{{ route('central.clients.create') }}" class="btn btn-primary"><x-icon name="plus" class="size-4"/> Nuevo cliente</a>
+            <a href="{{ route('central.clients.create') }}" class="btn btn-primary"><x-icon name="plus" class="size-4"/> Nuevo galpón</a>
         </x-slot:actions>
     </x-page-header>
 
     <div class="mb-6 grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
-        <x-stat label="Clientes" :value="num($stats['clients'])" icon="briefcase"/>
+        <x-stat label="Galpones" :value="num($stats['clients'])" icon="briefcase"/>
         <x-stat label="Conectados (24 h)" :value="num($stats['online'])" icon="signal" color="sky"/>
         <x-stat label="Usuarios activos (7 días)" :value="num($stats['users_active'])" icon="users" color="violet"/>
         <x-stat label="Cajones (30 días)" :value="num($stats['crates_30d'])" icon="box" color="accent"/>
@@ -17,19 +17,26 @@
     </div>
 
     <x-filters>
-        <x-input name="q" label="Buscar" :value="request('q')" placeholder="Empaque, localidad, ID"/>
+        <x-input name="q" label="Buscar" :value="request('q')" placeholder="Galpón, CUIT, localidad, ID"/>
         <x-select name="status" label="Licencia" :options="$statuses" :value="request('status')" placeholder="Todas"/>
     </x-filters>
 
     <x-table>
-        <thead><tr><th>Empaque</th><th>Conexión</th><th>Versión</th><th class="num">Usuarios activos</th><th class="num">Cajones hoy</th><th class="num">Cajones 30 d</th><th class="num">Soporte</th><th>Licencia</th></tr></thead>
+        <thead><tr><th>Galpón</th><th>Administrador</th><th>Conexión</th><th>Versión</th><th class="num">Usuarios activos</th><th class="num">Cajones hoy</th><th class="num">Cajones 30 d</th><th class="num">Soporte</th><th>Licencia</th></tr></thead>
         <tbody>
             @forelse ($clients as $client)
                 @php $r = $client->latestReport; $status = $client->effectiveStatus(); @endphp
                 <tr>
                     <td>
                         <a href="{{ route('central.clients.show', $client) }}" class="font-medium text-stone-900 hover:underline dark:text-white">{{ $client->client_name }}</a>
-                        <span class="block text-xs text-stone-500">{{ $client->locality ?? '' }} <span class="code">{{ $client->installation_id }}</span></span>
+                        <span class="block text-xs text-stone-500">{{ $client->locality ?? '' }}@if ($client->cuit) · CUIT {{ \App\Rules\Cuit::format($client->cuit) }}@endif <span class="code">{{ $client->installation_id }}</span></span>
+                    </td>
+                    <td class="text-sm">
+                        @if ($client->admin_username)
+                            <span class="code">{{ $client->admin_username }}</span>
+                        @else
+                            <x-badge color="amber">Falta crearlo</x-badge>
+                        @endif
                     </td>
                     <td class="whitespace-nowrap text-sm">
                         @if ($client->isOnline())
@@ -51,7 +58,7 @@
                     </td>
                 </tr>
             @empty
-                <x-empty colspan="8" message="Todavía no cargaste clientes. Tocá «Nuevo cliente»."/>
+                <x-empty colspan="9" message="Todavía no cargaste galpones. Tocá «Nuevo galpón»."/>
             @endforelse
         </tbody>
         <x-slot:footer>{{ $clients->links() }}</x-slot:footer>

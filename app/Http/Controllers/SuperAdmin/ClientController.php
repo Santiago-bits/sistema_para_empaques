@@ -12,7 +12,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 /**
- * Administración general → Clientes: si cada empaque pagó, hasta cuándo, cuánto usa el sistema y si tiene
+ * Administración general → Galpones: si cada galpón pagó, hasta cuándo, cuánto usa el sistema y si tiene
  * pedidos de soporte abiertos. La ficha técnica (licencia, uso detallado) sigue en el Panel General.
  */
 class ClientController extends Controller

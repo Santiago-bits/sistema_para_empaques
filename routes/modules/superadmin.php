@@ -27,12 +27,12 @@ Route::prefix('administradorgeneral')->name('superadmin.')->middleware('superadm
     Route::put('usuarios/{user}/estado', [UserController::class, 'updateStatus'])->whereNumber('user')->name('users.status');
     Route::post('usuarios/{user}/cerrar-sesiones', [UserController::class, 'terminateSessions'])->whereNumber('user')->name('users.sessions');
 
-    // Clientes y pagos: sólo con la gestión de clientes (Panel General) activada.
+    // Galpones y pagos: sólo con la gestión de clientes (Panel General) activada.
     Route::middleware('central')->group(function () {
-        Route::get('clientes', [ClientController::class, 'index'])->name('clients.index');
-        Route::get('clientes/{license}', [ClientController::class, 'show'])->whereNumber('license')->name('clients.show');
-        Route::put('clientes/{license}/cuota', [ClientController::class, 'updateFee'])->whereNumber('license')->name('clients.fee');
-        Route::post('clientes/{license}/pagos', [ClientController::class, 'storePayment'])->whereNumber('license')->middleware('throttle:30,1')->name('clients.payments.store');
-        Route::post('clientes/{license}/pagos/{payment}/anular', [ClientController::class, 'voidPayment'])->whereNumber(['license', 'payment'])->name('clients.payments.void');
+        Route::get('galpones', [ClientController::class, 'index'])->name('clients.index');
+        Route::get('galpones/{license}', [ClientController::class, 'show'])->whereNumber('license')->name('clients.show');
+        Route::put('galpones/{license}/cuota', [ClientController::class, 'updateFee'])->whereNumber('license')->name('clients.fee');
+        Route::post('galpones/{license}/pagos', [ClientController::class, 'storePayment'])->whereNumber('license')->middleware('throttle:30,1')->name('clients.payments.store');
+        Route::post('galpones/{license}/pagos/{payment}/anular', [ClientController::class, 'voidPayment'])->whereNumber(['license', 'payment'])->name('clients.payments.void');
     });
 });

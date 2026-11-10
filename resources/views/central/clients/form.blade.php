@@ -1,20 +1,32 @@
-<x-layouts.app :title="$license->exists ? 'Editar cliente' : 'Nuevo cliente'">
-    <x-page-header :title="$license->exists ? 'Editar: '.$license->client_name : 'Nuevo cliente'"
-                   subtitle="Cada empaque tiene su propia instalación; con estos datos se conecta a tu Panel General."
+<x-layouts.app :title="$license->exists ? 'Editar galpón' : 'Nuevo galpón'">
+    <x-page-header :title="$license->exists ? 'Editar: '.$license->client_name : 'Nuevo galpón'"
+                   subtitle="Cada galpón tiene su propio sistema (sus datos nunca se mezclan con los de otro); con estos datos se conecta a tu Panel General."
                    :back="$license->exists ? route('central.clients.show', $license) : route('central.clients.index')"/>
 
     <form method="POST" action="{{ $license->exists ? route('central.clients.update', $license) : route('central.clients.store') }}" class="max-w-4xl space-y-6">
         @csrf
         @if ($license->exists) @method('PUT') @endif
-        <x-panel title="Empaque">
+        <x-panel title="Galpón">
             <div class="grid gap-4 md:grid-cols-3">
-                <div class="md:col-span-2"><x-input name="client_name" label="Nombre del empaque" :value="$license->client_name" required/></div>
+                <div class="md:col-span-2"><x-input name="client_name" label="Nombre del galpón" :value="$license->client_name" required/></div>
+                <x-input name="cuit" label="CUIT" :value="$license->cuit" hint="11 dígitos"/>
                 <x-input name="locality" label="Localidad" :value="$license->locality"/>
                 <x-input name="contact_name" label="Contacto (dueño / encargado)" :value="$license->contact_name"/>
                 <x-input name="contact_phone" label="Teléfono" :value="$license->contact_phone"/>
                 <x-input name="contact_email" type="email" label="Email" :value="$license->contact_email"/>
                 <x-input name="installation_id" label="ID de instalación" :value="$license->installation_id" class="code"
                          :hint="$license->exists ? 'Cambiarlo obliga a actualizar el .env del empaque.' : 'Vacío = se genera solo.'"/>
+            </div>
+        </x-panel>
+
+        <x-panel title="Administrador general del galpón">
+            <div class="grid gap-4 md:grid-cols-3">
+                <x-input name="admin_username" label="Usuario del administrador" :value="$license->admin_username" class="code"
+                         hint="Lo creás vos en el sistema del galpón (rol Administrador). Anotalo acá para tenerlo ordenado."/>
+                <p class="text-sm text-stone-600 md:col-span-2 dark:text-stone-400">
+                    Este usuario es el encargado del galpón: desde <strong>Sistema → Usuarios</strong> de su propio sistema carga a sus empleados
+                    y les da los permisos. No hace falta que cargues empleados desde acá.
+                </p>
             </div>
         </x-panel>
 
@@ -25,7 +37,7 @@
                 <x-input name="starts_on" type="date" label="Inicio" :value="$license->starts_on" required/>
                 <x-input name="expires_on" type="date" label="Vencimiento" :value="$license->expires_on" hint="Vacío = sin vencimiento."/>
             </div>
-            <p class="form-hint mt-3">Una licencia vencida o suspendida nunca bloquea datos ni la operación del empaque: sólo le muestra un aviso.</p>
+            <p class="form-hint mt-3">Una licencia vencida o suspendida nunca bloquea datos ni la operación del galpón: sólo le muestra un aviso.</p>
             <div class="mt-4">
                 <span class="form-label">Módulos contratados</span>
                 <div class="mt-1 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">

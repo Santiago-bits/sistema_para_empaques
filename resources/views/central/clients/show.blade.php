@@ -22,11 +22,37 @@
         <x-stat label="Errores (7 d)" :value="$r ? num($r->metric('errors_7d')) : '—'" icon="alert" :color="$r && $r->metric('errors_7d') > 0 ? 'red' : 'stone'"/>
     </div>
 
+    @php
+        $steps = [
+            ['Galpón dado de alta', true, null],
+            ['Su sistema se conectó a este panel', (bool) $license->last_seen_at, 'Pegá los datos de conexión (abajo a la derecha) en el .env de su sistema.'],
+            ['Administrador general creado', filled($license->admin_username), 'Crealo en su sistema (Sistema → Usuarios, rol Administrador) y anotá el usuario con «Editar».'],
+            ['El administrador cargó a sus empleados', $r && (int) $r->metric('users_total') > 1, 'Lo hace el administrador del galpón desde su sistema.'],
+        ];
+    @endphp
+    <x-panel title="Puesta en marcha" class="mb-6">
+        <ol class="grid gap-3 md:grid-cols-4">
+            @foreach ($steps as $i => [$label, $done, $help])
+                <li class="flex gap-3">
+                    <span @class(['grid size-7 shrink-0 place-items-center text-sm font-semibold', 'bg-brand-600 text-white' => $done, 'bg-stone-200 text-stone-600 dark:bg-stone-800 dark:text-stone-300' => ! $done])>
+                        @if ($done)<x-icon name="check" class="size-4"/>@else{{ $i + 1 }}@endif
+                    </span>
+                    <span class="text-sm">
+                        <span class="font-medium">{{ $label }}</span>
+                        @if (! $done && $help)<span class="block text-xs text-stone-500">{{ $help }}</span>@endif
+                        @if ($i === 2 && $done)<span class="code block text-xs text-stone-500">{{ $license->admin_username }}</span>@endif
+                        @if ($i === 3 && $r)<span class="block text-xs text-stone-500">{{ num($r->metric('users_total')) }} usuario(s) en su sistema</span>@endif
+                    </span>
+                </li>
+            @endforeach
+        </ol>
+    </x-panel>
+
     <div class="grid gap-6 lg:grid-cols-3">
         <div class="space-y-6 lg:col-span-2">
             <x-panel title="Uso de los últimos 30 días">
                 @if ($daily->isEmpty())
-                    <p class="text-sm text-stone-500">Todavía no llegaron reportes de este empaque. Se envían solos cada hora cuando tiene internet.</p>
+                    <p class="text-sm text-stone-500">Todavía no llegaron reportes de este galpón. Se envían solos cada hora cuando tiene internet.</p>
                 @else
                     <div class="h-64" x-data x-init="new Chart($refs.c, { type: 'bar', data: { labels: {{ \Illuminate\Support\Js::from($chart['labels']) }}, datasets: [
                         { label: 'Cajones del día', data: {{ \Illuminate\Support\Js::from($chart['crates']) }}, backgroundColor: window.chartColors[0], borderRadius: 4 },
@@ -57,8 +83,8 @@
         </div>
 
         <div class="space-y-6">
-            <x-panel title="Datos de conexión del empaque">
-                <p class="mb-3 text-sm text-stone-600 dark:text-stone-300">Pegá estas líneas en el archivo <span class="code">.env</span> del servidor del empaque y ejecutá <span class="code">php artisan config:cache</span>.</p>
+            <x-panel title="Datos de conexión del galpón">
+                <p class="mb-3 text-sm text-stone-600 dark:text-stone-300">Pegá estas líneas en el archivo <span class="code">.env</span> del sistema del galpón y ejecutá <span class="code">php artisan config:cache</span>.</p>
                 <div x-data="{ copied: false }">
                     <pre class="overflow-x-auto rounded-lg bg-stone-900 p-3 text-xs text-emerald-300">{{ $envLines }}</pre>
                     <button type="button" class="btn btn-secondary btn-sm mt-2" @click="navigator.clipboard?.writeText({{ \Illuminate\Support\Js::from($envLines) }}); copied = true; setTimeout(() => copied = false, 2000)">
@@ -68,8 +94,10 @@
                 <p class="form-hint mt-3">La clave es secreta: no la compartas por canales públicos. Este servidor debe ser accesible por internet (idealmente con https).</p>
             </x-panel>
 
-            <x-panel title="Licencia">
+            <x-panel title="Datos y licencia">
                 <x-dl :items="[
+                    'CUIT' => $license->cuit ? \App\Rules\Cuit::format($license->cuit) : null,
+                    'Administrador general' => $license->admin_username,
                     'Plan' => \App\Http\Controllers\Developer\LicenseController::PLANS[$license->plan] ?? $license->plan,
                     'Inicio' => fdate($license->starts_on),
                     'Vencimiento' => $license->expires_on ? fdate($license->expires_on) : 'Sin vencimiento',

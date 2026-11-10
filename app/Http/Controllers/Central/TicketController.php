@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
-/** Panel General: pedidos de soporte de todos los empaques (mejoras, cambios, problemas). */
+/** Panel General: pedidos de soporte de todos los galpones (mejoras, cambios, problemas). */
 class TicketController extends Controller
 {
     public function __construct(private readonly CentralService $central)
@@ -51,7 +51,7 @@ class TicketController extends Controller
         ], [], ['body' => 'respuesta', 'status' => 'estado']);
         $this->central->reply($ticket, $request->user(), $data['body'], $data['status'] ?? null);
 
-        return redirect()->route('central.tickets.show', $ticket)->with('success', 'Respuesta guardada: el empaque la recibe en su próxima sincronización (cada 5 minutos).');
+        return redirect()->route('central.tickets.show', $ticket)->with('success', 'Respuesta guardada: el galpón la recibe en su próxima sincronización (cada 5 minutos).');
     }
 
     public function status(Request $request, ClientTicket $ticket): RedirectResponse

@@ -5,6 +5,12 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 ## [Sin publicar]
 
 ### Agregado
+- **Panel General → Galpones** (antes «Clientes y uso»): el desarrollador da de alta cada galpón (nombre, CUIT,
+  localidad, contacto, licencia y módulos) y anota el usuario de su **administrador general**, que crea a mano en el
+  sistema del galpón. Ese administrador carga a sus empleados desde su propio sistema. Cada galpón tiene una
+  **puesta en marcha** con los pasos (sistema conectado, administrador creado, empleados cargados) y el listado
+  marca los que todavía no tienen administrador. Cada galpón sigue con su propio sistema: sus datos nunca se mezclan.
+  Las direcciones viejas (`/panel-general/clientes`) redirigen solas.
 - **Importar una carpeta entera** (Importar y exportar → «Importar una carpeta entera», o Planillas subidas): se elige
   una carpeta (o varias planillas) y cada una va sola a su sección (camioneros, productores, camiones, clientes…).
   Se decide por el nombre del archivo y los títulos de las columnas, y **ante la duda no se elige**: si las columnas
