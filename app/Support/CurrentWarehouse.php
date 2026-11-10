@@ -55,6 +55,33 @@ class CurrentWarehouse
         return $id ? Warehouse::query()->find($id) : null;
     }
 
+    /**
+     * Asociaciones de citricultores del galpón activo, en una línea para imprimir
+     * («Asociación de Citricultores de Chajarí · …»). Null si no pertenece a ninguna.
+     */
+    public static function associationsLine(): ?string
+    {
+        $id = self::id();
+        if (! $id || ! Schema::hasTable('association_warehouse')) {
+            return null;
+        }
+        $lines = app()->bound('galpon.associations_lines') ? app('galpon.associations_lines') : [];
+        if (! array_key_exists($id, $lines)) {
+            $names = \App\Models\Association::query()->where('active', true)
+                ->whereHas('warehouses', fn ($q) => $q->whereKey($id))->orderBy('name')->pluck('name');
+            $lines[$id] = $names->isEmpty() ? null : $names->implode(' · ');
+            app()->instance('galpon.associations_lines', $lines);
+        }
+
+        return $lines[$id];
+    }
+
+    /** Al cambiar una asociación o los vínculos de un galpón se vuelve a armar la línea. */
+    public static function forgetAssociations(): void
+    {
+        app()->forgetInstance('galpon.associations_lines');
+    }
+
     /** El Super Administrador entra a un galpón. */
     public static function set(int $id): void
     {

@@ -48,7 +48,8 @@ class WarehouseController extends Controller
 
     public function create(): View
     {
-        return view('superadmin.warehouses.form', ['warehouse' => new Warehouse(['active' => true]), 'nextCode' => $this->warehouses->nextCode()]);
+        return view('superadmin.warehouses.form', ['warehouse' => new Warehouse(['active' => true]), 'nextCode' => $this->warehouses->nextCode(),
+            'associations' => \App\Models\Association::query()->where('active', true)->orderBy('name')->get(), 'linked' => []]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -65,7 +66,7 @@ class WarehouseController extends Controller
         $adminRole = Role::query()->withoutGlobalScopes()->where('slug', Role::ADMIN)->whereNull('warehouse_id')->value('id');
 
         return view('superadmin.warehouses.show', [
-            'warehouse' => $warehouse,
+            'warehouse' => $warehouse->load('associations'),
             'admins' => User::query()->where('warehouse_id', $warehouse->id)->where('role_id', $adminRole)->orderBy('id')->get(),
             'usersCount' => User::query()->where('warehouse_id', $warehouse->id)->count(),
             'crates30' => Crate::query()->withoutGlobalScopes()->where('warehouse_id', $warehouse->id)->where('created_at', '>=', now()->subDays(30))->count(),
@@ -76,7 +77,9 @@ class WarehouseController extends Controller
 
     public function edit(Warehouse $warehouse): View
     {
-        return view('superadmin.warehouses.form', ['warehouse' => $warehouse, 'nextCode' => $warehouse->code]);
+        return view('superadmin.warehouses.form', ['warehouse' => $warehouse, 'nextCode' => $warehouse->code,
+            'associations' => \App\Models\Association::query()->where(fn ($q) => $q->where('active', true)->orWhereHas('warehouses', fn ($w) => $w->whereKey($warehouse->id)))->orderBy('name')->get(),
+            'linked' => $warehouse->associations()->pluck('associations.id')->all()]);
     }
 
     public function update(Request $request, Warehouse $warehouse): RedirectResponse
@@ -127,6 +130,8 @@ class WarehouseController extends Controller
             'address' => ['nullable', 'string', 'max:255'],
             'locality' => ['nullable', 'string', 'max:120'],
             'active' => ['nullable', 'boolean'],
-        ], [], ['name' => 'nombre del galpón', 'code' => 'código', 'address' => 'dirección', 'locality' => 'localidad']);
+            'associations' => ['nullable', 'array'],
+            'associations.*' => ['integer', Rule::exists('associations', 'id')],
+        ], [], ['associations' => 'asociaciones', 'name' => 'nombre del galpón', 'code' => 'código', 'address' => 'dirección', 'locality' => 'localidad']);
     }
 }

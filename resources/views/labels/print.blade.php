@@ -14,6 +14,7 @@
         .labels { display: flex; flex-wrap: wrap; gap: 4mm; padding: 4mm; }
         .label { width: {{ $width }}mm; height: {{ $height }}mm; border: 1px dashed #999; padding: 2.5mm; display: grid; grid-template-columns: 1fr auto; grid-auto-rows: auto; align-content: space-between; gap: .8mm 2mm; overflow: hidden; page-break-after: always; }
         .company { grid-column: 1 / 3; font-size: 6.5pt; font-weight: 700; line-height: 1.15; border-bottom: .3mm solid #000; padding-bottom: .6mm; }
+        .associations { grid-column: 1 / 3; font-size: 5.8pt; font-weight: 600; line-height: 1.15; }
         .regulatory { grid-column: 1 / 3; font-size: 5.8pt; line-height: 1.15; text-align: center; border-top: .3mm solid #000; padding-top: .6mm; }
         .head { grid-column: 1 / 3; display: flex; justify-content: space-between; align-items: baseline; }
         .kind { font-size: 7pt; text-transform: uppercase; letter-spacing: .1em; color: #444; }
@@ -40,6 +41,7 @@
         @foreach ($labels as $label)
             <div class="label">
                 @if (! empty($companyLine))<div class="company">{{ $companyLine }}</div>@endif
+                @if (! empty($associationsLine))<div class="associations">{{ $associationsLine }}</div>@endif
                 <div class="head">
                     <span class="kind">{{ $label['title'] }}</span>
                     <span class="code">{{ $label['code'] }}</span>

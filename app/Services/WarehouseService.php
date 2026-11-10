@@ -39,6 +39,8 @@ class WarehouseService
             ]);
         });
 
+        $warehouse->associations()->sync($data['associations'] ?? []);
+        CurrentWarehouse::forgetAssociations();
         \App\Support\Tenancy::refresh(); // ahora puede haber más de un galpón
         // Datos base y configuración propia del galpón nuevo.
         (new SystemSeeder)->seedWarehouse($warehouse->id);
@@ -70,7 +72,11 @@ class WarehouseService
             'address' => $data['address'] ?? null,
             'active' => (bool) ($data['active'] ?? false),
         ]);
-        CurrentWarehouse::runFor($warehouse->id, fn () => $this->audit->log('update', $warehouse, $old, $warehouse->only(['name', 'code', 'address', 'active']),
+        $oldAssociations = $warehouse->associations()->pluck('name')->all();
+        $warehouse->associations()->sync($data['associations'] ?? []);
+        CurrentWarehouse::forgetAssociations();
+        $old['associations'] = $oldAssociations;
+        CurrentWarehouse::runFor($warehouse->id, fn () => $this->audit->log('update', $warehouse, $old, $warehouse->only(['name', 'code', 'address', 'active']) + ['associations' => $warehouse->associations()->pluck('name')->all()],
             $warehouse->active ? 'Actualizó el galpón '.$warehouse->name : 'Suspendió el galpón '.$warehouse->name));
 
         return $warehouse;
