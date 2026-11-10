@@ -153,12 +153,125 @@ class ImportService
     {
         DB::transaction(function () use ($batch) {
             $locked = ImportBatch::query()->lockForUpdate()->findOrFail($batch->id);
-            if ($locked->status !== 'validated') {
+            if (! in_array($locked->status, ['validated', 'unrecognized'], true)) {
                 throw new BusinessException('Sólo se puede descartar una importación pendiente de confirmar.');
             }
             $locked->update(['status' => 'discarded']);
         });
         Storage::disk(self::DISK)->delete($batch->path);
+    }
+
+    /**
+     * Una planilla de una carpeta: se guarda, se detecta a qué sección va y, si se reconoce, se valida
+     * igual que una importación suelta. Si no se reconoce queda «unrecognized» hasta que el usuario elija.
+     */
+    public function uploadDetected(UploadedFile $file, User $user, string $mode, string $group): ImportBatch
+    {
+        $mode = array_key_exists($mode, self::MODES) ? $mode : 'create';
+        $extension = strtolower($file->getClientOriginalExtension() ?: 'csv');
+        if (! in_array($extension, ['csv', 'txt', 'xlsx'], true)) {
+            throw new BusinessException('Formato no admitido: sólo planillas CSV o Excel (.xlsx).');
+        }
+        $path = $file->storeAs('imports', now()->format('Ymd_His').'_'.Str::random(8).'.'.$extension, self::DISK);
+        $filename = Str::limit($file->getClientOriginalName(), 250, '');
+
+        try {
+            $detection = app(ImportDetector::class)->detect(Storage::disk(self::DISK)->path($path), $filename);
+        } catch (\Throwable) {
+            Storage::disk(self::DISK)->delete($path);
+            throw new BusinessException('No se pudo leer «'.$filename.'». Verificá que sea un CSV o XLSX válido.');
+        }
+        unset($detection['headers']);
+        $detection['by'] = 'auto';
+
+        $batch = ImportBatch::query()->create([
+            'type' => '', 'mode' => $mode, 'group_uuid' => $group, 'detection' => $detection,
+            'filename' => $filename, 'path' => $path, 'status' => 'unrecognized', 'user_id' => $user->id,
+        ]);
+
+        if ($detection['type'] !== null) {
+            try {
+                $this->retype($batch, $detection['type'], auto: true);
+            } catch (\Throwable $e) {
+                $reason = $e instanceof BusinessException ? $e->getMessage() : 'No se pudo leer el contenido de la planilla.';
+                $batch->update(['detection' => ['type' => null, 'reason' => $reason, 'by' => 'auto'] + $detection]);
+            }
+        }
+
+        return $batch->refresh();
+    }
+
+    /**
+     * Asigna (o corrige) la sección de una planilla y la vuelve a validar sin guardar nada todavía.
+     * Si las columnas no sirven para esa sección, la planilla sigue sin reconocer y se avisa por qué.
+     */
+    public function retype(ImportBatch $batch, string $type, bool $auto = false, ?User $by = null): ImportBatch
+    {
+        $definition = $this->definition($type);
+
+        return DB::transaction(function () use ($batch, $type, $definition, $auto, $by) {
+            $locked = ImportBatch::query()->lockForUpdate()->findOrFail($batch->id);
+            if (! in_array($locked->status, ['validated', 'unrecognized'], true)) {
+                throw new BusinessException('Esta planilla ya fue importada o descartada.');
+            }
+            $result = $this->analyze($definition, $locked->path, $locked->mode ?: 'create');
+            $detection = (array) $locked->detection;
+            if (! $auto) {
+                $detection = ['type' => $type, 'reason' => 'Elegido a mano'.($by ? ' por '.$by->full_name : '').'.', 'by' => 'user'] + $detection;
+            }
+            $locked->update([
+                'type' => $type,
+                'status' => 'validated',
+                'detection' => $detection,
+                'total_rows' => $result['total'],
+                'valid_rows' => count($result['valid']),
+                'updated_rows' => count(array_filter($result['valid'], fn ($r) => isset($r['id']))),
+                'error_rows' => $result['error_rows'],
+                'errors' => array_slice($result['errors'], 0, self::MAX_STORED_ERRORS),
+            ]);
+
+            return $locked;
+        });
+    }
+
+    /**
+     * Confirma todas las planillas reconocidas de una carpeta. Primero las secciones de las que dependen
+     * otras (transportistas antes que camiones y camioneros, clientes antes que destinos, cuadrillas antes
+     * que empleados). Cada planilla se vuelve a validar al confirmarla, así un camión cuyo transportista viene
+     * en otra planilla de la misma carpeta ya lo encuentra. Cada planilla va en su propia transacción: si una
+     * falla, las demás no se tocan.
+     *
+     * @return array{imported: array<string, int>, failed: array<string, string>}
+     */
+    public function confirmGroup(string $group): array
+    {
+        $order = array_flip(array_keys(CatalogRegistry::importable()));
+        $batches = ImportBatch::query()->where('group_uuid', $group)->where('status', 'validated')->get()
+            ->sortBy(fn (ImportBatch $b) => [$this->definition($b->type)->importRelations() === [] ? 0 : 1, $order[$b->type] ?? 99, $b->id]);
+
+        $imported = [];
+        $failed = [];
+        foreach ($batches as $batch) {
+            try {
+                $imported[$batch->filename] = $this->confirm($batch);
+            } catch (BusinessException $e) {
+                $failed[$batch->filename] = $e->getMessage();
+            }
+        }
+
+        return ['imported' => $imported, 'failed' => $failed];
+    }
+
+    /** Descarta todo lo que quedó pendiente de una carpeta (lo ya importado no se toca). */
+    public function discardGroup(string $group): int
+    {
+        $count = 0;
+        foreach (ImportBatch::query()->where('group_uuid', $group)->whereIn('status', ['validated', 'unrecognized'])->get() as $batch) {
+            $this->discard($batch);
+            $count++;
+        }
+
+        return $count;
     }
 
     /**
