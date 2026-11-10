@@ -81,7 +81,7 @@ class ExchangeRateService
             throw new BusinessException('El servicio de cotizaciones devolvió un valor inválido. Cargalo a mano.');
         }
 
-        Cache::put(self::LAST_FETCH_KEY, now()->getTimestamp(), now()->addDays(7));
+        Cache::put(self::key(self::LAST_FETCH_KEY), now()->getTimestamp(), now()->addDays(7));
 
         return $this->save([
             'date' => today()->toDateString(),
@@ -97,14 +97,14 @@ class ExchangeRateService
      */
     public function autoUpdate(): ?ExchangeRate
     {
-        if (! self::autoEnabled() || ! $this->autoIsDue() || Cache::has(self::FAILED_KEY)) {
+        if (! self::autoEnabled() || ! $this->autoIsDue() || Cache::has(self::key(self::FAILED_KEY))) {
             return null;
         }
 
         try {
             return $this->fetchOnline(self::autoType());
         } catch (BusinessException) {
-            Cache::put(self::FAILED_KEY, true, now()->addMinutes(30));
+            Cache::put(self::key(self::FAILED_KEY), true, now()->addMinutes(30));
 
             return null;
         }
@@ -115,8 +115,14 @@ class ExchangeRateService
         $this->settings->set('treasury.exchange_auto', $enabled);
         $this->settings->set('treasury.exchange_type', array_key_exists($type, self::ONLINE_TYPES) ? $type : 'oficial');
         // Al activar o cambiar de tipo, la próxima pasada trae el valor enseguida.
-        Cache::forget(self::LAST_FETCH_KEY);
-        Cache::forget(self::FAILED_KEY);
+        Cache::forget(self::key(self::LAST_FETCH_KEY));
+        Cache::forget(self::key(self::FAILED_KEY));
+    }
+
+    /** Multigalpón: cada galpón tiene su propio valor del dólar y su propia actualización automática. */
+    private static function key(string $base): string
+    {
+        return $base.':'.(\App\Support\CurrentWarehouse::id() ?? '');
     }
 
     public static function autoEnabled(): bool
@@ -133,7 +139,7 @@ class ExchangeRateService
 
     public static function lastFetch(): ?Carbon
     {
-        $ts = Cache::get(self::LAST_FETCH_KEY);
+        $ts = Cache::get(self::key(self::LAST_FETCH_KEY));
 
         return $ts ? Carbon::createFromTimestamp($ts, config('app.timezone')) : null;
     }

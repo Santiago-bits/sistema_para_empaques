@@ -47,9 +47,9 @@ class SessionService
         if (! $row) {
             return;
         }
-        $user = $row->user_id ? User::query()->find($row->user_id) : null;
-        // La sesión del Super Administrador no existe para los demás.
-        abort_if($user?->isHiddenFromViewer(), 404);
+        $user = $row->user_id ? User::query()->visibleTo()->find($row->user_id) : null;
+        // La sesión del Super Administrador o de alguien de otro galpón no existe para los demás.
+        abort_if(($row->user_id && ! $user) || $user?->isHiddenFromViewer(), 404);
         DB::table(config('session.table', 'sessions'))->where('id', $sessionId)->delete();
         $this->audit->log('session_terminated', $user, description: 'Sesión cerrada remotamente (IP '.$row->ip_address.')');
     }

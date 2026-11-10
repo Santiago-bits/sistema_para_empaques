@@ -55,5 +55,8 @@ $artisan('auth:clear-resets')->daily();
 $artisan('queue:prune-failed --hours=720')->daily();
 
 // Valor del dólar: si está activada la actualización automática (Tesorería → Valor del dólar), lo trae cada 6 horas.
-Schedule::call(fn () => app(ExchangeRateService::class)->autoUpdate())->hourly()->name('valor-dolar')->withoutOverlapping(10)
-    ->when(fn () => ExchangeRateService::autoEnabled());
+// Multigalpón: cada galpón con su propia configuración (sólo los que la tienen activada).
+Schedule::call(fn () => \App\Support\Tenancy::ready()
+    ? \App\Support\CurrentWarehouse::forEach(fn () => ExchangeRateService::autoEnabled() ? app(ExchangeRateService::class)->autoUpdate() : null)
+    : (ExchangeRateService::autoEnabled() ? app(ExchangeRateService::class)->autoUpdate() : null))
+    ->hourly()->name('valor-dolar')->withoutOverlapping(10);

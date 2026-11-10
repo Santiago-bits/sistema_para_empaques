@@ -140,7 +140,7 @@ class LoadService
                     }
 
                     // UPDATE atómico condicional: sólo gana quien encuentra el cajón libre.
-                    $affected = DB::table('crates')
+                    $affected = \App\Support\Tenancy::table('crates')
                         ->where('id', $id)
                         ->whereNull('current_load_id')
                         ->where('status', $crate->status->value)
@@ -439,27 +439,27 @@ class LoadService
             $this->bulkCrateTransition($locked, CrateStatus::Loaded, CrateStatus::Dispatched, 'Despachado en '.$label, $by, true);
 
             // Movimientos de ubicación: el cajón/pallet sale del galpón hacia el camión.
-            DB::table('crates')->where('current_load_id', $locked->id)->whereNull('deleted_at')
+            \App\Support\Tenancy::table('crates')->where('current_load_id', $locked->id)->whereNull('deleted_at')
                 ->select(['id', 'location_id'])->orderBy('id')
                 ->chunk(500, function ($rows) use ($locked, $label, $by, $now) {
-                    DB::table('location_movements')->insert($rows->map(fn ($r) => [
+                    \App\Support\Tenancy::table('location_movements')->insert($rows->map(fn ($r) => [
                         'warehouse_id' => $locked->warehouse_id, 'movable_type' => 'crate', 'movable_id' => $r->id, 'from_location_id' => $r->location_id,
                         'to_location_id' => null, 'to_label' => $label, 'user_id' => $by->id,
                         'notes' => 'Despacho carga '.$locked->number, 'moved_at' => $now,
                     ])->all());
                 });
-            DB::table('crates')->where('current_load_id', $locked->id)->update(['location_id' => null]);
+            \App\Support\Tenancy::table('crates')->where('current_load_id', $locked->id)->update(['location_id' => null]);
 
             $palletIds = $this->palletIdsOf($locked);
             $dispatchedPallets = $this->syncPallets($locked, $palletIds, PalletStatus::Loaded, PalletStatus::Dispatched, true,
                 'Despachado en '.$label);
             foreach ($dispatchedPallets as $pallet) {
-                DB::table('location_movements')->insert([
+                \App\Support\Tenancy::table('location_movements')->insert([
                     'warehouse_id' => $locked->warehouse_id, 'movable_type' => 'pallet', 'movable_id' => $pallet->id, 'from_location_id' => $pallet->location_id,
                     'to_location_id' => null, 'to_label' => $label, 'user_id' => $by->id,
                     'notes' => 'Despacho carga '.$locked->number, 'moved_at' => $now,
                 ]);
-                DB::table('pallets')->where('id', $pallet->id)->update(['location_id' => null]);
+                \App\Support\Tenancy::table('pallets')->where('id', $pallet->id)->update(['location_id' => null]);
             }
 
             // Si la carga ya estaba facturada (CAE antes del despacho), los cajones pasan a Facturado.
@@ -541,7 +541,7 @@ class LoadService
     /** Resumen para la pantalla de cierre / remito. */
     public function summary(Load $load): array
     {
-        $base = fn () => DB::table('crates')->where('crates.current_load_id', $load->id)->whereNull('crates.deleted_at');
+        $base = fn () => \App\Support\Tenancy::table('crates')->where('crates.current_load_id', $load->id)->whereNull('crates.deleted_at');
 
         $totals = $base()->selectRaw('COUNT(*) as crates, COALESCE(SUM(crates.weight), 0) as kg, COUNT(DISTINCT crates.pallet_id) as pallets')->first();
 
@@ -574,7 +574,7 @@ class LoadService
     /** Detalle por variedad + tamaño (base de los ítems de remito y factura). */
     public function byVarietySize(Load $load): array
     {
-        return DB::table('crates')
+        return \App\Support\Tenancy::table('crates')
             ->leftJoin('varieties', 'varieties.id', '=', 'crates.variety_id')
             ->leftJoin('sizes', 'sizes.id', '=', 'crates.size_id')
             ->where('crates.current_load_id', $load->id)->whereNull('crates.deleted_at')
@@ -633,9 +633,9 @@ class LoadService
     /** Motivo cuando el UPDATE condicional no afectó filas (otro usuario se adelantó). */
     private function raceReason(int $id): string
     {
-        $row = DB::table('crates')->where('id', $id)->first(['current_load_id', 'status']);
+        $row = \App\Support\Tenancy::table('crates')->where('id', $id)->first(['current_load_id', 'status']);
         if ($row && $row->current_load_id) {
-            $number = DB::table('loads')->where('id', $row->current_load_id)->value('number');
+            $number = \App\Support\Tenancy::table('loads')->where('id', $row->current_load_id)->value('number');
 
             return 'Otro usuario lo asignó recién a otra carga'.($number ? " ({$number})" : '').'.';
         }
@@ -672,7 +672,7 @@ class LoadService
             try {
                 DB::transaction(fn () => LoadCrate::query()->insert($row($id)));
             } catch (UniqueConstraintViolationException) {
-                DB::table('crates')->where('id', $id)->where('current_load_id', $load->id)->update([
+                \App\Support\Tenancy::table('crates')->where('id', $id)->where('current_load_id', $load->id)->update([
                     'current_load_id' => null,
                     'status' => $taken[$id]->status->value,
                     'version' => DB::raw('version + 1'),
@@ -709,7 +709,7 @@ class LoadService
                     continue;
                 }
                 $to = $crate->quality_status === 'approved' ? CrateStatus::Approved : CrateStatus::Processed;
-                $affected = DB::table('crates')->where('id', $id)
+                $affected = \App\Support\Tenancy::table('crates')->where('id', $id)
                     ->where('current_load_id', $load->id)
                     ->where('status', CrateStatus::Reserved->value)
                     ->update([
@@ -763,7 +763,7 @@ class LoadService
         $ids = Crate::query()->where('current_load_id', $load->id)->where('status', $from->value)->pluck('id')->all();
         $now = now();
         foreach (array_chunk($ids, 500) as $chunk) {
-            $affected = DB::table('crates')->whereIn('id', $chunk)
+            $affected = \App\Support\Tenancy::table('crates')->whereIn('id', $chunk)
                 ->where('current_load_id', $load->id)
                 ->where('status', $from->value)
                 ->update(['status' => $to->value, 'version' => DB::raw('version + 1'), 'updated_at' => $now]);
@@ -788,7 +788,7 @@ class LoadService
             return [];
         }
 
-        $stats = DB::table('crates')->whereIn('pallet_id', $palletIds)->whereNull('deleted_at')
+        $stats = \App\Support\Tenancy::table('crates')->whereIn('pallet_id', $palletIds)->whereNull('deleted_at')
             ->where('status', '!=', CrateStatus::Voided->value)
             ->groupBy('pallet_id')
             ->selectRaw('pallet_id, COUNT(*) as total, SUM(CASE WHEN current_load_id = ? THEN 1 ELSE 0 END) as in_load', [$load->id])
@@ -816,7 +816,7 @@ class LoadService
     /** @return list<int> */
     private function palletIdsOf(Load $load): array
     {
-        return DB::table('crates')->where('current_load_id', $load->id)->whereNotNull('pallet_id')
+        return \App\Support\Tenancy::table('crates')->where('current_load_id', $load->id)->whereNotNull('pallet_id')
             ->distinct()->pluck('pallet_id')->map(fn ($v) => (int) $v)->all();
     }
 
@@ -880,7 +880,7 @@ class LoadService
     /** Recalcula totales con una consulta agregada (nunca sumando en PHP). */
     private function recalculateTotals(Load $load, bool $bumpVersion = true): void
     {
-        $agg = DB::table('crates')->where('current_load_id', $load->id)->whereNull('deleted_at')
+        $agg = \App\Support\Tenancy::table('crates')->where('current_load_id', $load->id)->whereNull('deleted_at')
             ->selectRaw('COUNT(*) as c, COALESCE(SUM(weight), 0) as kg')->first();
 
         $values = ['total_crates' => (int) $agg->c, 'total_kg' => round((float) $agg->kg, 2), 'updated_at' => now()];
@@ -888,7 +888,7 @@ class LoadService
             // Cambió el contenido: un cierre basado en un resumen anterior debe fallar.
             $values['version'] = DB::raw('version + 1');
         }
-        DB::table('loads')->where('id', $load->id)->update($values);
+        \App\Support\Tenancy::table('loads')->where('id', $load->id)->update($values);
     }
 
     private function assertCheckPrerequisite(Load $load, string $item): void
@@ -918,7 +918,7 @@ class LoadService
     private function insertHistory(array $rows): void
     {
         foreach (array_chunk($rows, 500) as $chunk) {
-            DB::table('state_histories')->insert($chunk);
+            \App\Support\Tenancy::table('state_histories')->insert($chunk);
         }
     }
 

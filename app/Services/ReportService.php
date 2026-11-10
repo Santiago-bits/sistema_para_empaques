@@ -75,7 +75,7 @@ class ReportService
     /** Producción válida filtrada. Alias: pr (production_records), c (crates), l (loads). */
     public function productionQuery(ReportFilters $f, bool $joinCrates = false): Builder
     {
-        $q = DB::table('production_records as pr')
+        $q = \App\Support\Tenancy::table('production_records as pr')
             ->whereNull('pr.voided_at')
             ->whereBetween('pr.recorded_at', [$f->from, $f->to]);
 
@@ -116,7 +116,7 @@ class ReportService
     /** Rechazos filtrados. Alias: r (rejects). */
     public function rejectsQuery(ReportFilters $f): Builder
     {
-        $q = DB::table('rejects as r')->whereBetween('r.rejected_at', [$f->from, $f->to]);
+        $q = \App\Support\Tenancy::table('rejects as r')->whereBetween('r.rejected_at', [$f->from, $f->to]);
 
         foreach (['variety_id', 'size_id', 'packer_id', 'lot_id', 'reason_id'] as $key) {
             if ($id = $f->get($key)) {
@@ -125,8 +125,8 @@ class ReportService
         }
         if ($id = $f->get('producer_id')) {
             $q->where(function ($w) use ($id) {
-                $w->whereIn('r.lot_id', DB::table('lots')->select('id')->where('producer_id', $id))
-                    ->orWhereIn('r.crate_id', DB::table('crates')->select('id')->where('producer_id', $id));
+                $w->whereIn('r.lot_id', \App\Support\Tenancy::table('lots')->select('id')->where('producer_id', $id))
+                    ->orWhereIn('r.crate_id', \App\Support\Tenancy::table('crates')->select('id')->where('producer_id', $id));
             });
         }
 
@@ -136,7 +136,7 @@ class ReportService
     /** Cargas filtradas por fecha de carga. Alias: l (loads). */
     public function loadsQuery(ReportFilters $f): Builder
     {
-        $q = DB::table('loads as l')
+        $q = \App\Support\Tenancy::table('loads as l')
             ->whereNull('l.deleted_at')
             ->whereBetween('l.date', [$f->from->toDateString(), $f->to->toDateString()]);
 
@@ -197,7 +197,7 @@ class ReportService
      */
     public function intakeTotals(ReportFilters $f): array
     {
-        $crates = DB::table('crates')
+        $crates = \App\Support\Tenancy::table('crates')
             ->whereNull('deleted_at')
             ->where('status', '!=', CrateStatus::Voided->value)
             ->whereBetween('created_at', [$f->from, $f->to])
@@ -208,7 +208,7 @@ class ReportService
             ->selectRaw('COUNT(*) as n, COALESCE(SUM(weight), 0) as kg')
             ->first();
 
-        $pallets = DB::table('pallets')
+        $pallets = \App\Support\Tenancy::table('pallets')
             ->whereNull('deleted_at')
             ->where('status', '!=', PalletStatus::Voided->value)
             ->whereBetween('received_at', [$f->from, $f->to])
@@ -234,7 +234,7 @@ class ReportService
      */
     public function dispatchTotals(ReportFilters $f): array
     {
-        $row = DB::table('loads')
+        $row = \App\Support\Tenancy::table('loads')
             ->whereNull('deleted_at')
             ->whereIn('status', [LoadStatus::Dispatched->value, LoadStatus::Delivered->value])
             ->whereBetween('dispatched_at', [$f->from, $f->to])
@@ -258,7 +258,7 @@ class ReportService
     public function averageLoadMinutes(ReportFilters $f): ?float
     {
         $diff = $this->secondsDiffExpr('created_at', 'closed_at');
-        $avg = DB::table('loads')
+        $avg = \App\Support\Tenancy::table('loads')
             ->whereNull('deleted_at')
             ->whereNotNull('closed_at')
             ->whereBetween('closed_at', [$f->from, $f->to])
@@ -272,7 +272,7 @@ class ReportService
     /** Cargas pendientes (en armado o cerradas sin despachar), estado actual. */
     public function pendingLoads(?int $warehouseId = null): array
     {
-        $rows = DB::table('loads')
+        $rows = \App\Support\Tenancy::table('loads')
             ->whereNull('deleted_at')
             ->whereIn('status', [LoadStatus::Draft->value, LoadStatus::Closed->value])
             ->when($warehouseId, fn ($q) => $q->where('warehouse_id', $warehouseId))
@@ -289,7 +289,7 @@ class ReportService
     /** Conteo actual de cajones por estado. */
     public function crateStatusCounts(?int $warehouseId = null): array
     {
-        return DB::table('crates')
+        return \App\Support\Tenancy::table('crates')
             ->whereNull('deleted_at')
             ->when($warehouseId, fn ($q) => $q->where('warehouse_id', $warehouseId))
             ->selectRaw('status, COUNT(*) as n')
@@ -302,7 +302,7 @@ class ReportService
     /** Conteo actual de pallets por estado. */
     public function palletStatusCounts(?int $warehouseId = null): array
     {
-        return DB::table('pallets')
+        return \App\Support\Tenancy::table('pallets')
             ->whereNull('deleted_at')
             ->when($warehouseId, fn ($q) => $q->where('warehouse_id', $warehouseId))
             ->selectRaw('status, COUNT(*) as n')
@@ -585,7 +585,7 @@ class ReportService
     public function dispatchesByDay(ReportFilters $f): array
     {
         $date = $this->dateExpr('dispatched_at');
-        $rows = DB::table('loads')
+        $rows = \App\Support\Tenancy::table('loads')
             ->whereNull('deleted_at')
             ->whereNotNull('dispatched_at')
             ->whereBetween('dispatched_at', [$f->from, $f->to])
@@ -758,7 +758,7 @@ class ReportService
     public function billingTotals(ReportFilters $f): array
     {
         $credit = implode(',', self::CREDIT_NOTES);
-        $row = DB::table('invoices')
+        $row = \App\Support\Tenancy::table('invoices')
             ->whereNull('deleted_at')
             ->where('status', InvoiceStatus::Authorized->value)
             // Sólo comprobantes del modo ARCA vigente: los CAE ficticios de simulación no son ingresos reales.
@@ -770,7 +770,7 @@ class ReportService
                 COALESCE(SUM(CASE WHEN voucher_type IN ({$credit}) THEN -total_amount * exchange_rate ELSE total_amount * exchange_rate END), 0) as total")
             ->first();
 
-        $pending = DB::table('invoices')
+        $pending = \App\Support\Tenancy::table('invoices')
             ->whereNull('deleted_at')
             ->whereIn('status', [InvoiceStatus::Draft->value, InvoiceStatus::Pending->value, InvoiceStatus::Rejected->value])
             ->whereDate('issued_on', '>=', $f->from->toDateString())->whereDate('issued_on', '<=', $f->to->toDateString())
@@ -783,7 +783,7 @@ class ReportService
     public function costTotals(ReportFilters $f): array
     {
         $main = (string) setting('regional.currency', 'ARS');
-        $rows = DB::table('costs')
+        $rows = \App\Support\Tenancy::table('costs')
             ->whereDate('date', '>=', $f->from->toDateString())->whereDate('date', '<=', $f->to->toDateString())
             ->selectRaw('category, currency, COALESCE(SUM(amount), 0) as total, COUNT(*) as n')
             ->groupBy('category', 'currency')

@@ -3,13 +3,14 @@
 namespace App\Models;
 
 use App\Models\Concerns\Auditable;
+use App\Models\Concerns\BelongsToWarehouse;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /** Cotización del dólar por día (la vigente es la de fecha más reciente hasta hoy). */
 class ExchangeRate extends Model
 {
-    use Auditable;
+    use Auditable, BelongsToWarehouse;
 
     public const SOURCES = ['BNA' => 'Banco Nación (oficial)', 'BLUE' => 'Dólar blue', 'BCRA' => 'BCRA (Com. A 3500)', 'MEP' => 'Dólar MEP', 'manual' => 'Otra / manual'];
 

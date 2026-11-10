@@ -50,7 +50,7 @@ class TraceabilityService
             'packer', 'shift', 'productionLine', 'location', 'processor',
         ]);
 
-        $assignments = DB::table('load_crates')->where('crate_id', $crate->id)->orderBy('added_at')->orderBy('id')->get();
+        $assignments = \App\Support\Tenancy::table('load_crates')->where('crate_id', $crate->id)->orderBy('added_at')->orderBy('id')->get();
         $loadIds = $assignments->pluck('load_id')->push($crate->current_load_id)->filter()->unique()->values();
         $loads = $loadIds->isEmpty() ? collect() : Load::query()->with('truck', 'destination', 'client', 'driver')
             ->whereIn('id', $loadIds)->get()->keyBy('id');
@@ -59,8 +59,8 @@ class TraceabilityService
         $currentLoadId = $crate->current_load_id ?? $activeAssignment?->load_id ?? $assignments->last()?->load_id;
         $load = $currentLoadId ? $loads->get($currentLoadId) : null;
 
-        $remito = $load ? DB::table('remitos')->where('load_id', $load->id)->whereNull('deleted_at')->first() : null;
-        $invoices = $load ? DB::table('invoices')->whereNull('deleted_at')
+        $remito = $load ? \App\Support\Tenancy::table('remitos')->where('load_id', $load->id)->whereNull('deleted_at')->first() : null;
+        $invoices = $load ? \App\Support\Tenancy::table('invoices')->whereNull('deleted_at')
             ->where(fn ($q) => $q->where('load_id', $load->id)->when($remito, fn ($w) => $w->orWhere('remito_id', $remito->id)))
             ->orderBy('issued_on')->get() : collect();
 

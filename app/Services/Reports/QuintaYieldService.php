@@ -14,7 +14,7 @@ class QuintaYieldService
     /** @return Collection<int, object> una fila por productor */
     public function rows(string $from, string $to, ?int $producerId = null): Collection
     {
-        $lots = DB::table('lots')
+        $lots = \App\Support\Tenancy::table('lots')
             ->leftJoin('producers', 'producers.id', '=', 'lots.producer_id')
             ->whereNull('lots.deleted_at')->where('lots.status', '!=', 'voided')
             ->whereDate('lots.date', '>=', $from)->whereDate('lots.date', '<=', $to)
@@ -25,11 +25,11 @@ class QuintaYieldService
         }
         $ids = $lots->pluck('id')->all();
 
-        $packed = DB::table('production_records')->join('crates', 'crates.id', '=', 'production_records.crate_id')
+        $packed = \App\Support\Tenancy::table('production_records')->join('crates', 'crates.id', '=', 'production_records.crate_id')
             ->whereNull('production_records.voided_at')->whereIn('crates.lot_id', $ids)
             ->groupBy('crates.lot_id')->selectRaw('crates.lot_id, COUNT(*) as packages, COALESCE(SUM(production_records.weight), 0) as kg')
             ->get()->keyBy('lot_id');
-        $rejected = DB::table('rejects')->whereIn('lot_id', $ids)
+        $rejected = \App\Support\Tenancy::table('rejects')->whereIn('lot_id', $ids)
             ->groupBy('lot_id')->selectRaw('lot_id, COALESCE(SUM(weight), 0) as kg')->get()->keyBy('lot_id');
 
         return $lots->groupBy(fn ($l) => $l->producer_id ?? 0)->map(function (Collection $group) use ($packed, $rejected) {

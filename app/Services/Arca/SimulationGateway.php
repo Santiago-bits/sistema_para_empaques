@@ -34,7 +34,7 @@ class SimulationGateway implements ArcaGateway
 
     public function lastAuthorizedNumber(int $pointOfSale, int $voucherType): int
     {
-        return (int) DB::table('invoices')->where('arca_mode', 'simulation')->where('point_of_sale', $pointOfSale)
+        return (int) \App\Support\Tenancy::table('invoices')->where('arca_mode', 'simulation')->where('point_of_sale', $pointOfSale)
             ->where('voucher_type', $voucherType)->max('number');
     }
 

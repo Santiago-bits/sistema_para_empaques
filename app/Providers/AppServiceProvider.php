@@ -223,6 +223,10 @@ class AppServiceProvider extends ServiceProvider
             if ($user->isSuperAdmin()) {
                 return true;
             }
+            // Multigalpón: lo que abarca a todos los galpones (copias de la base entera, registros técnicos) es sólo del Super Administrador.
+            if (in_array($ability, \App\Support\Tenancy::SYSTEM_PERMISSIONS, true) && \App\Support\Tenancy::isMulti()) {
+                return false;
+            }
             if ($module !== null) {
                 return $user->hasPermission($ability);
             }
