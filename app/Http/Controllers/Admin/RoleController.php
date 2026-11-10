@@ -39,7 +39,9 @@ class RoleController extends Controller
         $data = $this->validated($request);
         $role = DB::transaction(function () use ($data) {
             $role = Role::query()->create([
-                'slug' => Str::slug($data['name'], '_'),
+                // Los roles de un galpón llevan su número adelante: nunca chocan con los del sistema ni con los de otro galpón.
+                'slug' => (\App\Support\Tenancy::ready() && \App\Support\CurrentWarehouse::id() ? 'g'.\App\Support\CurrentWarehouse::id().'_' : '')
+                    .Str::slug($data['name'], '_'),
                 'name' => $data['name'],
                 'description' => $data['description'] ?? null,
             ]);

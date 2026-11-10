@@ -19,8 +19,14 @@ class UserService
     public function create(array $data, ?User $actor = null): User
     {
         return DB::transaction(function () use ($data, $actor) {
-            $user = User::query()->create(Arr::except($data, ['warehouses', 'password_confirmation', 'access_mode', 'sectors']));
-            $user->warehouses()->sync($data['warehouses'] ?? []);
+            $user = new User(Arr::except($data, ['warehouses', 'password_confirmation', 'access_mode', 'sectors']));
+            // Multigalpón: el usuario queda en el galpón de quien lo crea (un Super Administrador no tiene galpón).
+            $isSuper = $user->role_id && \App\Models\Role::query()->whereKey($user->role_id)->value('slug') === \App\Models\Role::SUPER_ADMIN;
+            if (! $isSuper && \App\Support\Tenancy::ready()) {
+                $user->warehouse_id = \App\Support\CurrentWarehouse::id();
+            }
+            $user->save();
+            $user->warehouses()->sync($user->warehouse_id ? [$user->warehouse_id] : ($data['warehouses'] ?? []));
             if (($data['access_mode'] ?? 'role') === 'sectors') {
                 $this->syncSectors($user, $data['sectors'] ?? [], $actor ?? auth()->user());
             }
@@ -84,7 +90,9 @@ class UserService
             $data['deactivated_at'] = $status === UserStatus::Active ? null : ($user->deactivated_at ?? now());
 
             $user->update(Arr::except($data, ['warehouses', 'password_confirmation']));
-            $user->warehouses()->sync($data['warehouses'] ?? []);
+            if ($user->warehouse_id) {
+                $user->warehouses()->sync([$user->warehouse_id]);
+            }
 
             // Al dar de baja a un usuario, o al cambiarle la contraseña, se cierran sus sesiones y tokens de API.
             $passwordChanged = ! empty($data['password']);

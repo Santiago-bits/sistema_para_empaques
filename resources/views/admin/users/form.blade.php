@@ -72,8 +72,9 @@
                 @if ($clients->isNotEmpty())
                     <x-select name="client_id" label="Cliente (portal)" :options="$clients" :value="$user->client_id" placeholder="Ninguno"/>
                 @endif
-                <x-select name="warehouses[]" label="Galpones con acceso" :options="$warehouses" multiple
-                          :value="$user->exists ? $user->warehouses->pluck('id')->all() : array_keys($warehouses->all())"/>
+                <x-field label="Galpón" name="warehouse">
+                    <p class="form-input bg-stone-50 dark:bg-stone-900">{{ $user->exists ? ($user->warehouse?->name ?? 'Todos (Super Administrador)') : (\App\Support\CurrentWarehouse::model()?->name ?? '—') }}</p>
+                </x-field>
             </div>
         </x-panel>
 

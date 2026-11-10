@@ -32,6 +32,23 @@ class Role extends Model
         ];
     }
 
+    /**
+     * Multigalpón: los roles del sistema (sin galpón) los ven todos; los que crea un galpón, sólo ese galpón.
+     */
+    protected static function booted(): void
+    {
+        static::addGlobalScope('warehouse', function ($query) {
+            if (\App\Support\Tenancy::ready() && ($id = \App\Support\CurrentWarehouse::id()) !== null) {
+                $query->where(fn ($q) => $q->whereNull('roles.warehouse_id')->orWhere('roles.warehouse_id', $id));
+            }
+        });
+        static::creating(function (Role $role) {
+            if (! $role->is_system && $role->warehouse_id === null && \App\Support\Tenancy::ready()) {
+                $role->warehouse_id = \App\Support\CurrentWarehouse::id();
+            }
+        });
+    }
+
     public function permissions(): BelongsToMany
     {
         return $this->belongsToMany(Permission::class);

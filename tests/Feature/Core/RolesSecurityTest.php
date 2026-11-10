@@ -47,11 +47,11 @@ class RolesSecurityTest extends TestCase
         $this->get(route('admin.users.index'))->assertOk()->assertSee('operario1')->assertDontSee('desarrollador');
 
         // Al super administrador: no lo ve, no lo edita, no le cambia la clave ni los permisos.
-        $this->get(route('admin.users.show', $super))->assertForbidden();
-        $this->get(route('admin.users.edit', $super))->assertForbidden();
-        $this->put(route('admin.users.update', $super), $this->userPayload(['username' => 'desarrollador', 'role_id' => $this->role('admin')->id]))->assertForbidden();
-        $this->post(route('admin.users.password.reset', $super))->assertForbidden();
-        $this->put(route('admin.users.permissions.update', $super), ['overrides' => ['users.manage' => 'revoke']])->assertForbidden();
+        $this->get(route('admin.users.show', $super))->assertNotFound(); // el Super Administrador ni siquiera existe para un admin de galpón
+        $this->get(route('admin.users.edit', $super))->assertNotFound();
+        $this->put(route('admin.users.update', $super), $this->userPayload(['username' => 'desarrollador', 'role_id' => $this->role('admin')->id]))->assertNotFound();
+        $this->post(route('admin.users.password.reset', $super))->assertNotFound();
+        $this->put(route('admin.users.permissions.update', $super), ['overrides' => ['users.manage' => 'revoke']])->assertNotFound();
         $this->assertTrue($super->fresh()->isSuperAdmin());
 
         // No puede crear ni convertir a nadie en super administrador, ni editar ese rol.

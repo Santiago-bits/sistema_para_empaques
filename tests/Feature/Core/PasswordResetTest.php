@@ -208,7 +208,7 @@ class PasswordResetTest extends TestCase
         $this->post(route('admin.users.password.reset', $operator))->assertForbidden();
 
         $this->actingAsRole('admin');
-        $this->post(route('admin.users.password.reset', $superAdmin))->assertForbidden();
+        $this->post(route('admin.users.password.reset', $superAdmin))->assertNotFound(); // el Super Administrador ni siquiera existe para un admin de galpón
         $this->assertFalse($superAdmin->fresh()->must_change_password);
     }
 

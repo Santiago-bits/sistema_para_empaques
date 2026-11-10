@@ -15,8 +15,13 @@ class WarehousePresenceVerifier extends DatabasePresenceVerifier
     {
         $query = parent::table($table);
         $name = str_contains($table, '.') ? substr($table, strrpos($table, '.') + 1) : $table;
-        if (Tenancy::isTenantTable($name) && Tenancy::ready() && ($id = CurrentWarehouse::id()) !== null) {
-            $query->where($name.'.warehouse_id', $id);
+        if (Tenancy::ready() && ($id = CurrentWarehouse::id()) !== null) {
+            if (Tenancy::isTenantTable($name)) {
+                $query->where($name.'.warehouse_id', $id);
+            } elseif ($name === 'roles') {
+                // Roles del sistema (comunes) o del propio galpón.
+                $query->where(fn ($q) => $q->whereNull('roles.warehouse_id')->orWhere('roles.warehouse_id', $id));
+            }
         }
 
         return $query;
