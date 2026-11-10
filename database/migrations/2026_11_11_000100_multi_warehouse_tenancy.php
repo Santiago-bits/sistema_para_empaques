@@ -62,6 +62,10 @@ return new class extends Migration
             $this->scopeUniqueIndexes($table);
         }
 
+        // «Ya se cargaron los datos de ejemplo» pasa a ser de cada galpón (era del sistema entero).
+        if ($warehouseId && Schema::hasTable('settings')) {
+            DB::table('settings')->where('key', 'system.sample_data_at')->update(['key' => 'demo.sample_data_at', 'group' => 'demo']);
+        }
         // Configuración: lo general queda común; lo de la empresa, etiquetas, ARCA, producción, etc. pasa al primer galpón.
         if ($warehouseId && Schema::hasTable('settings')) {
             $settings = DB::table('settings')->whereNull('warehouse_id')->get(['id', 'key']);

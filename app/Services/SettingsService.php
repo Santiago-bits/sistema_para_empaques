@@ -108,7 +108,7 @@ class SettingsService
         // Gestión de clientes (Panel General) activada desde la administración general, sin tocar el .env.
         'system.central_panel' => [false, 'bool', 'system'],
         // Fecha en que se cargaron los datos de ejemplo desde la administración general (se cargan una sola vez).
-        'system.sample_data_at' => ['', 'string', 'system'],
+        'demo.sample_data_at' => ['', 'string', 'demo'], // por galpón: cada galpón puede cargar sus ejemplos una vez
         'treatments.types' => [['Tratamiento en frío', 'Bromuro de metilo'], 'json', 'treatments'],
         'system.environment_label' => ['', 'string', 'system'],
     ];
