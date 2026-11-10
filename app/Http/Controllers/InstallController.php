@@ -175,6 +175,7 @@ class InstallController extends Controller
                     'status' => 'active',
                     'password' => $row['password'],
                 ]);
+                $user->forceFill(['warehouse_id' => $warehouse->id])->save(); // cada usuario, en su galpón
                 $user->warehouses()->sync([$warehouse->id]);
             }
 
