@@ -88,7 +88,7 @@ class DemoSeeder extends Seeder
     {
         app(AuditService::class)->muted(function () use ($withUsers) {
             DB::transaction(function () use ($withUsers) {
-                $this->warehouse = Warehouse::query()->firstOrFail();
+                $this->warehouse = \App\Support\CurrentWarehouse::model() ?? Warehouse::query()->firstOrFail(); // el galpón en el que se está
                 $this->catalogs();
                 if ($withUsers) {
                     $this->users();
@@ -291,6 +291,9 @@ class DemoSeeder extends Seeder
                 'first_name' => $first, 'last_name' => $last, 'status' => 'active', 'password' => $password,
                 'role_id' => Role::query()->where('slug', $role)->value('id'),
             ], $extra));
+            if ($user->warehouse_id === null && \App\Support\Tenancy::ready() && $role !== Role::SUPER_ADMIN) {
+                $user->forceFill(['warehouse_id' => $this->warehouse->id])->save(); // cada usuario, en su galpón
+            }
             $user->warehouses()->syncWithoutDetaching([$this->warehouse->id]);
         }
     }
