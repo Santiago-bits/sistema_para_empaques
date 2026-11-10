@@ -93,6 +93,9 @@ class DatabaseUpgrader
                     @set_time_limit(300); // en la web; en consola y en los tests no hay límite
                 }
                 Artisan::call('migrate', ['--force' => true]);
+                // Con la base al día ya se puede separar por galpón (ver Tenancy::ready()).
+                \App\Support\Tenancy::refresh();
+                \App\Support\CurrentWarehouse::reset();
             }
             // Permisos, roles y módulos nuevos de esta versión (no pisa lo que el galpón configuró).
             (new SystemSeeder)->run();

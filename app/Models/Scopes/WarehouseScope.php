@@ -16,6 +16,9 @@ class WarehouseScope implements Scope
 {
     public function apply(Builder $builder, Model $model): void
     {
+        if (! \App\Support\Tenancy::ready()) {
+            return;
+        }
         $id = CurrentWarehouse::id();
         if ($id !== null) {
             $builder->where($model->qualifyColumn('warehouse_id'), $id);

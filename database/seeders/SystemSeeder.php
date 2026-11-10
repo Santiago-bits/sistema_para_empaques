@@ -28,15 +28,30 @@ class SystemSeeder extends Seeder
         app(AuditService::class)->muted(function () {
             $this->companyAndWarehouse();
             $this->permissionsAndRoles();
-            $this->modules();
-            $this->sequences();
-            $this->reasons();
-            $this->shifts();
-            $this->grades();
-            $this->season();
         });
+        // Multigalpón: los datos base de cada galpón (módulos, numeraciones, motivos, turnos, selecciones, temporada).
+        if (\App\Support\Tenancy::ready()) {
+            \App\Support\CurrentWarehouse::forEach(fn (int $id) => $this->seedWarehouse($id));
+        } else {
+            $this->seedWarehouse(null);
+        }
+    }
 
-        app(ModuleService::class)->flush();
+    /** Datos base de un galpón (al crearlo y en cada actualización; no pisa lo que el galpón cambió). */
+    public function seedWarehouse(?int $warehouseId): void
+    {
+        $seed = function () {
+            app(AuditService::class)->muted(function () {
+                $this->modules();
+                $this->sequences();
+                $this->reasons();
+                $this->shifts();
+                $this->grades();
+                $this->season();
+            });
+            app(ModuleService::class)->flush();
+        };
+        $warehouseId ? \App\Support\CurrentWarehouse::runFor($warehouseId, $seed) : $seed();
     }
 
     private function companyAndWarehouse(): void

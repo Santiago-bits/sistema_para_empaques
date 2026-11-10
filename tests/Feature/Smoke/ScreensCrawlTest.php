@@ -175,7 +175,9 @@ class ScreensCrawlTest extends TestCase
                 continue;
             }
             $model = self::PARAMS[$param] ?? null;
-            $id = $model ? $model::query()->value('id') : null;
+            // Siempre el mismo ejemplo (el de menor id); el rol del Super Administrador no se edita, se usa otro.
+            $id = $model ? $model::query()->when($param === 'role', fn ($q) => $q->where('slug', '!=', \App\Models\Role::SUPER_ADMIN))
+                ->orderBy((new $model)->getQualifiedKeyName())->value((new $model)->getKeyName()) : null;
             if (! $id) {
                 return null;
             }

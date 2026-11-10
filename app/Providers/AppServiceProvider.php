@@ -193,6 +193,11 @@ class AppServiceProvider extends ServiceProvider
             [\Illuminate\Auth\Events\Authenticated::class, \Illuminate\Auth\Events\Login::class, \Illuminate\Auth\Events\Logout::class],
             fn () => \App\Support\CurrentWarehouse::reset()
         );
+        // Al migrar (o deshacer migraciones) se vuelve a mirar si la base ya está separada por galpón.
+        \Illuminate\Support\Facades\Event::listen(\Illuminate\Database\Events\MigrationsEnded::class, function () {
+            \App\Support\Tenancy::refresh();
+            \App\Support\CurrentWarehouse::reset();
+        });
         // Las reglas «unique» y «exists» sobre tablas de un galpón miran sólo el galpón activo.
         $this->app->extend('validation.presence', fn ($verifier, $app) => new \App\Support\WarehousePresenceVerifier($app['db']));
         if ($this->app->resolved('validator')) {
