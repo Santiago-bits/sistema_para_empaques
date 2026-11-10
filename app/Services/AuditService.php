@@ -52,7 +52,13 @@ class AuditService
 
         $request = app()->runningInConsole() && ! app()->runningUnitTests() ? null : request();
 
+        // Multigalpón: sin galpón activo (p. ej. un ingreso), la acción queda en el galpón del registro auditado.
+        $warehouseId = \App\Support\Tenancy::ready()
+            ? (\App\Support\CurrentWarehouse::id() ?? ($model && isset($model->warehouse_id) ? $model->warehouse_id : null))
+            : null;
+
         return AuditLog::query()->create([
+            ...(\App\Support\Tenancy::ready() ? ['warehouse_id' => $warehouseId] : []),
             'user_id' => auth()->id(),
             'action' => $action,
             'auditable_type' => $model?->getMorphClass(),

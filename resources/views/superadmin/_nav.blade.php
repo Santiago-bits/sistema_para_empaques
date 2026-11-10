@@ -4,10 +4,11 @@
     $openTickets = $central ? \App\Models\ClientTicket::query()->whereNotIn('status', ['resolved', 'closed'])->count() : 0;
     $tabs = [
         ['superadmin.index', 'Resumen', 'chart-bar', 'superadmin.index', null],
+        ['superadmin.warehouses.index', 'Galpones', 'home', 'superadmin.warehouses.*', null],
         ['superadmin.users.index', 'Usuarios', 'users', 'superadmin.users.*', null],
     ];
     if ($central) {
-        $tabs[] = ['superadmin.clients.index', 'Galpones y pagos', 'briefcase', 'superadmin.clients.*', null];
+        $tabs[] = ['superadmin.clients.index', 'Instalaciones aparte', 'briefcase', 'superadmin.clients.*', null];
         $tabs[] = ['central.tickets.index', 'Soporte', 'lifebuoy', 'central.tickets.*', $openTickets];
     }
 @endphp

@@ -156,6 +156,19 @@
             @endif
 
             <div class="ml-auto flex shrink-0 items-center gap-0.5 sm:gap-1">
+                {{-- Multigalpón: el galpón en el que se trabaja. El Super Administrador lo cambia desde acá. --}}
+                @if (($switchableWarehouses ?? collect())->count() > 1)
+                    <form method="POST" x-data x-ref="f" :action="'{{ url('galpones') }}/' + $refs.s.value + '/entrar'" class="hidden md:block">
+                        @csrf
+                        <select x-ref="s" @change="$refs.f.submit()" class="form-input max-w-48 py-1 text-sm font-medium" aria-label="Galpón en el que trabajás" data-current-warehouse>
+                            @foreach ($switchableWarehouses as $w)
+                                <option value="{{ $w->id }}" @selected($w->id === $currentWarehouse?->id)>{{ $w->name }}{{ $w->active ? '' : ' (suspendido)' }}</option>
+                            @endforeach
+                        </select>
+                    </form>
+                @elseif ($currentWarehouse ?? null)
+                    <span class="hidden max-w-48 truncate px-2 text-sm font-medium text-stone-600 md:inline dark:text-stone-300" data-current-warehouse>{{ $currentWarehouse->name }}</span>
+                @endif
                 @if ($envLabel)
                     <span class="hidden rounded-md bg-accent-500/15 px-2 py-1 text-xs font-semibold text-accent-600 sm:inline dark:text-accent-400">{{ $envLabel }}</span>
                 @endif

@@ -15,16 +15,26 @@ class EnsureUserIsActive
         $user = $request->user();
 
         if ($user && ! $user->isActive()) {
-            if ($request->expectsJson()) {
-                abort(403, 'Usuario inactivo.');
-            }
-            Auth::guard('web')->logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-
-            return redirect()->route('login')->withErrors(['login' => 'Tu usuario está inactivo. Contactá al administrador.']);
+            return $this->kickOut($request, 'Usuario inactivo.', 'Tu usuario está inactivo. Contactá al administrador.');
+        }
+        // Multigalpón: si el galpón del usuario está suspendido, nadie de ese galpón entra.
+        if ($user && $user->warehouse_id && \App\Support\Tenancy::ready()
+            && ! \App\Models\Warehouse::query()->whereKey($user->warehouse_id)->where('active', true)->exists()) {
+            return $this->kickOut($request, 'Galpón suspendido.', 'Tu galpón está suspendido. Contactá al administrador del sistema.');
         }
 
         return $next($request);
+    }
+
+    private function kickOut(Request $request, string $short, string $message): Response
+    {
+        if ($request->expectsJson()) {
+            abort(403, $short);
+        }
+        Auth::guard('web')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('login')->withErrors(['login' => $message]);
     }
 }
