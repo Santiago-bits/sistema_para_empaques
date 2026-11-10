@@ -7,15 +7,29 @@
             <div class="space-y-4">
                 <x-select name="mode" label="Si un registro ya existe (mismo código, CUIT, DNI o patente)" :options="\App\Services\ImportService::MODES" value="upsert" x-model="mode"/>
 
-                <div class="grid gap-3 sm:grid-cols-2">
-                    <label class="btn btn-primary cursor-pointer justify-center" :class="busy && 'pointer-events-none opacity-50'">
+                <div class="grid gap-3 sm:grid-cols-3">
+                    <label class="btn btn-primary cursor-pointer justify-center" :class="busy && 'pointer-events-none opacity-50'" x-show="canPickFolder">
                         <x-icon name="folder" class="size-4"/> Elegir una carpeta
                         <input type="file" class="sr-only" webkitdirectory directory multiple @change="pick($event)" :disabled="busy">
                     </label>
                     <label class="btn btn-secondary cursor-pointer justify-center" :class="busy && 'pointer-events-none opacity-50'">
-                        <x-icon name="upload" class="size-4"/> Elegir varias planillas
+                        <x-icon name="archive" class="size-4"/> Carpeta comprimida (.zip)
+                        <input type="file" class="sr-only" accept=".zip,application/zip" @change="pick($event)" :disabled="busy">
+                    </label>
+                    <label class="btn btn-secondary cursor-pointer justify-center" :class="busy && 'pointer-events-none opacity-50'">
+                        <x-icon name="upload" class="size-4"/> Varias planillas
                         <input type="file" class="sr-only" accept=".xlsx,.csv,.txt" multiple @change="pick($event)" :disabled="busy">
                     </label>
+                </div>
+
+                <p x-show="!canPickFolder" class="bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
+                    En el celular no se pueden elegir carpetas. Comprimí la carpeta en un <strong>.zip</strong> (o elegí todas las planillas juntas) y subila con los botones de arriba.
+                </p>
+
+                <div class="hidden border-2 border-dashed p-6 text-center text-sm sm:block"
+                     :class="dragging ? 'border-brand-500 bg-brand-500/5' : 'border-stone-300 text-stone-500 dark:border-stone-700'"
+                     @dragover.prevent="dragging = true" @dragleave.prevent="dragging = false" @drop.prevent="drop($event)">
+                    O arrastrá la carpeta (o el .zip) y soltala acá.
                 </div>
 
                 <template x-if="items.length">
@@ -58,6 +72,7 @@
 
         <x-panel title="Cómo se ordena cada planilla">
             <ol class="list-inside list-decimal space-y-2 text-sm text-stone-600 dark:text-stone-400">
+                <li>Elegí la carpeta, o comprimila en un <strong>.zip</strong> (así funciona también desde el celular).</li>
                 <li>El sistema mira el <strong>nombre del archivo</strong> (por ejemplo «camioneros.xlsx») y los <strong>títulos de las columnas</strong>.</li>
                 <li>Sólo la manda a una sección si las dos cosas coinciden. Ante la duda (por ejemplo, columnas que sirven para productores y para propietarios) la deja <strong>sin reconocer</strong> y elegís vos.</li>
                 <li>Cada fila se valida igual que en una importación suelta. Las que tienen errores no se cargan.</li>
@@ -73,6 +88,9 @@
                 return {
                     ...config,
                     mode: 'upsert',
+                    dragging: false,
+                    // Los navegadores del celular no dejan elegir carpetas (sólo archivos sueltos o un .zip).
+                    canPickFolder: !/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) && 'webkitdirectory' in document.createElement('input'),
                     items: [],
                     skipped: [],
                     done: 0,
@@ -81,17 +99,43 @@
                     async pick(event) {
                         const files = Array.from(event.target.files || []);
                         event.target.value = '';
+                        await this.add(files);
+                    },
+                    async add(files) {
                         for (const file of files) {
-                            const name = file.webkitRelativePath || file.name;
+                            const name = file.webkitRelativePath || file.relativePath || file.name;
                             const base = file.name;
-                            // Archivos temporales de Excel («~$…»), ocultos y lo que no es planilla no se mandan.
-                            if (base.startsWith('~$') || base.startsWith('.') || !/\.(xlsx|csv|txt)$/i.test(base)) {
+                            // Archivos temporales de Excel («~$…»), ocultos y lo que no es planilla ni .zip no se mandan.
+                            if (base.startsWith('~$') || base.startsWith('.') || !/\.(xlsx|csv|txt|zip)$/i.test(base)) {
                                 this.skipped.push(base);
                                 continue;
                             }
                             this.items.push({ key: this.items.length + ':' + name, name, file, state: 'waiting', section: null, message: null });
                         }
                         await this.send();
+                    },
+                    // Arrastrar y soltar: recorre las carpetas soltadas (y sus subcarpetas) y junta los archivos.
+                    async drop(event) {
+                        this.dragging = false;
+                        const entries = Array.from(event.dataTransfer.items || []).map((i) => i.webkitGetAsEntry && i.webkitGetAsEntry()).filter(Boolean);
+                        if (!entries.length) return this.add(Array.from(event.dataTransfer.files || []));
+                        const files = [];
+                        const walk = async (entry, path) => {
+                            if (entry.isFile) {
+                                const file = await new Promise((ok, fail) => entry.file(ok, fail));
+                                file.relativePath = path + file.name;
+                                files.push(file);
+                            } else if (entry.isDirectory) {
+                                const reader = entry.createReader();
+                                let batch;
+                                do {
+                                    batch = await new Promise((ok, fail) => reader.readEntries(ok, fail));
+                                    for (const child of batch) await walk(child, path + entry.name + '/');
+                                } while (batch.length);
+                            }
+                        };
+                        for (const entry of entries) await walk(entry, '');
+                        await this.add(files);
                     },
                     async send() {
                         if (this.busy) return;
@@ -114,8 +158,20 @@
                                     item.message = response.status === 419 ? 'La sesión expiró. Recargá la página.'
                                         : (data.errors ? Object.values(data.errors)[0][0] : (data.message || 'No se pudo leer.'));
                                 } else {
-                                    item.state = data.recognized ? 'ok' : 'unknown';
-                                    item.section = data.section;
+                                    const results = data.files || [];
+                                    if (results.length === 1 && !/\.zip$/i.test(item.file.name)) {
+                                        item.state = results[0].recognized ? 'ok' : 'unknown';
+                                        item.section = results[0].section;
+                                    } else {
+                                        // Un .zip: se reemplaza por una línea por cada planilla que traía adentro.
+                                        item.state = 'ok';
+                                        item.section = results.length + ' planilla(s) adentro';
+                                        for (const r of results) {
+                                            this.items.push({ key: this.items.length + ':' + r.filename, name: '  ' + item.file.name + ' → ' + r.filename, file: null,
+                                                state: r.recognized ? 'ok' : 'unknown', section: r.section, message: null });
+                                            this.done++;
+                                        }
+                                    }
                                 }
                             } catch (e) {
                                 item.state = 'error';

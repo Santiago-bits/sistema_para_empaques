@@ -83,22 +83,29 @@ class ImportController extends Controller
     {
         $data = $request->validate([
             'group' => ['required', 'uuid'],
-            'file' => ['required', 'file', 'max:10240', 'mimes:csv,txt,xlsx'],
+            'file' => ['required', 'file', 'max:51200', 'mimes:csv,txt,xlsx,zip'],
             'mode' => ['nullable', Rule::in(array_keys(ImportService::MODES))],
         ], [], ['file' => 'archivo', 'mode' => 'modo']);
         $foreign = ImportBatch::query()->where('group_uuid', $data['group'])->where('user_id', '!=', $request->user()->id)->exists();
         abort_if($foreign, 403);
 
-        $batch = $this->imports->uploadDetected($request->file('file'), $request->user(), $data['mode'] ?? 'upsert', $data['group']);
+        $file = $request->file('file');
+        $mode = $data['mode'] ?? 'upsert';
+        if (strtolower($file->getClientOriginalExtension()) === 'zip') {
+            $batches = $this->imports->uploadZip($file, $request->user(), $mode, $data['group']);
+        } else {
+            abort_if($file->getSize() > ImportService::ZIP_MAX_FILE_BYTES, 422, 'La planilla supera los 10 MB.');
+            $batches = [$this->imports->uploadDetected($file, $request->user(), $mode, $data['group'])];
+        }
 
-        return response()->json([
+        return response()->json(['files' => array_map(fn (ImportBatch $batch) => [
             'filename' => $batch->filename,
             'recognized' => $batch->status === 'validated',
             'section' => $this->imports->types()[$batch->type] ?? null,
             'reason' => $batch->detection['reason'] ?? null,
             'valid_rows' => $batch->valid_rows,
             'error_rows' => $batch->error_rows,
-        ]);
+        ], $batches)]);
     }
 
     public function folderShow(string $group): View

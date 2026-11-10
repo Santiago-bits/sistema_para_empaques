@@ -50,7 +50,7 @@
                         @if (in_array($batch->status, ['validated', 'unrecognized'], true))
                             <form method="POST" action="{{ route('imports.retype', $batch) }}" class="flex items-center gap-2">
                                 @csrf
-                                <select name="type" class="form-input py-1 text-sm" aria-label="Sección de {{ $batch->filename }}" required>
+                                <select name="type" class="form-input min-w-44 py-1 text-sm" aria-label="Sección de {{ $batch->filename }}" required>
                                     <option value="">Elegir sección…</option>
                                     @foreach ($types as $key => $label)
                                         <option value="{{ $key }}" @selected($batch->type === $key)>{{ $label }}</option>

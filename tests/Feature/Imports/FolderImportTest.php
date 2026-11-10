@@ -62,21 +62,21 @@ class FolderImportTest extends TestCase
     public function test_each_spreadsheet_goes_to_its_own_section_and_nothing_is_saved_until_confirmed(): void
     {
         $this->actingAsRole('admin');
-        $this->get(route('imports.folder.create'))->assertOk()->assertSee('Elegir una carpeta');
+        $this->get(route('imports.folder.create'))->assertOk()->assertSee('Elegir una carpeta')->assertSee('Carpeta comprimida (.zip)');
 
         // Camiones antes que su transportista (el orden en que el navegador manda la carpeta no importa).
         $this->upload($this->xlsx('camiones.xlsx', [
             ['patente', 'transportista', 'marca'],
             ['AB123CD', 'Transportes del Sur SA', 'Scania'],
-        ]))->assertOk()->assertJson(['recognized' => true, 'section' => 'Camiones']);
+        ]))->assertOk()->assertJson(['files' => [['recognized' => true, 'section' => 'Camiones']]]);
         $this->upload($this->csv('transportistas.csv', "razon_social;cuit;telefono\nTransportes del Sur SA;30500001735;2995551111\n"))
-            ->assertOk()->assertJson(['recognized' => true, 'section' => 'Transportistas']);
+            ->assertOk()->assertJson(['files' => [['recognized' => true, 'section' => 'Transportistas']]]);
         $this->upload($this->xlsx('Choferes 2026.xlsx', [
             ['Nombre', 'Apellido', 'DNI', 'Licencia número', 'Transportista'],
             ['Juan', 'Pérez', '30111222', 'L-555', 'Transportes del Sur SA'],
-        ]))->assertOk()->assertJson(['recognized' => true, 'section' => 'Camioneros']);
+        ]))->assertOk()->assertJson(['files' => [['recognized' => true, 'section' => 'Camioneros']]]);
         $this->upload($this->csv('productores.csv', "codigo;nombre;cuit;renspa\nPR-1;Quinta Albiero;20123456786;12.345.6.78901/00\n"))
-            ->assertOk()->assertJson(['recognized' => true, 'section' => 'Productores']);
+            ->assertOk()->assertJson(['files' => [['recognized' => true, 'section' => 'Productores']]]);
 
         $this->assertSame('drivers', $this->batch('Choferes 2026.xlsx')->type);
         // Nada se guardó todavía.
@@ -103,7 +103,7 @@ class FolderImportTest extends TestCase
 
         // Productores y propietarios tienen las mismas columnas: sin pista en el nombre, no se elige.
         $this->upload($this->csv('datos.csv', "codigo;nombre;cuit;telefono\nX-1;Los Álamos;20123456786;2995550000\n"))
-            ->assertOk()->assertJson(['recognized' => false]);
+            ->assertOk()->assertJson(['files' => [['recognized' => false]]]);
         $batch = $this->batch('datos.csv');
         $this->assertSame('unrecognized', $batch->status);
         $this->assertStringContainsString('varias secciones', $batch->detection['reason']);
@@ -127,16 +127,45 @@ class FolderImportTest extends TestCase
 
         // Dice «productores» pero trae camioneros: queda sin reconocer.
         $this->upload($this->csv('productores.csv', "nombre;apellido;dni;licencia_numero\nJuan;Pérez;30111222;L-1\n"))
-            ->assertOk()->assertJson(['recognized' => false]);
+            ->assertOk()->assertJson(['files' => [['recognized' => false]]]);
         $this->assertStringContainsString('Camioneros', $this->batch('productores.csv')->detection['reason']);
 
         // Columnas que no son de ninguna sección.
-        $this->upload($this->csv('cosas.csv', "fruta_favorita;color\nnaranja;rojo\n"))->assertOk()->assertJson(['recognized' => false]);
+        $this->upload($this->csv('cosas.csv', "fruta_favorita;color\nnaranja;rojo\n"))->assertOk()->assertJson(['files' => [['recognized' => false]]]);
 
         // Elegir a mano una sección cuyas columnas no corresponden tampoco carga nada.
         $this->post(route('imports.retype', $this->batch('productores.csv')), ['type' => 'producers'])->assertRedirect();
         $this->post(route('imports.folder.confirm', $this->group))->assertRedirect();
         $this->assertSame(0, Producer::query()->count() + Driver::query()->count());
+    }
+
+    public function test_a_zipped_folder_works_like_a_folder(): void
+    {
+        $this->actingAsRole('admin');
+        $path = tempnam(sys_get_temp_dir(), 'zip').'.zip';
+        $zip = new \ZipArchive;
+        $zip->open($path, \ZipArchive::CREATE);
+        $zip->addFromString('Planillas/transportistas.csv', "razon_social;cuit\nTransportes del Sur SA;30500001735\n");
+        $zip->addFromString('Planillas/camioneros.csv', "nombre;apellido;dni;transportista\nJuan;Pérez;30111222;Transportes del Sur SA\n");
+        $zip->addFromString('Planillas/~$camioneros.csv', 'temporal de Excel');
+        $zip->addFromString('__MACOSX/Planillas/._camioneros.csv', 'basura de Mac');
+        $zip->addFromString('Planillas/notas.docx', 'no es planilla');
+        $zip->close();
+
+        $this->upload(new UploadedFile($path, 'Planillas.zip', 'application/zip', null, true))->assertOk()
+            ->assertJsonCount(2, 'files')
+            ->assertJson(['files' => [['filename' => 'transportistas.csv', 'section' => 'Transportistas'], ['filename' => 'camioneros.csv', 'section' => 'Camioneros']]]);
+
+        $this->post(route('imports.folder.confirm', $this->group))->assertRedirect();
+        $this->assertSame(Transporter::query()->sole()->id, Driver::query()->sole()->transporter_id);
+
+        // Un .zip sin planillas avisa en vez de no hacer nada.
+        $empty = tempnam(sys_get_temp_dir(), 'zip').'.zip';
+        $zip = new \ZipArchive;
+        $zip->open($empty, \ZipArchive::CREATE);
+        $zip->addFromString('foto.jpg', 'x');
+        $zip->close();
+        $this->upload(new UploadedFile($empty, 'fotos.zip', 'application/zip', null, true))->assertUnprocessable()->assertJsonFragment(['message' => 'El .zip no tiene planillas (.xlsx o .csv).']);
     }
 
     public function test_dtv_spreadsheets_are_sent_to_their_own_screen(): void
@@ -145,7 +174,7 @@ class FolderImportTest extends TestCase
         $this->upload($this->xlsx('planilla.xlsx', [
             ['', '', 'REGISTRO DE DTV-e EMPAQUE'],
             ['FECHA', 'E / I', 'N° DTV-e', 'ESPECIE'],
-        ]))->assertOk()->assertJson(['recognized' => false]);
+        ]))->assertOk()->assertJson(['files' => [['recognized' => false]]]);
         $this->assertSame('dtv', $this->batch('planilla.xlsx')->detection['special']);
         $this->get(route('imports.folder.show', $this->group))->assertOk()->assertSee('Ir a DTV-e');
     }
