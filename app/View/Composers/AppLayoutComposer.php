@@ -28,6 +28,10 @@ class AppLayoutComposer
             // Cotización del dólar arriba en todas las pantallas (sólo para quien maneja plata).
             'usdRate' => module_enabled('treasury') && ($user->can('treasury.view') || $user->can('billing.view'))
                 ? \App\Models\ExchangeRate::current() : null,
+            // Multigalpón: en qué galpón se está trabajando (el Super Administrador puede cambiar desde el encabezado).
+            'currentWarehouse' => \App\Support\Tenancy::ready() ? \App\Support\CurrentWarehouse::model() : null,
+            'switchableWarehouses' => $user->isSuperAdmin() && \App\Support\Tenancy::ready()
+                ? \App\Models\Warehouse::query()->orderBy('name')->get(['id', 'name', 'active']) : collect(),
             'license' =>License::query()->where('installation_id', config('galpon.installation_id'))->first(),
         ]);
     }

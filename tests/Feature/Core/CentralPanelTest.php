@@ -158,7 +158,7 @@ class CentralPanelTest extends TestCase
         $this->get(route('dashboard'))->assertDontSee(route('central.clients.index'), false);
 
         config(['galpon.central.mode' => true]);
-        $this->get(route('dashboard'))->assertSee(route('central.clients.index'), false)->assertSee('Soporte de los galpones');
+        $this->get(route('dashboard'))->assertSee(route('central.clients.index'), false)->assertSee('Soporte de instalaciones');
         $this->get(route('central.clients.index'))->assertOk()->assertSee('Empaque del Sur');
         $this->get(route('central.clients.create'))->assertOk();
         $this->post(route('central.clients.store'), ['client_name' => 'Citrícola Norte', 'plan' => 'pro', 'status' => 'active', 'starts_on' => today()->toDateString(),
@@ -179,8 +179,8 @@ class CentralPanelTest extends TestCase
             'starts_on' => today()->toDateString()])->assertSessionHasErrors('cuit');
 
         // Las direcciones viejas («clientes») siguen llevando al lugar correcto.
-        $this->get('/panel-general/clientes')->assertRedirect('/panel-general/galpones');
-        $this->get('/panel-general/clientes/'.$new->id)->assertRedirect('/panel-general/galpones/'.$new->id);
+        $this->get('/panel-general/clientes')->assertRedirect('/panel-general/instalaciones');
+        $this->get('/panel-general/galpones/'.$new->id)->assertRedirect('/panel-general/instalaciones/'.$new->id);
 
         // Un administrador del galpón (no super admin) no entra al Panel General.
         $this->actingAsRole('admin');

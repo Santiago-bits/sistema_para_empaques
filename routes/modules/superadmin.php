@@ -3,6 +3,7 @@
 use App\Http\Controllers\SuperAdmin\ClientController;
 use App\Http\Controllers\SuperAdmin\HubController;
 use App\Http\Controllers\SuperAdmin\UserController;
+use App\Http\Controllers\SuperAdmin\WarehouseController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -20,6 +21,14 @@ Route::prefix('administradorgeneral')->name('superadmin.')->middleware('superadm
     Route::post('datos-de-ejemplo', [HubController::class, 'sampleData'])->middleware('throttle:3,10')->name('sample');
     Route::post('actualizar-base', [HubController::class, 'upgradeDatabase'])->middleware('throttle:5,1')->name('upgrade');
 
+    // Galpones del sistema (multigalpón): cada uno con su administrador general y sus propios datos.
+    Route::get('galpones', [WarehouseController::class, 'index'])->name('warehouses.index');
+    Route::get('galpones/nuevo', [WarehouseController::class, 'create'])->name('warehouses.create');
+    Route::post('galpones', [WarehouseController::class, 'store'])->name('warehouses.store');
+    Route::get('galpones/{warehouse}', [WarehouseController::class, 'show'])->whereNumber('warehouse')->name('warehouses.show');
+    Route::get('galpones/{warehouse}/editar', [WarehouseController::class, 'edit'])->whereNumber('warehouse')->name('warehouses.edit');
+    Route::put('galpones/{warehouse}', [WarehouseController::class, 'update'])->whereNumber('warehouse')->name('warehouses.update');
+    Route::post('galpones/{warehouse}/administrador', [WarehouseController::class, 'storeAdmin'])->whereNumber('warehouse')->middleware('throttle:20,1')->name('warehouses.admin');
     Route::get('usuarios', [UserController::class, 'index'])->name('users.index');
     Route::get('usuarios/{user}', [UserController::class, 'show'])->whereNumber('user')->name('users.show');
     Route::post('usuarios/{user}/contrasena-temporal', [UserController::class, 'resetPassword'])->whereNumber('user')->middleware('throttle:10,1')->name('users.password');
@@ -27,12 +36,12 @@ Route::prefix('administradorgeneral')->name('superadmin.')->middleware('superadm
     Route::put('usuarios/{user}/estado', [UserController::class, 'updateStatus'])->whereNumber('user')->name('users.status');
     Route::post('usuarios/{user}/cerrar-sesiones', [UserController::class, 'terminateSessions'])->whereNumber('user')->name('users.sessions');
 
-    // Galpones y pagos: sólo con la gestión de clientes (Panel General) activada.
+    // Instalaciones aparte (galpones con su propio sistema) y pagos: sólo con la gestión de clientes (Panel General) activada.
     Route::middleware('central')->group(function () {
-        Route::get('galpones', [ClientController::class, 'index'])->name('clients.index');
-        Route::get('galpones/{license}', [ClientController::class, 'show'])->whereNumber('license')->name('clients.show');
-        Route::put('galpones/{license}/cuota', [ClientController::class, 'updateFee'])->whereNumber('license')->name('clients.fee');
-        Route::post('galpones/{license}/pagos', [ClientController::class, 'storePayment'])->whereNumber('license')->middleware('throttle:30,1')->name('clients.payments.store');
-        Route::post('galpones/{license}/pagos/{payment}/anular', [ClientController::class, 'voidPayment'])->whereNumber(['license', 'payment'])->name('clients.payments.void');
+        Route::get('instalaciones', [ClientController::class, 'index'])->name('clients.index');
+        Route::get('instalaciones/{license}', [ClientController::class, 'show'])->whereNumber('license')->name('clients.show');
+        Route::put('instalaciones/{license}/cuota', [ClientController::class, 'updateFee'])->whereNumber('license')->name('clients.fee');
+        Route::post('instalaciones/{license}/pagos', [ClientController::class, 'storePayment'])->whereNumber('license')->middleware('throttle:30,1')->name('clients.payments.store');
+        Route::post('instalaciones/{license}/pagos/{payment}/anular', [ClientController::class, 'voidPayment'])->whereNumber(['license', 'payment'])->name('clients.payments.void');
     });
 });

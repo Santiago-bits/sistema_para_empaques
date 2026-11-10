@@ -52,6 +52,10 @@ class LoginController extends Controller
         if (! $user->isActive()) {
             throw ValidationException::withMessages(['login' => 'Tu usuario está inactivo. Contactá al administrador.']);
         }
+        if ($user->warehouse_id && \App\Support\Tenancy::ready()
+            && ! \App\Models\Warehouse::query()->whereKey($user->warehouse_id)->where('active', true)->exists()) {
+            throw ValidationException::withMessages(['login' => 'Tu galpón está suspendido. Contactá al administrador del sistema.']);
+        }
 
         Auth::login($user, $request->boolean('remember'));
         $request->session()->regenerate();

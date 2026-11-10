@@ -1,6 +1,6 @@
 @php $statuses = \App\Http\Controllers\Developer\LicenseController::STATUSES; @endphp
-<x-layouts.app title="Panel general · Galpones">
-    <x-page-header title="Galpones" subtitle="Cada galpón con su propio sistema: su administrador, cuánto lo usa y su licencia.">
+<x-layouts.app title="Panel general · Instalaciones aparte">
+    <x-page-header title="Instalaciones aparte" subtitle="Galpones con su propio sistema (otra dirección y otra base): su administrador, cuánto lo usan y su licencia. Los galpones de este sistema se manejan en Administración general → Galpones.">
         <x-slot:actions>
             <a href="{{ route('central.tickets.index') }}" class="btn btn-secondary"><x-icon name="lifebuoy" class="size-4"/> Soporte ({{ $stats['open_tickets'] }})</a>
             <a href="{{ route('central.clients.create') }}" class="btn btn-primary"><x-icon name="plus" class="size-4"/> Nuevo galpón</a>
