@@ -2,9 +2,32 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versionado semántico.
 
-## [Sin publicar]
+## [1.11.0] - 2026-11-10
 
 ### Agregado
+- **Multigalpón: un solo sistema para infinidad de galpones.** Cada galpón tiene sus propios usuarios, fichas
+  (productores, clientes, camioneros, camiones…), lotes, cajones, pallets, cargas, remitos, facturas, caja,
+  informes, configuración (nombre, CUIT, logo, código ARCA, etiquetas), numeraciones (cada uno empieza en 1) y
+  módulos. **Ningún galpón ve ni toca datos de otro**: todas las consultas se filtran solas por galpón, las
+  validaciones no dejan elegir un registro de otro galpón y los códigos se pueden repetir entre galpones.
+- **Administración general → Galpones** (sólo el Super Administrador): crear galpones, crearles su
+  **administrador general** (con contraseña temporal) y ver su puesta en marcha. El administrador de cada galpón
+  carga a sus empleados y maneja todo su galpón. Un galpón se puede **suspender** (nadie de ese galpón entra; los
+  datos se conservan).
+- **Selector de galpón** en el encabezado para el Super Administrador; los demás ven en qué galpón están.
+- Los avisos y alertas automáticas, el valor del dólar y las exportaciones grandes funcionan galpón por galpón.
+- Lo que ya estaba cargado queda como el primer galpón: no se pierde ni se mueve nada. La base se actualiza sola
+  en la primera visita (con copia de seguridad previa).
+
+### Seguridad
+- Con más de un galpón, las copias de seguridad (contienen la base entera) y los registros técnicos son sólo del
+  Super Administrador, igual que la configuración de seguridad, ingreso y backups (valen para todo el sistema).
+- Un administrador de galpón no puede abrir, editar ni cerrar la sesión de usuarios de otro galpón (ni del Super
+  Administrador): para él no existen.
+
+### Cambiado
+- El Panel General de licencias pasa a llamarse **«Instalaciones aparte»** (galpones con su propio sistema), para
+  no confundirse con los galpones de este sistema.
 - **Panel General → Galpones** (antes «Clientes y uso»): el desarrollador da de alta cada galpón (nombre, CUIT,
   localidad, contacto, licencia y módulos) y anota el usuario de su **administrador general**, que crea a mano en el
   sistema del galpón. Ese administrador carga a sus empleados desde su propio sistema. Cada galpón tiene una

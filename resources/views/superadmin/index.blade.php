@@ -100,15 +100,16 @@
         </div>
     @endif
 
-    @unless (setting('system.sample_data_at'))
+    @unless (setting('demo.sample_data_at'))
         <div class="panel mb-8 flex flex-wrap items-center justify-between gap-4 border-sky-300 p-5 dark:border-sky-900">
             <div class="max-w-2xl">
                 <p class="font-semibold">Datos de ejemplo</p>
                 <p class="mt-1 text-sm text-stone-600 dark:text-stone-400">
                     Carga al menos 10 ejemplos de todo: productores, clientes, proveedores, camioneros, camiones, cámaras de frío, lotes,
                     pallets, cajones con etiqueta, cargas, remitos, facturas, caja, cheques, mantenimiento, incidentes y más. Sirve para ver
-                    cómo se ve cada pantalla y probarla. Úsalo en un sistema de prueba, no en el de un galpón real.
+                    cómo se ve cada pantalla y probarla. Úsalo en un galpón de prueba, no en el de un galpón real.
                 </p>
+                <p class="mt-1 text-sm font-medium">Se cargan en el galpón en el que estás: {{ \App\Support\CurrentWarehouse::model()?->name ?? '—' }}.</p>
             </div>
             <form method="POST" action="{{ route('superadmin.sample') }}" x-data="{ busy: false }" x-confirm="¿Cargar los datos de ejemplo? Tarda alrededor de un minuto." @submit="busy = true">
                 @csrf

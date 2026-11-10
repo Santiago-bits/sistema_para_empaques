@@ -4,7 +4,7 @@
             <x-badge :color="$warehouse->active ? 'emerald' : 'red'" class="text-sm">{{ $warehouse->active ? 'Activo' : 'Suspendido' }}</x-badge>
             <form method="POST" action="{{ route('warehouses.enter', $warehouse) }}">
                 @csrf
-                <button class="btn btn-secondary"><x-icon name="arrow-left" class="size-4 rotate-180"/> Entrar a este galpón</button>
+                <button class="btn btn-secondary"><x-icon name="logout" class="size-4"/> Entrar a este galpón</button>
             </form>
             <a href="{{ route('superadmin.warehouses.edit', $warehouse) }}" class="btn btn-primary"><x-icon name="pencil" class="size-4"/> Editar</a>
         </x-slot:actions>

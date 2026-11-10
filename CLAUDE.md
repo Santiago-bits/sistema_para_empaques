@@ -62,7 +62,33 @@ routes/web.php          Carga routes/public/*.php (sin login) y routes/modules/*
     (usar `cursor()`/`lazy()` en exportaciones).
 12. **Configuración**: `setting('production.weight_min')`, `module_enabled('loads')`. Helpers de formato:
     `kg()`, `num()`, `pct()`, `money()`, `fdate($fecha, true)`.
-13. **Multigalpón**: los modelos operativos usan `BelongsToWarehouse` (completa `warehouse_id` solo).
+13. **Multigalpón** (un solo sistema, muchos galpones; cada uno con sus propios datos — ver sección abajo).
+
+## Multigalpón — NO romper
+
+Un solo sistema (una URL, una base) para infinidad de galpones. Cada galpón tiene sus usuarios, fichas, operación,
+facturación, configuración, numeraciones y módulos; **ningún galpón ve ni toca datos de otro**.
+
+- **Galpón activo**: `CurrentWarehouse::id()`. Un usuario de galpón (`users.warehouse_id`) trabaja SIEMPRE en el suyo.
+  El Super Administrador (sin galpón) elige en cuál entrar (selector del encabezado). Sin usuario (consola, colas)
+  con varios galpones no hay galpón activo: recorrer con `CurrentWarehouse::forEach(fn ($id) => …)` o fijar uno con
+  `CurrentWarehouse::runFor($id, fn () => …)`.
+- **Tabla nueva con datos de un galpón**: agregarla a `App\Support\Tenancy::TABLES`, columna `warehouse_id`
+  (migración aditiva) y `use BelongsToWarehouse;` en su modelo. Con eso: filtro automático en toda consulta Eloquent,
+  `warehouse_id` al crear, y las reglas `unique`/`exists` miran sólo el galpón activo. Los índices únicos van con
+  `warehouse_id` adelante: `$t->unique(['warehouse_id', 'code'])`.
+- **`DB::table()` NO filtra**: para consultas a mano usar `Tenancy::table('loads as l')` (ya filtrado). Los `insert()`
+  masivos (sin modelo) deben llevar `'warehouse_id' => …` a mano.
+- **Usuarios**: listados con `User::query()->visibleTo()` (sólo los del galpón). Nunca `User::query()` suelto para
+  mostrar o notificar gente; avisos con `Recipients::withPermission()` (ya filtra por galpón).
+- **Configuración**: `setting()` es del galpón activo. Sólo `SettingsService::GLOBAL_PREFIXES` (system., support.,
+  backup., login., security.) es común a todos.
+- **Trabajos en cola** (`ShouldQueue`): guardar el `warehouseId` al despacharlos y correr con `runFor()` (ver
+  `GenerateReportExport`).
+- **Lo que abarca todo el sistema** (backups de la base entera, logs) es sólo del Super Administrador
+  (`Tenancy::SYSTEM_PERMISSIONS`).
+- **Pruebas**: `tests/Feature/MultiWarehouse/IsolationTest.php` llena el galpón A con datos demo, crea el B y recorre
+  todas las pantallas, búsquedas, exportaciones y la API como admin de B. Toda pantalla nueva entra sola en esa prueba.
 
 ## Interfaz (Blade)
 
@@ -110,7 +136,8 @@ El Panel General corre en Hostinger, que tiene **`proc_open` deshabilitado**. Po
 5. **Migraciones**: el deploy no las corre; las aplica solo `UpgradeDatabase` (middleware) + `DatabaseUpgrader` en la
    primera visita después de actualizar (también sincroniza permisos/módulos con SystemSeeder). Las migraciones tienen
    que ser aditivas y seguras de correr desde una petición web. Las consultas de totales: `cloneWithout(['columns',
-   'orders', 'limit', 'offset'])` antes de `selectRaw` (MySQL rechaza mezclar columnas del listado con SUM/COUNT).
+   'orders', 'limit', 'offset'])->cloneWithoutBindings(['select', 'order'])` antes de `selectRaw` (MySQL rechaza
+   mezclar columnas del listado con SUM/COUNT; sin quitar los bindings del select, un withCount filtrado rompe la consulta).
 6. Todo lo que use `Symfony\Component\Process` (backups con mysqldump) debe fallar con un mensaje claro y no
    romper nada si `proc_open` no está disponible.
 
