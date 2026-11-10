@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Module;
+use App\Support\CurrentWarehouse;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
 
@@ -41,17 +42,19 @@ class ModuleService
         'mobile_app' => ['Aplicación móvil', 'API para aplicación móvil', false, false],
     ];
 
-    private ?array $states = null;
+    /** @var array<string, array> Estados por galpón (cada galpón activa sus propios módulos). */
+    private array $states = [];
 
     public function states(): array
     {
-        if ($this->states !== null) {
-            return $this->states;
+        $slot = (string) (CurrentWarehouse::id() ?? '');
+        if (isset($this->states[$slot])) {
+            return $this->states[$slot];
         }
 
         $stored = [];
         try {
-            $stored = Cache::rememberForever(self::CACHE_KEY, function () {
+            $stored = Cache::rememberForever(self::CACHE_KEY.'.'.$slot, function () {
                 if (! Schema::hasTable('modules')) {
                     return [];
                 }
@@ -64,7 +67,7 @@ class ModuleService
 
         $defaults = array_map(fn ($m) => $m[2], self::CATALOG);
 
-        return $this->states = array_replace($defaults, $stored);
+        return $this->states[$slot] = array_replace($defaults, $stored);
     }
 
     public function enabled(string $key): bool
@@ -82,14 +85,14 @@ class ModuleService
             return; // Los módulos núcleo no se pueden desactivar.
         }
 
-        $module = Module::query()->where('key', $key)->firstOrFail();
-        $module->update(['enabled' => $enabled]);
+        // Un galpón nuevo todavía no tiene sus filas de módulos: se crean al primer cambio.
+        Module::query()->updateOrCreate(['key' => $key], ['name' => self::CATALOG[$key][0] ?? $key, 'is_core' => self::CATALOG[$key][3] ?? false, 'enabled' => $enabled]);
         $this->flush();
     }
 
     public function flush(): void
     {
-        Cache::forget(self::CACHE_KEY);
-        $this->states = null;
+        Cache::forget(self::CACHE_KEY.'.'.(CurrentWarehouse::id() ?? ''));
+        $this->states = [];
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToWarehouse;
 use App\Enums\InvoiceStatus;
 use App\Models\Concerns\Auditable;
 use App\Models\Concerns\HasStateHistory;
@@ -14,6 +15,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Invoice extends Model
 {
+    use BelongsToWarehouse;
+
     use Auditable, HasStateHistory, SoftDeletes;
 
     public const VOUCHER_TYPES = [

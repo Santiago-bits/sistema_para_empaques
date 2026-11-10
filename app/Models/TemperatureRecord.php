@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToWarehouse;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class TemperatureRecord extends Model
 {
+    use BelongsToWarehouse;
+
     public $timestamps = false;
 
     protected $fillable = [

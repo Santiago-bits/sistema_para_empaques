@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToWarehouse;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,6 +10,8 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Alert extends Model
 {
+    use BelongsToWarehouse;
+
     protected $fillable = [
         'type', 'severity', 'title', 'message', 'alertable_type', 'alertable_id', 'fingerprint',
         'resolved_at', 'resolved_by',

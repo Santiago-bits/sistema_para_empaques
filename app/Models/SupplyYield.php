@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToWarehouse;
 use App\Models\Concerns\Auditable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,6 +14,8 @@ use Illuminate\Support\Facades\DB;
  */
 class SupplyYield extends Model
 {
+    use BelongsToWarehouse;
+
     use Auditable;
 
     protected $fillable = ['supply_id', 'name', 'started_on', 'ended_on', 'quantity_used', 'unit', 'packages_manual', 'notes', 'created_by'];

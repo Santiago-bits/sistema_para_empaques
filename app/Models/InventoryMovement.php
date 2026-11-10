@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToWarehouse;
 use App\Models\Concerns\Auditable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class InventoryMovement extends Model
 {
+    use BelongsToWarehouse;
+
     use Auditable;
 
     public const TYPES = ['in' => 'Ingreso', 'out' => 'Egreso', 'adjust' => 'Ajuste'];

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToWarehouse;
 use App\Models\Concerns\Auditable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,6 +13,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Packer extends Model
 {
+    use BelongsToWarehouse;
+
     use Auditable, HasFactory, SoftDeletes;
 
     protected $fillable = [

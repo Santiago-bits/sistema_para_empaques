@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToWarehouse;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /** Línea de un DTV-e: especie, variedad, cantidad, unidad y kilos. */
 class DtvLine extends Model
 {
+    use BelongsToWarehouse;
+
     protected $fillable = ['dtv_document_id', 'species', 'variety_id', 'variety_name', 'quantity', 'unit', 'kg_per_unit', 'kg_total'];
 
     protected function casts(): array

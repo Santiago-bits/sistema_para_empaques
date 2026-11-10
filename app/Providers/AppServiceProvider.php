@@ -188,6 +188,17 @@ class AppServiceProvider extends ServiceProvider
     private function registerGates(): void
     {
         // Orden de evaluación: módulo desactivado → usuario inactivo → super admin → permiso granular.
+        // Multigalpón: al cambiar el usuario (ingreso, salida) se vuelve a resolver el galpón activo.
+        \Illuminate\Support\Facades\Event::listen(
+            [\Illuminate\Auth\Events\Authenticated::class, \Illuminate\Auth\Events\Login::class, \Illuminate\Auth\Events\Logout::class],
+            fn () => \App\Support\CurrentWarehouse::reset()
+        );
+        // Las reglas «unique» y «exists» sobre tablas de un galpón miran sólo el galpón activo.
+        $this->app->extend('validation.presence', fn ($verifier, $app) => new \App\Support\WarehousePresenceVerifier($app['db']));
+        if ($this->app->resolved('validator')) {
+            $this->app['validator']->setPresenceVerifier($this->app['validation.presence']);
+        }
+
         Gate::before(function (User $user, string $ability) {
             $module = PermissionRegistry::moduleOf($ability);
 

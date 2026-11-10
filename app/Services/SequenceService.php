@@ -30,7 +30,9 @@ class SequenceService
 
             if (! $sequence) {
                 [$prefix, $padding] = self::DEFAULTS[$key] ?? [strtoupper($key).'-', 6];
+                // insertOrIgnore no pasa por el modelo: el galpón se pone a mano (cada galpón tiene su numeración).
                 Sequence::query()->insertOrIgnore([
+                    'warehouse_id' => \App\Support\CurrentWarehouse::id(),
                     'key' => $key, 'prefix' => $prefix, 'padding' => $padding, 'next_number' => 1,
                     'created_at' => now(), 'updated_at' => now(),
                 ]);

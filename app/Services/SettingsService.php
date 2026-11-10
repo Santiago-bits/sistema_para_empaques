@@ -3,16 +3,35 @@
 namespace App\Services;
 
 use App\Models\Setting;
+use App\Support\CurrentWarehouse;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * Configuración general del sistema (tabla settings) con cache.
+ * Configuración (tabla settings) con cache.
  * Uso: setting('production.weight_min', 5) o app(SettingsService::class)->set(...).
+ *
+ * Multigalpón: cada galpón tiene su propia configuración (empresa, CUIT, logo, ARCA, etiquetas, producción…).
+ * Sólo lo que es del sistema entero (GLOBAL_PREFIXES: ingreso, seguridad de sesión, backups, soporte, sistema)
+ * es común a todos y se guarda sin galpón.
  */
 class SettingsService
 {
     private const CACHE_KEY = 'galpon.settings';
+
+    /** Claves comunes a todos los galpones. */
+    public const GLOBAL_PREFIXES = ['system.', 'support.', 'backup.', 'login.', 'security.'];
+
+    public static function isGlobal(string $key): bool
+    {
+        foreach (self::GLOBAL_PREFIXES as $prefix) {
+            if (str_starts_with($key, $prefix)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     /** Valores por defecto: si una clave no existe en la base se usa este valor. */
     public const DEFAULTS = [
@@ -94,24 +113,31 @@ class SettingsService
         'system.environment_label' => ['', 'string', 'system'],
     ];
 
-    private ?array $values = null;
+    /** @var array<string, array> Valores ya resueltos por galpón ('' = sin galpón). */
+    private array $values = [];
 
     public function all(): array
     {
-        if ($this->values !== null) {
-            return $this->values;
+        $warehouseId = CurrentWarehouse::id();
+        $slot = (string) ($warehouseId ?? '');
+        if (isset($this->values[$slot])) {
+            return $this->values[$slot];
         }
 
         $stored = [];
         try {
-            $stored = Cache::rememberForever(self::CACHE_KEY, function () {
+            $stored = Cache::rememberForever(self::CACHE_KEY.'.'.$slot, function () use ($warehouseId) {
                 if (! Schema::hasTable('settings')) {
                     return [];
                 }
+                $scoped = Schema::hasColumn('settings', 'warehouse_id');
+                $rows = Setting::query()
+                    ->when($scoped, fn ($q) => $q->where(fn ($w) => $w->whereNull('warehouse_id')->when($warehouseId, fn ($x) => $x->orWhere('warehouse_id', $warehouseId))))
+                    // Primero las comunes y después las del galpón (que pisan a las comunes).
+                    ->when($scoped, fn ($q) => $q->orderByRaw('warehouse_id IS NOT NULL'))
+                    ->get(['key', 'value', 'type']);
 
-                return Setting::query()->get(['key', 'value', 'type'])
-                    ->mapWithKeys(fn (Setting $s) => [$s->key => $this->cast($s->value, $s->type)])
-                    ->all();
+                return $rows->mapWithKeys(fn (Setting $s) => [$s->key => $this->cast($s->value, $s->type)])->all();
             });
         } catch (\Throwable) {
             // Sin base de datos (instalación inicial): se usan los valores por defecto.
@@ -119,7 +145,7 @@ class SettingsService
 
         $defaults = array_map(fn ($d) => $d[0], self::DEFAULTS);
 
-        return $this->values = array_replace($defaults, $stored);
+        return $this->values[$slot] = array_replace($defaults, $stored);
     }
 
     public function get(string $key, mixed $default = null): mixed
@@ -132,16 +158,34 @@ class SettingsService
         $type ??= self::DEFAULTS[$key][1] ?? (is_array($value) ? 'json' : 'string');
         $group = self::DEFAULTS[$key][2] ?? explode('.', $key)[0];
 
-        $setting = Setting::query()->firstOrNew(['key' => $key]);
+        $warehouseId = self::isGlobal($key) ? null : CurrentWarehouse::id();
+        $setting = Schema::hasColumn('settings', 'warehouse_id')
+            ? Setting::query()->where('key', $key)->where('warehouse_id', $warehouseId)->first()
+                ?? new Setting(['key' => $key, 'warehouse_id' => $warehouseId])
+            : Setting::query()->firstOrNew(['key' => $key]);
         $setting->fill(['value' => $this->serialize($value, $type), 'type' => $type, 'group' => $group])->save();
 
-        $this->flush();
+        $this->flush($warehouseId === null && self::isGlobal($key));
     }
 
-    public function flush(): void
+    /** Olvida lo leído en esta petición (al cambiar de galpón); no toca la cache. */
+    public function flushMemory(): void
     {
-        Cache::forget(self::CACHE_KEY);
-        $this->values = null;
+        $this->values = [];
+    }
+
+    /** Vacía la cache del galpón activo (o la de todos, si cambió algo común). */
+    public function flush(bool $everyWarehouse = true): void
+    {
+        Cache::forget(self::CACHE_KEY.'.');
+        if ($everyWarehouse && Schema::hasTable('warehouses')) {
+            foreach (\App\Models\Warehouse::query()->pluck('id') as $id) {
+                Cache::forget(self::CACHE_KEY.'.'.$id);
+            }
+        } else {
+            Cache::forget(self::CACHE_KEY.'.'.(CurrentWarehouse::id() ?? ''));
+        }
+        $this->values = [];
     }
 
     private function serialize(mixed $value, string $type): ?string
