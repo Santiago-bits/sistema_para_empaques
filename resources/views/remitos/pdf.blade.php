@@ -35,6 +35,7 @@
             <td style="text-align:right">
                 <strong>{{ setting('company.name') }}</strong><br>
                 @if (setting('company.cuit'))CUIT {{ \App\Rules\Cuit::format(setting('company.cuit')) }}<br>@endif
+                @if (filled(setting('arca.warehouse_code')))Galpón ARCA N° {{ setting('arca.warehouse_code') }}<br>@endif
                 {{ setting('company.address') }}<br>
                 {{ setting('company.phone') }}
             </td>

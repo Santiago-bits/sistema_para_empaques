@@ -39,7 +39,7 @@
         <header>
             <div>
                 <h1>{{ setting('company.name') }}</h1>
-                <div class="muted">{{ setting('company.address') }}@if (setting('company.cuit')) · CUIT {{ setting('company.cuit') }}@endif</div>
+                <div class="muted">{{ setting('company.address') }}@if (setting('company.cuit')) · CUIT {{ setting('company.cuit') }}@endif{{ filled(setting('arca.warehouse_code')) ? ' · Galpón ARCA N° '.setting('arca.warehouse_code') : '' }}</div>
             </div>
             <div style="text-align:right">
                 <strong style="font-size:13pt">ROMANEO</strong><br>

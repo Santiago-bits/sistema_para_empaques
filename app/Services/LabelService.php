@@ -35,7 +35,11 @@ class LabelService
 
     public function crateLabel(Crate $crate): array
     {
-        $crate->loadMissing('lot', 'variety', 'size', 'grade', 'containerType', 'pallet', 'producer', 'packer');
+        $crate->loadMissing('lot', 'variety', 'size', 'grade', 'containerType', 'pallet', 'producer', 'packer', 'currentLoad.destination', 'currentLoad.client');
+        $load = $crate->currentLoad;
+        // A dónde va: el destino de la carga en la que está el cajón (si ya se cargó).
+        $destination = $load ? ($load->destination?->name ?: ($load->client?->business_name
+            ?: (\App\Models\Load::COMMERCIAL_DESTINATIONS[$load->commercial_destination] ?? null))) : null;
         $nominal = (float) setting('label.nominal_kg', 0);
         $weight = $crate->weight !== null ? kg($crate->weight) : ($nominal > 0 ? 'aprox. '.kg($nominal, 0) : null);
 
@@ -47,6 +51,7 @@ class LabelService
                 ['Calibre', $crate->size?->name],
                 ['Selección', $crate->grade?->name],
                 ['Kg', $weight],
+                ['Destino', $destination],
                 ['Envase', $crate->containerType?->name],
                 ['Lote', $crate->lot?->code],
                 ['Pallet', $crate->pallet?->code],
@@ -79,16 +84,18 @@ class LabelService
         ];
     }
 
-    /** Encabezado de la etiqueta: empaque, CUIT y dirección (Configuración → Etiquetas). */
+    /**
+     * Encabezado de la etiqueta: empaque, CUIT y dirección (Configuración → Etiquetas) y, siempre que esté
+     * cargado, el código del galpón en ARCA (Configuración → ARCA).
+     */
     public function companyLine(): ?string
     {
-        if (! setting('label.show_company', true)) {
-            return null;
-        }
+        $arca = trim((string) setting('arca.warehouse_code'));
         $parts = array_filter([
-            setting('company.name'),
-            setting('company.cuit') ? 'CUIT '.setting('company.cuit') : null,
-            setting('company.address'),
+            setting('label.show_company', true) ? setting('company.name') : null,
+            setting('label.show_company', true) && setting('company.cuit') ? 'CUIT '.setting('company.cuit') : null,
+            $arca !== '' ? 'Galpón ARCA N° '.$arca : null,
+            setting('label.show_company', true) ? setting('company.address') : null,
         ]);
 
         return $parts ? implode(' · ', $parts) : null;
