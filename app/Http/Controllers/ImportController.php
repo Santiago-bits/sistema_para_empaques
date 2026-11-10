@@ -110,6 +110,8 @@ class ImportController extends Controller
 
     public function folderShow(string $group): View
     {
+        // Números realistas para las planillas que dependen de otras de la misma carpeta (no guarda nada).
+        $this->imports->simulateGroup($group);
         $batches = ImportBatch::query()->where('group_uuid', $group)->with('user:id,first_name,last_name')->orderBy('id')->get();
         abort_if($batches->isEmpty(), 404);
 

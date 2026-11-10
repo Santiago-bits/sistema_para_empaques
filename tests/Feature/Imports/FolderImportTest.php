@@ -168,6 +168,63 @@ class FolderImportTest extends TestCase
         $this->upload(new UploadedFile($empty, 'fotos.zip', 'application/zip', null, true))->assertUnprocessable()->assertJsonFragment(['message' => 'El .zip no tiene planillas (.xlsx o .csv).']);
     }
 
+    public function test_spreadsheets_that_depend_on_others_of_the_same_folder_preview_and_import_correctly(): void
+    {
+        $this->actingAsRole('admin');
+        $clients = [['razon_social', 'nombre_fantasia', 'cuit', 'condicion_iva']];
+        $destinations = [['nombre', 'cliente', 'direccion', 'localidad']];
+        $transporters = [['razon_social', 'cuit', 'condicion_iva', 'contacto']];
+        $trucks = [['patente', 'transportista', 'tipo', 'marca']];
+        $drivers = [['nombre', 'apellido', 'dni', 'cuil', 'transportista', 'licencia_vencimiento']];
+        $crews = [['codigo', 'nombre', 'tipo', 'encargado']];
+        $employees = [['legajo', 'nombre', 'apellido', 'dni', 'cuadrilla']];
+        $cuits = ['30500001018', '30500001026', '30500001034', '30500001042', '30500001050'];
+        foreach ($cuits as $i => $cuit) {
+            $n = $i + 1;
+            $clients[] = ["Frutas del Valle {$n} S.A.", "Mercado {$n}", $cuit, 'RI'];
+            // El destino nombra al cliente por su nombre de fantasía.
+            $destinations[] = ["Depósito {$n}", "Mercado {$n}", "Calle {$n}", 'Neuquén'];
+            $transporters[] = ["Transportes {$n} SRL", $cuit, 'RI', "Contacto {$n}"];
+            $trucks[] = [sprintf('AB%03dCD', $n), "Transportes {$n} SRL", 'Semirremolque', 'Scania'];
+            $drivers[] = ["Chofer{$n}", 'Pérez', (string) (30000000 + $n), '20'.(30000000 + $n).'1', $cuit, '31/12/2027'];
+            $crews[] = ["CU-{$n}", "Cuadrilla {$n}", 'cosecha', 'Encargado'];
+            $employees[] = ["L-{$n}", "Empleado{$n}", 'Gómez', (string) (31000000 + $n), "Cuadrilla {$n}"];
+        }
+        $files = ['01_clientes.xlsx' => $clients, '02_destinos.xlsx' => $destinations, '05_transportistas.xlsx' => $transporters,
+            '06_camiones.xlsx' => $trucks, '07_choferes.xlsx' => $drivers, '08_cuadrillas.xlsx' => $crews, '09_empleados.xlsx' => $employees];
+        // El orden en que el navegador manda los archivos no importa: los que dependen, primero.
+        foreach (array_reverse($files, true) as $name => $rows) {
+            $this->upload($this->xlsx($name, $rows))->assertOk()->assertJson(['files' => [['recognized' => true]]]);
+        }
+
+        // Vista previa realista: todas las filas correctas, aunque sus clientes/transportistas/cuadrillas todavía no estén cargados.
+        $this->get(route('imports.folder.show', $this->group))->assertOk();
+        foreach (array_keys($files) as $name) {
+            $batch = $this->batch($name);
+            $this->assertSame([5, 0], [$batch->valid_rows, $batch->error_rows], $name.': '.json_encode($batch->errors, JSON_UNESCAPED_UNICODE));
+        }
+        // La vista previa no guardó nada.
+        $this->assertSame(0, \App\Models\Client::query()->count() + Transporter::query()->count() + \App\Models\Crew::query()->count());
+
+        $this->post(route('imports.folder.confirm', $this->group))->assertRedirect()->assertSessionHas('success');
+        $this->assertSame(5, \App\Models\Destination::query()->whereNotNull('client_id')->count());
+        $this->assertSame(5, Truck::query()->whereNotNull('transporter_id')->count());
+        $this->assertSame(5, Driver::query()->whereNotNull('transporter_id')->count());
+        $this->assertSame(5, \App\Models\Employee::query()->whereNotNull('crew_id')->count());
+        $this->assertSame('Mercado 3', \App\Models\Destination::query()->where('name', 'Depósito 3')->sole()->client->name);
+    }
+
+    public function test_a_reference_that_does_not_exist_says_which_one_and_what_to_do(): void
+    {
+        $this->actingAsRole('admin');
+        $this->upload($this->csv('destinos.csv', "nombre;cliente;localidad\nDepósito Norte;Cliente Que No Existe;Neuquén\n"))->assertOk();
+        $this->get(route('imports.folder.show', $this->group))->assertOk();
+        $error = $this->batch('destinos.csv')->errors[0];
+        $this->assertSame('cliente', $error['field']);
+        $this->assertStringContainsString('No se encontró «Cliente Que No Existe»', $error['message']);
+        $this->assertStringContainsString('misma carpeta', $error['message']);
+    }
+
     public function test_dtv_spreadsheets_are_sent_to_their_own_screen(): void
     {
         $this->actingAsRole('admin');

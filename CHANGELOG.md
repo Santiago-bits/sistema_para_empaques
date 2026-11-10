@@ -2,6 +2,21 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versionado semántico.
 
+## [1.11.1] - 2026-11-10
+
+### Cambiado
+- **Administración general → Usuarios**: primero un cuadro por galpón (activo o suspendido, cuántos usuarios,
+  cuántos con contraseña temporal y cuántos nunca entraron) y uno aparte para los Super Administradores; al tocar
+  un galpón se ven sólo sus usuarios. Buscar sigue mirando todos los galpones y dice de cuál es cada usuario.
+
+### Corregido
+- **Importar una carpeta**: las planillas que dependen de otras de la misma carpeta (destinos de sus clientes,
+  camiones y choferes de sus transportistas, empleados de sus cuadrillas) aparecían con todas sus filas en error
+  en la vista previa. Ahora la vista previa simula la carga completa en orden (sin guardar nada) y muestra los
+  mismos números que se van a cargar al confirmar.
+- Los destinos encuentran a su cliente también por el nombre de fantasía.
+- Mensaje claro cuando no se encuentra el cliente, transportista o cuadrilla de una fila: dice cuál y qué hacer.
+
 ## [1.11.0] - 2026-11-10
 
 ### Agregado
