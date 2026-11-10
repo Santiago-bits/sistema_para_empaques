@@ -44,6 +44,7 @@
                 <div>N° <strong>{{ $invoice->formattedNumber() }}</strong></div>
                 <div>Fecha: {{ fdate($invoice->issued_on) }}</div>
                 <div>CUIT: {{ \App\Rules\Cuit::format(setting('arca.cuit') ?: setting('company.cuit')) }}</div>
+                @if (filled(setting('arca.warehouse_code')))<div>Galpón ARCA N° {{ setting('arca.warehouse_code') }}</div>@endif
             </td>
         </tr>
     </table>

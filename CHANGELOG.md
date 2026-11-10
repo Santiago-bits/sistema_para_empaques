@@ -5,6 +5,16 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 ## [Sin publicar]
 
 ### Agregado
+- **Importar una carpeta entera** (Importar y exportar → «Importar una carpeta entera», o Planillas subidas): se elige
+  una carpeta (o varias planillas) y cada una va sola a su sección (camioneros, productores, camiones, clientes…).
+  Se decide por el nombre del archivo y los títulos de las columnas, y **ante la duda no se elige**: si las columnas
+  sirven para dos secciones (por ejemplo productores y propietarios) o el nombre dice una cosa y las columnas otra,
+  la planilla queda «sin reconocer» y se elige a mano. Nada se guarda hasta confirmar; al confirmar se cargan
+  primero transportistas, clientes y cuadrillas, y después camiones, camioneros, destinos y empleados. Las planillas
+  de DTV-e se derivan a Logística → DTV-e.
+- **Código del galpón en ARCA en todo lo que se imprime**: etiquetas de cajones y pallets (aunque se oculten los
+  datos de la empresa), remitos, facturas, romaneos y resúmenes de cuenta.
+- La etiqueta del cajón muestra el **destino** (el de la carga en la que está, cuando ya se cargó).
 - **Avisos de errores por correo** al desarrollador: cada 5 minutos se revisan los errores registrados y el log; se mandan
   agrupados por causa (como mucho un correo cada 15 minutos). Se configura en Herramientas técnicas → Avisos por correo,
   con botones para mandar un correo de prueba, revisar ahora y limpiar.
