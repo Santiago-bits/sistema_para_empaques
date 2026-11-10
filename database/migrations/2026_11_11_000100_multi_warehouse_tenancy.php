@@ -21,9 +21,21 @@ use Illuminate\Support\Facades\Schema;
  */
 return new class extends Migration
 {
+    /** Registro de los índices únicos cambiados (nombre y columnas originales), para poder deshacer exacto. */
+    private const LOG_TABLE = 'tenancy_unique_indexes';
+
     public function up(): void
     {
         $warehouseId = $this->firstWarehouseId();
+        if (! Schema::hasTable(self::LOG_TABLE)) {
+            Schema::create(self::LOG_TABLE, function (Blueprint $t) {
+                $t->id();
+                $t->string('table_name', 64);
+                $t->string('original_name', 64);
+                $t->string('scoped_name', 64);
+                $t->text('columns');
+            });
+        }
 
         if (! Schema::hasColumn('users', 'warehouse_id')) {
             Schema::table('users', function (Blueprint $table) {
@@ -76,6 +88,15 @@ return new class extends Migration
                 continue;
             }
             $indexes = Schema::getIndexes($table);
+            // MySQL descarta solo el índice interno de la clave foránea de warehouse_id cuando otro índice lo reemplaza:
+            // antes de soltar los únicos por galpón hace falta un índice propio sobre warehouse_id.
+            $hasOwn = collect($indexes)->contains(fn ($i) => $i['columns'] === ['warehouse_id']);
+            if (! $hasOwn && Schema::hasColumn($table, 'warehouse_id')) {
+                Schema::table($table, fn (Blueprint $t) => $t->index(['warehouse_id']));
+                $indexes = Schema::getIndexes($table);
+            }
+            $logged = Schema::hasTable(self::LOG_TABLE)
+                ? DB::table(self::LOG_TABLE)->where('table_name', $table)->pluck('original_name', 'scoped_name')->all() : [];
             foreach ($indexes as $index) {
                 if (! $index['unique'] || ! str_contains($index['name'], '_wh_')) {
                     continue;
@@ -83,9 +104,10 @@ return new class extends Migration
                 $columns = array_values(array_diff($index['columns'], ['warehouse_id']));
                 $plain = substr($table.'_'.implode('_', $columns).'_idx', 0, 60);
                 $hasPlain = in_array($plain, array_column($indexes, 'name'), true);
-                Schema::table($table, function (Blueprint $t) use ($index, $columns, $plain, $hasPlain) {
+                $original = $logged[$index['name']] ?? null;
+                Schema::table($table, function (Blueprint $t) use ($index, $columns, $plain, $hasPlain, $original) {
                     $t->dropUnique($index['name']);
-                    $t->unique($columns);
+                    $t->unique($columns, $original);
                     if ($hasPlain) {
                         $t->dropIndex($plain);
                     }
@@ -98,6 +120,7 @@ return new class extends Migration
                 });
             }
         }
+        Schema::dropIfExists(self::LOG_TABLE);
         if (Schema::hasColumn('users', 'warehouse_id')) {
             Schema::table('users', function (Blueprint $t) {
                 $t->dropIndex(['warehouse_id']);
@@ -137,6 +160,7 @@ return new class extends Migration
             $scoped = substr($table.'_wh_'.implode('_', $columns).'_unique', 0, 60);
             $plain = substr($table.'_'.implode('_', $columns).'_idx', 0, 60);
             $needsPlain = ! in_array($plain, $existing, true) && ! in_array($columns, $plainColumns, true);
+            DB::table(self::LOG_TABLE)->insert(['table_name' => $table, 'original_name' => $index['name'], 'scoped_name' => $scoped, 'columns' => json_encode($columns)]);
             Schema::table($table, function (Blueprint $t) use ($index, $columns, $scoped, $plain, $needsPlain) {
                 // Índice común sobre las mismas columnas antes de soltar el único (MySQL lo exige si son claves foráneas).
                 if ($needsPlain) {

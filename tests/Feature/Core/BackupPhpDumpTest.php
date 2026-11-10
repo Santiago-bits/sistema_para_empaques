@@ -23,6 +23,7 @@ class BackupPhpDumpTest extends TestCase
             $this->markTestSkipped('Requiere MySQL/MariaDB.');
         }
         config(['galpon.backup_driver' => 'php']);
+        $this->seed(\Database\Seeders\SystemSeeder::class); // como después de instalar: hay un galpón
     }
 
     public function test_php_dump_is_valid_and_restores_the_data(): void
