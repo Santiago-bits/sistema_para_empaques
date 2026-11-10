@@ -34,6 +34,10 @@ class ImportService
 
     public const MAX_STORED_ERRORS = 2000;
 
+    public const ZIP_MAX_FILES = 200;
+
+    public const ZIP_MAX_FILE_BYTES = 10 * 1024 * 1024;
+
     private const DISK = 'local';
 
     public function __construct(private readonly AuditService $audit)
@@ -260,6 +264,60 @@ class ImportService
         }
 
         return ['imported' => $imported, 'failed' => $failed];
+    }
+
+    /**
+     * Carpeta comprimida (.zip): cada planilla de adentro se trata como si se hubiera subido sola. Es la forma
+     * de mandar una carpeta desde el celular (los navegadores del celular no dejan elegir carpetas).
+     * Nunca se extrae al disco con el nombre que trae el zip: cada planilla se lee en memoria con tope de tamaño.
+     *
+     * @return list<ImportBatch>
+     */
+    public function uploadZip(UploadedFile $file, User $user, string $mode, string $group): array
+    {
+        $zip = new \ZipArchive;
+        if ($zip->open($file->getRealPath()) !== true) {
+            throw new BusinessException('No se pudo abrir el .zip. Verificá que sea una carpeta comprimida válida.');
+        }
+
+        $batches = [];
+        try {
+            if ($zip->numFiles > self::ZIP_MAX_FILES) {
+                throw new BusinessException('El .zip tiene demasiados archivos (máximo '.self::ZIP_MAX_FILES.'). Dividilo en partes.');
+            }
+            for ($i = 0; $i < $zip->numFiles; $i++) {
+                $stat = $zip->statIndex($i);
+                $name = (string) ($stat['name'] ?? '');
+                $base = basename(str_replace('\\', '/', $name));
+                // Carpetas, archivos ocultos o de sistema (__MACOSX), temporales de Excel («~$…») y lo que no es planilla: se ignoran.
+                if (str_ends_with($name, '/') || str_contains($name, '__MACOSX/') || $base === '' || str_starts_with($base, '.')
+                    || str_starts_with($base, '~$') || ! in_array(strtolower(pathinfo($base, PATHINFO_EXTENSION)), ['csv', 'txt', 'xlsx'], true)) {
+                    continue;
+                }
+                if (($stat['size'] ?? 0) > self::ZIP_MAX_FILE_BYTES) {
+                    throw new BusinessException('«'.$base.'» supera los 10 MB.');
+                }
+                $content = $zip->getFromIndex($i, self::ZIP_MAX_FILE_BYTES + 1);
+                if ($content === false || strlen($content) > self::ZIP_MAX_FILE_BYTES) {
+                    throw new BusinessException('No se pudo leer «'.$base.'» dentro del .zip.');
+                }
+                $temp = tempnam(sys_get_temp_dir(), 'zip');
+                file_put_contents($temp, $content);
+                try {
+                    $batches[] = $this->uploadDetected(new UploadedFile($temp, $base, null, null, true), $user, $mode, $group);
+                } finally {
+                    @unlink($temp);
+                }
+            }
+        } finally {
+            $zip->close();
+        }
+
+        if ($batches === []) {
+            throw new BusinessException('El .zip no tiene planillas (.xlsx o .csv).');
+        }
+
+        return $batches;
     }
 
     /** Descarta todo lo que quedó pendiente de una carpeta (lo ya importado no se toca). */

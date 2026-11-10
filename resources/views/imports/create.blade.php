@@ -1,5 +1,9 @@
 <x-layouts.app title="Nueva importación">
-    <x-page-header title="Nueva importación" :back="route('imports.index')"/>
+    <x-page-header title="Nueva importación" :back="route('imports.index')">
+        <x-slot:actions>
+            <a href="{{ route('imports.folder.create') }}" class="btn btn-secondary"><x-icon name="folder" class="size-4"/> ¿Son varias? Importá la carpeta entera</a>
+        </x-slot:actions>
+    </x-page-header>
 
     <div class="grid gap-6 lg:grid-cols-3">
         <x-panel title="1. Subir archivo" class="lg:col-span-2">

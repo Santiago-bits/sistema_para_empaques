@@ -11,7 +11,8 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
   sirven para dos secciones (por ejemplo productores y propietarios) o el nombre dice una cosa y las columnas otra,
   la planilla queda «sin reconocer» y se elige a mano. Nada se guarda hasta confirmar; al confirmar se cargan
   primero transportistas, clientes y cuadrillas, y después camiones, camioneros, destinos y empleados. Las planillas
-  de DTV-e se derivan a Logística → DTV-e.
+  de DTV-e se derivan a Logística → DTV-e. También se puede subir la carpeta **comprimida en .zip** (la única forma
+  desde el celular, que no deja elegir carpetas) o **arrastrarla** a la pantalla.
 - **Código del galpón en ARCA en todo lo que se imprime**: etiquetas de cajones y pallets (aunque se oculten los
   datos de la empresa), remitos, facturas, romaneos y resúmenes de cuenta.
 - La etiqueta del cajón muestra el **destino** (el de la carga en la que está, cuando ya se cargó).
