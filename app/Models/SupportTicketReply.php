@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToWarehouse;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SupportTicketReply extends Model
 {
+    use BelongsToWarehouse;
+
     protected $fillable = [
         'support_ticket_id', 'user_id', 'body', 'from_developer', 'central_id', 'central_synced_at',
     ];

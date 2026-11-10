@@ -124,7 +124,7 @@ class ImportService
 
             foreach (array_chunk($inserts, self::CHUNK) as $chunk) {
                 $model::query()->insert(array_map(
-                    fn (array $row) => $row['data'] + ['created_at' => $now, 'updated_at' => $now],
+                    fn (array $row) => $row['data'] + ['warehouse_id' => $locked->warehouse_id, 'created_at' => $now, 'updated_at' => $now],
                     $chunk
                 ));
             }

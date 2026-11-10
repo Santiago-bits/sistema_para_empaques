@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToWarehouse;
 use App\Models\Concerns\Auditable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,6 +14,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Treatment extends Model
 {
+    use BelongsToWarehouse;
+
     use Auditable, SoftDeletes;
 
     /** Tipos sugeridos (se puede escribir otro). Se configuran en Configuración → Tratamientos. */

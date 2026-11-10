@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToWarehouse;
 use App\Models\Concerns\Auditable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
@@ -11,6 +12,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Driver extends Model
 {
+    use BelongsToWarehouse;
+
     use Auditable, SoftDeletes;
 
     protected $fillable = [

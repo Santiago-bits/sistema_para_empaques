@@ -10,6 +10,6 @@ class Setting extends Model
     use Auditable;
 
     protected $fillable = [
-        'key', 'value', 'type', 'group',
+        'key', 'value', 'type', 'group', 'warehouse_id',
     ];
 }

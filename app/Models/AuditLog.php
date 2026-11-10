@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToWarehouse;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -11,6 +12,11 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  */
 class AuditLog extends Model
 {
+    use BelongsToWarehouse;
+
+    /** Acciones sobre el sistema entero (sin galpón) también se auditan. */
+    public bool $warehouseOptional = true;
+
     public const UPDATED_AT = null;
 
     protected $fillable = [

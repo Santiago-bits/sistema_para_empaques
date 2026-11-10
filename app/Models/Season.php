@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToWarehouse;
 use App\Models\Concerns\Auditable;
 use Illuminate\Database\Eloquent\Model;
 
 class Season extends Model
 {
+    use BelongsToWarehouse;
+
     use Auditable;
 
     protected $fillable = [

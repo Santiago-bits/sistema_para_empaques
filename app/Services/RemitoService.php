@@ -75,6 +75,7 @@ class RemitoService
             }
 
             RemitoItem::query()->insert(array_map(fn ($i) => [
+                'warehouse_id' => $remito->warehouse_id,
                 'remito_id' => $remito->id,
                 'variety_id' => $i['variety_id'],
                 'size_id' => $i['size_id'],

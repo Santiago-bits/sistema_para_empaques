@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToWarehouse;
 use App\Models\Concerns\Auditable;
 use App\Models\Concerns\HasStateHistory;
 use Illuminate\Database\Eloquent\Model;
@@ -10,6 +11,8 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Incident extends Model
 {
+    use BelongsToWarehouse;
+
     use Auditable, HasStateHistory;
 
     public const PRIORITIES = ['low' => 'Baja', 'medium' => 'Media', 'high' => 'Alta', 'critical' => 'Crítica'];

@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToWarehouse;
 use App\Models\Concerns\Auditable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Maintenance extends Model
 {
+    use BelongsToWarehouse;
+
     use Auditable;
 
     public const TYPES = ['preventive' => 'Preventivo', 'corrective' => 'Correctivo', 'emergency' => 'Emergencia'];

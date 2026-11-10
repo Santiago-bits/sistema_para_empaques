@@ -16,6 +16,7 @@ use App\Models\Crate;
 use App\Models\DispatchCheck;
 use App\Models\Invoice;
 use App\Models\Load;
+use App\Support\CurrentWarehouse;
 use App\Models\LoadCrate;
 use App\Models\Pallet;
 use App\Models\Remito;
@@ -442,7 +443,7 @@ class LoadService
                 ->select(['id', 'location_id'])->orderBy('id')
                 ->chunk(500, function ($rows) use ($locked, $label, $by, $now) {
                     DB::table('location_movements')->insert($rows->map(fn ($r) => [
-                        'movable_type' => 'crate', 'movable_id' => $r->id, 'from_location_id' => $r->location_id,
+                        'warehouse_id' => $locked->warehouse_id, 'movable_type' => 'crate', 'movable_id' => $r->id, 'from_location_id' => $r->location_id,
                         'to_location_id' => null, 'to_label' => $label, 'user_id' => $by->id,
                         'notes' => 'Despacho carga '.$locked->number, 'moved_at' => $now,
                     ])->all());
@@ -454,7 +455,7 @@ class LoadService
                 'Despachado en '.$label);
             foreach ($dispatchedPallets as $pallet) {
                 DB::table('location_movements')->insert([
-                    'movable_type' => 'pallet', 'movable_id' => $pallet->id, 'from_location_id' => $pallet->location_id,
+                    'warehouse_id' => $locked->warehouse_id, 'movable_type' => 'pallet', 'movable_id' => $pallet->id, 'from_location_id' => $pallet->location_id,
                     'to_location_id' => null, 'to_label' => $label, 'user_id' => $by->id,
                     'notes' => 'Despacho carga '.$locked->number, 'moved_at' => $now,
                 ]);
@@ -655,7 +656,7 @@ class LoadService
         }
 
         $row = fn (int $id) => [
-            'load_id' => $load->id, 'crate_id' => $id, 'active_crate_id' => $id,
+            'warehouse_id' => $load->warehouse_id, 'load_id' => $load->id, 'crate_id' => $id, 'active_crate_id' => $id,
             'added_by' => $by->id, 'added_at' => $now,
         ];
 
@@ -909,7 +910,7 @@ class LoadService
     private function historyRow(int $id, string $from, string $to, ?User $by, $now, string $notes): array
     {
         return [
-            'stateful_type' => 'crate', 'stateful_id' => $id, 'from_state' => $from, 'to_state' => $to,
+            'warehouse_id' => CurrentWarehouse::id(), 'stateful_type' => 'crate', 'stateful_id' => $id, 'from_state' => $from, 'to_state' => $to,
             'user_id' => $by?->id ?? auth()->id(), 'notes' => mb_substr($notes, 0, 250), 'created_at' => $now,
         ];
     }
