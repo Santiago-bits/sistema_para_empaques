@@ -1,5 +1,11 @@
 <x-layouts.app title="Importar y exportar">
-    <x-page-header title="Importar y exportar (Excel)" subtitle="Bajá cualquier listado a Excel, o cargá muchos datos de una sola vez subiendo una planilla."/>
+    <x-page-header title="Importar y exportar (Excel)" subtitle="Bajá cualquier listado a Excel, o cargá muchos datos de una sola vez subiendo una planilla.">
+        @if ($canImport)
+            <x-slot:actions>
+                <a href="{{ route('imports.folder.create') }}" class="btn btn-primary"><x-icon name="folder" class="size-4"/> Importar una carpeta entera</a>
+            </x-slot:actions>
+        @endif
+    </x-page-header>
 
     <div class="mb-6 grid gap-3 md:grid-cols-3">
         <div class="panel p-4">

@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\ImportBatch;
 use App\Services\ImportService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -51,7 +53,7 @@ class ImportController extends Controller
     {
         return view('imports.show', [
             'batch' => $import->load('user'),
-            'typeLabel' => $this->imports->types()[$import->type] ?? $import->type,
+            'typeLabel' => $this->imports->types()[$import->type] ?? null,
             'preview' => $import->status === 'validated' ? $this->imports->preview($import) : ['headers' => [], 'rows' => []],
         ]);
     }
@@ -68,6 +70,73 @@ class ImportController extends Controller
         $this->imports->discard($import);
 
         return redirect()->route('imports.index')->with('success', 'Importación descartada. No se guardó ningún dato.');
+    }
+
+    /** Subir una carpeta entera (o varias planillas juntas). */
+    public function folderCreate(): View
+    {
+        return view('imports.folder-create', ['group' => (string) Str::uuid()]);
+    }
+
+    /** Una planilla de la carpeta (el navegador las manda de a una, así no hay límite de cantidad). */
+    public function folderUpload(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'group' => ['required', 'uuid'],
+            'file' => ['required', 'file', 'max:10240', 'mimes:csv,txt,xlsx'],
+            'mode' => ['nullable', Rule::in(array_keys(ImportService::MODES))],
+        ], [], ['file' => 'archivo', 'mode' => 'modo']);
+        $foreign = ImportBatch::query()->where('group_uuid', $data['group'])->where('user_id', '!=', $request->user()->id)->exists();
+        abort_if($foreign, 403);
+
+        $batch = $this->imports->uploadDetected($request->file('file'), $request->user(), $data['mode'] ?? 'upsert', $data['group']);
+
+        return response()->json([
+            'filename' => $batch->filename,
+            'recognized' => $batch->status === 'validated',
+            'section' => $this->imports->types()[$batch->type] ?? null,
+            'reason' => $batch->detection['reason'] ?? null,
+            'valid_rows' => $batch->valid_rows,
+            'error_rows' => $batch->error_rows,
+        ]);
+    }
+
+    public function folderShow(string $group): View
+    {
+        $batches = ImportBatch::query()->where('group_uuid', $group)->with('user:id,first_name,last_name')->orderBy('id')->get();
+        abort_if($batches->isEmpty(), 404);
+
+        return view('imports.folder-show', ['group' => $group, 'batches' => $batches, 'types' => $this->imports->types()]);
+    }
+
+    public function folderConfirm(string $group): RedirectResponse
+    {
+        $result = $this->imports->confirmGroup($group);
+        $total = array_sum($result['imported']);
+        $message = 'Se importaron '.num($total).' registro(s) de '.count($result['imported']).' planilla(s).';
+        if ($result['failed'] !== []) {
+            return redirect()->route('imports.folder.show', $group)->with('warning', $message.' No se pudieron importar: '
+                .collect($result['failed'])->map(fn ($error, $file) => $file.' ('.$error.')')->implode('; '));
+        }
+
+        return redirect()->route('imports.folder.show', $group)->with('success', $message);
+    }
+
+    public function folderDiscard(string $group): RedirectResponse
+    {
+        $count = $this->imports->discardGroup($group);
+
+        return redirect()->route('imports.index')->with('success', "Se descartaron {$count} planilla(s). No se guardó ningún dato.");
+    }
+
+    /** Elegir (o corregir) a mano la sección de una planilla. */
+    public function retype(Request $request, ImportBatch $import): RedirectResponse
+    {
+        $data = $request->validate(['type' => ['required', Rule::in(array_keys($this->imports->types()))]], [], ['type' => 'sección']);
+        $this->imports->retype($import, $data['type'], by: $request->user());
+        $back = $import->group_uuid ? route('imports.folder.show', $import->group_uuid) : route('imports.show', $import);
+
+        return redirect($back)->with('success', '«'.$import->filename.'» va a '.mb_strtolower($this->imports->types()[$data['type']]).'. Revisá el resultado antes de confirmar.');
     }
 
     /** Descarga los errores de validación como CSV (para corregir la planilla). */

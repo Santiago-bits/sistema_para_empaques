@@ -1,6 +1,7 @@
 @php $errorsList = $batch->errors ?? []; @endphp
 <x-layouts.app title="Importación">
-    <x-page-header :title="'Importación de '.mb_strtolower($typeLabel)" :subtitle="$batch->filename.' · '.fdate($batch->created_at, true).' · '.$batch->user?->full_name" :back="route('imports.index')"/>
+    <x-page-header :title="$typeLabel ? 'Importación de '.mb_strtolower($typeLabel) : 'Planilla sin reconocer'" :subtitle="$batch->filename.' · '.fdate($batch->created_at, true).' · '.$batch->user?->full_name"
+                   :back="$batch->group_uuid ? route('imports.folder.show', $batch->group_uuid) : route('imports.index')"/>
 
     <div class="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
         <x-stat label="Registros encontrados" :value="num($batch->total_rows)" icon="list"/>
@@ -38,9 +39,13 @@
         </div>
     @else
         <div class="mb-6">
-            <x-badge :color="$batch->status === 'imported' ? 'emerald' : 'zinc'" class="text-sm">
-                {{ $batch->status === 'imported' ? 'Importado el '.fdate($batch->imported_at, true) : 'Descartado' }}
-            </x-badge>
+            @if ($batch->status === 'unrecognized')
+                <x-badge color="red" class="text-sm">Sin reconocer: elegí su sección en la revisión de la carpeta</x-badge>
+            @else
+                <x-badge :color="$batch->status === 'imported' ? 'emerald' : 'zinc'" class="text-sm">
+                    {{ $batch->status === 'imported' ? 'Importado el '.fdate($batch->imported_at, true) : 'Descartado' }}
+                </x-badge>
+            @endif
         </div>
     @endif
 

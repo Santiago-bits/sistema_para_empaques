@@ -9,13 +9,14 @@ class ImportBatch extends Model
 {
     protected $fillable = [
         'type', 'mode', 'filename', 'path', 'status', 'total_rows', 'valid_rows', 'updated_rows', 'error_rows', 'errors', 'user_id',
-        'imported_at',
+        'imported_at', 'group_uuid', 'detection',
     ];
 
     protected function casts(): array
     {
         return [
             'errors' => 'array',
+            'detection' => 'array',
             'imported_at' => 'datetime',
         ];
     }
