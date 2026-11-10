@@ -42,7 +42,7 @@ class SupplyYield extends Model
             return $this->packages_manual;
         }
 
-        return (int) DB::table('production_records')
+        return (int) \App\Support\Tenancy::table('production_records')
             ->whereNull('voided_at')
             ->where('recorded_at', '>=', $this->started_on->copy()->startOfDay())
             ->where('recorded_at', '<=', ($this->ended_on ?? today())->copy()->endOfDay())

@@ -33,7 +33,10 @@ class GenerateReportExport implements ShouldQueue
         public readonly array $filters,
         public readonly string $format,
         public readonly string $file,
+        // Multigalpón: el galpón en el que estaba el usuario al pedirlo (el trabajo corre sin sesión).
+        public ?int $warehouseId = null,
     ) {
+        $this->warehouseId ??= \App\Support\CurrentWarehouse::id();
     }
 
     public function handle(ReportDatasets $datasets, ExportService $exports): void
@@ -43,11 +46,18 @@ class GenerateReportExport implements ShouldQueue
             return;
         }
 
-        $filters = ReportFilters::fromArray($this->filters);
-        $dataset = $datasets->make($this->report, $this->variant, $filters, $user);
-        $exports->store($dataset, $this->format, $filters, ExportService::pathFor($user->id, $this->file), $user);
-
-        $user->notify(new ReportReady($dataset->title, $this->file, $this->format));
+        $run = function () use ($user, $datasets, $exports) {
+            $filters = ReportFilters::fromArray($this->filters);
+            $dataset = $datasets->make($this->report, $this->variant, $filters, $user);
+            $exports->store($dataset, $this->format, $filters, ExportService::pathFor($user->id, $this->file), $user);
+            $user->notify(new ReportReady($dataset->title, $this->file, $this->format));
+        };
+        // Nunca sin galpón: si hay varios y no se sabe cuál, no se genera (no se mezclan datos).
+        $warehouseId = $this->warehouseId ?? $user->warehouse_id;
+        if (\App\Support\Tenancy::ready() && $warehouseId === null && \App\Models\Warehouse::query()->count() > 1) {
+            throw new \RuntimeException('Exportación sin galpón: no se genera para no mezclar datos de distintos galpones.');
+        }
+        $warehouseId ? \App\Support\CurrentWarehouse::runFor((int) $warehouseId, $run) : $run();
     }
 
     public function failed(Throwable $e): void

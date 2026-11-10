@@ -36,13 +36,24 @@ class SettingController extends Controller
     {
     }
 
+    /** Multigalpón: seguridad (ingreso, sesiones) y backups valen para todo el sistema: sólo el Super Administrador. */
+    private const SYSTEM_GROUPS = ['security', 'backup'];
+
+    private function groupsFor(Request $request): array
+    {
+        return \App\Support\Tenancy::isMulti() && ! $request->user()->isSuperAdmin()
+            ? array_diff_key(self::GROUPS, array_flip(self::SYSTEM_GROUPS))
+            : self::GROUPS;
+    }
+
     public function index(Request $request): View
     {
-        $group = array_key_exists($request->query('tab'), self::GROUPS) ? $request->query('tab') : 'company';
+        $groups = $this->groupsFor($request);
+        $group = array_key_exists($request->query('tab'), $groups) ? $request->query('tab') : 'company';
 
         return view('admin.settings.index', [
             'group' => $group,
-            'groups' => self::GROUPS,
+            'groups' => $groups,
             's' => $this->settings->all(),
             'sequences' => Sequence::query()->orderBy('key')->get(),
             'modules' => collect(ModuleService::CATALOG)->map(fn ($m) => $m[0]),
@@ -51,7 +62,7 @@ class SettingController extends Controller
 
     public function update(Request $request, string $group): RedirectResponse
     {
-        abort_unless(array_key_exists($group, self::GROUPS), 404);
+        abort_unless(array_key_exists($group, $this->groupsFor($request)), 404);
 
         $method = 'save'.ucfirst($group);
         $this->{$method}($request);

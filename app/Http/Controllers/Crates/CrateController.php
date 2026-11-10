@@ -150,7 +150,7 @@ class CrateController extends Controller
             })
             ->when($request->filled('pallet_id'), fn ($q) => $q->where('pallet_id', $request->integer('pallet_id')))
             ->when($request->filled('load'), function ($q) use ($request) {
-                $q->whereIn('current_load_id', DB::table('loads')->select('id')->where('number', trim((string) $request->string('load'))));
+                $q->whereIn('current_load_id', \App\Support\Tenancy::table('loads')->select('id')->where('number', trim((string) $request->string('load'))));
             });
     }
 

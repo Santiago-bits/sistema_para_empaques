@@ -15,7 +15,11 @@ class Recipients
     /** @return Collection<int, User> */
     public static function withPermission(string $permission): Collection
     {
+        // Multigalpón: sólo la gente del galpón activo (el Super Administrador no recibe los avisos operativos de cada galpón).
+        $warehouseId = \App\Support\Tenancy::ready() ? \App\Support\CurrentWarehouse::id() : null;
+
         return User::query()
+            ->when(\App\Support\Tenancy::ready(), fn ($q) => $q->where('warehouse_id', $warehouseId ?? 0))
             ->where('status', UserStatus::Active->value)
             ->with('role')
             ->get()

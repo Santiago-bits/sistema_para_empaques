@@ -28,17 +28,17 @@ class UserActivityService
     {
         $since = $from->copy()->startOfDay();
 
-        $audit = DB::table('audit_logs')->where('created_at', '>=', $since)->whereNotNull('user_id')
+        $audit = \App\Support\Tenancy::table('audit_logs')->where('created_at', '>=', $since)->whereNotNull('user_id')
             ->groupBy('user_id')
             ->selectRaw("user_id, SUM(CASE WHEN action = 'login' THEN 1 ELSE 0 END) as logins")
             ->selectRaw("SUM(CASE WHEN action NOT IN ('login', 'login_failed', 'logout') THEN 1 ELSE 0 END) as actions")
             ->selectRaw('COUNT(DISTINCT DATE(created_at)) as days, MAX(created_at) as last_action')
             ->get()->keyBy('user_id');
 
-        $crates = DB::table('production_records')->whereNull('voided_at')->where('recorded_at', '>=', $since)
+        $crates = \App\Support\Tenancy::table('production_records')->whereNull('voided_at')->where('recorded_at', '>=', $since)
             ->groupBy('user_id')->selectRaw('user_id, COUNT(*) as n')->pluck('n', 'user_id');
 
-        $online = DB::table('sessions')->whereNotNull('user_id')->where('last_activity', '>=', now()->subMinutes(10)->getTimestamp())
+        $online = \App\Support\Tenancy::table('sessions')->whereNotNull('user_id')->where('last_activity', '>=', now()->subMinutes(10)->getTimestamp())
             ->distinct()->pluck('user_id')->flip();
 
         $users = User::query()->visibleTo()->with('role:id,name,slug')->where('status', 'active')->orderBy('last_name')->get()
@@ -57,12 +57,12 @@ class UserActivityService
             })
             ->sortByDesc(fn ($r) => [$r->actions + $r->crates, $r->logins])->values();
 
-        $daily = DB::table('audit_logs')->where('created_at', '>=', $since)->whereNotNull('user_id')
+        $daily = \App\Support\Tenancy::table('audit_logs')->where('created_at', '>=', $since)->whereNotNull('user_id')
             ->groupByRaw('DATE(created_at)')->orderByRaw('DATE(created_at)')
             ->selectRaw('DATE(created_at) as day, COUNT(DISTINCT user_id) as users, COUNT(*) as actions')->get();
 
         $areas = [];
-        DB::table('audit_logs')->where('created_at', '>=', $since)->whereNotNull('auditable_type')
+        \App\Support\Tenancy::table('audit_logs')->where('created_at', '>=', $since)->whereNotNull('auditable_type')
             ->groupBy('auditable_type')->selectRaw('auditable_type, COUNT(*) as n')->get()
             ->each(function ($r) use (&$areas) {
                 $label = self::AREAS[$r->auditable_type] ?? null;

@@ -13,7 +13,23 @@ class CheckAlerts extends Command
 
     public function handle(AlertChecker $checker): int
     {
-        $summary = $checker->run();
+        // Multigalpón: cada galpón con sus propias alertas, su configuración y su gente.
+        $summary = [];
+        $merge = function (array $part) use (&$summary) {
+            foreach ($part as $type => $row) {
+                $prev = $summary[$type] ?? null;
+                $summary[$type] = $prev === null ? $row : [
+                    'status' => $prev['status'] === 'error' || $row['status'] === 'error' ? 'error' : ($prev['status'] === 'ok' ? 'ok' : $row['status']),
+                    'active' => ($prev['active'] ?? 0) + ($row['active'] ?? 0),
+                    'resolved' => ($prev['resolved'] ?? 0) + ($row['resolved'] ?? 0),
+                ];
+            }
+        };
+        if (\App\Support\Tenancy::ready()) {
+            \App\Support\CurrentWarehouse::forEach(fn () => $merge(app(AlertChecker::class)->run()));
+        } else {
+            $merge($checker->run());
+        }
 
         $labels = trans('alerts.types');
         $statusLabels = ['ok' => 'evaluada', 'disabled' => 'deshabilitada', 'module_disabled' => 'módulo apagado', 'error' => 'ERROR'];

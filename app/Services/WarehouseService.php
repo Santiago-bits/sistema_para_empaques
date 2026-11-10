@@ -39,6 +39,7 @@ class WarehouseService
             ]);
         });
 
+        \App\Support\Tenancy::refresh(); // ahora puede haber más de un galpón
         // Datos base y configuración propia del galpón nuevo.
         (new SystemSeeder)->seedWarehouse($warehouse->id);
         CurrentWarehouse::runFor($warehouse->id, function () use ($data) {

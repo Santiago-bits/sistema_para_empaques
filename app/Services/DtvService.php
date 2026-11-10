@@ -58,7 +58,7 @@ class DtvService
     public function draftFromLoad(Load $load): array
     {
         $nominal = (float) setting('label.nominal_kg', 18) ?: 18.0;
-        $rows = DB::table('crates')->join('varieties', 'varieties.id', '=', 'crates.variety_id')
+        $rows = \App\Support\Tenancy::table('crates')->join('varieties', 'varieties.id', '=', 'crates.variety_id')
             ->where('crates.current_load_id', $load->id)->whereNull('crates.deleted_at')
             ->groupBy('crates.variety_id', 'varieties.name', 'varieties.species')
             ->selectRaw('crates.variety_id, varieties.name as variety, varieties.species as species, COUNT(*) as crates')
@@ -107,7 +107,7 @@ class DtvService
      */
     public function balances(?string $from = null, ?string $to = null)
     {
-        return DB::table('dtv_lines')
+        return \App\Support\Tenancy::table('dtv_lines')
             ->join('dtv_documents', 'dtv_documents.id', '=', 'dtv_lines.dtv_document_id')
             ->leftJoin('varieties', 'varieties.id', '=', 'dtv_lines.variety_id')
             ->whereNull('dtv_documents.deleted_at')

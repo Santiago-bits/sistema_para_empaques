@@ -19,7 +19,7 @@ class Tenancy
     public const TABLES = [
         'account_movements', 'alerts', 'arca_records', 'audit_logs', 'cash_movements', 'cash_sessions', 'checks',
         'clients', 'cold_rooms', 'container_movements', 'container_types', 'costs', 'crates', 'crews', 'daily_closings',
-        'destinations', 'dispatch_checks', 'documents', 'drivers', 'dtv_documents', 'dtv_lines', 'employees', 'grades',
+        'destinations', 'dispatch_checks', 'documents', 'drivers', 'dtv_documents', 'dtv_lines', 'employees', 'exchange_rates', 'grades',
         'import_batches', 'incidents', 'inventory_movements', 'invoice_items', 'invoices', 'load_crates', 'loads',
         'location_movements', 'lots', 'machines', 'maintenances', 'modules', 'owners', 'packers', 'pallets', 'producers',
         'production_lines', 'production_records', 'production_stoppages', 'production_targets', 'providers',
@@ -39,6 +39,25 @@ class Tenancy
         'account_movements', 'cash_sessions', 'checks', 'container_movements', 'crates', 'daily_closings', 'dtv_documents',
         'loads', 'lots', 'pallets', 'production_lines', 'production_records', 'warehouse_locations',
     ];
+
+    /**
+     * Permisos que tocan el sistema entero (todas las bases de todos los galpones): con más de un galpón
+     * sólo los tiene el Super Administrador, aunque un rol de galpón los tenga tildados.
+     */
+    public const SYSTEM_PERMISSIONS = ['backups.manage', 'backups.restore', 'logs.view'];
+
+    /** ¿Hay más de un galpón en este sistema? */
+    public static function isMulti(): bool
+    {
+        if (! self::ready()) {
+            return false;
+        }
+        if (! app()->bound('galpon.tenancy_multi')) {
+            app()->instance('galpon.tenancy_multi', \App\Models\Warehouse::query()->count() > 1);
+        }
+
+        return app('galpon.tenancy_multi');
+    }
 
     private const READY_KEY = 'galpon.tenancy_ready';
 
@@ -66,6 +85,24 @@ class Tenancy
     public static function refresh(): void
     {
         app()->forgetInstance(self::READY_KEY);
+        app()->forgetInstance('galpon.tenancy_multi');
+    }
+
+    /**
+     * DB::table() filtrado por el galpón activo, para informes y consultas armadas a mano.
+     * Acepta alias: Tenancy::table('loads as l') filtra por l.warehouse_id.
+     */
+    public static function table(string $table): \Illuminate\Database\Query\Builder
+    {
+        $query = \Illuminate\Support\Facades\DB::table($table);
+        $parts = preg_split('/\s+as\s+/i', trim($table));
+        $name = $parts[0];
+        $alias = $parts[1] ?? $name;
+        if (self::isTenantTable($name) && self::ready() && ($id = CurrentWarehouse::id()) !== null) {
+            $query->where($alias.'.warehouse_id', $id);
+        }
+
+        return $query;
     }
 
     public static function isTenantTable(string $table): bool
