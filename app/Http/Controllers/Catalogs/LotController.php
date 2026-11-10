@@ -44,7 +44,7 @@ class LotController extends Controller
             return $this->exportIntakes($request, $query, (string) $request->query('format'));
         }
         // Consulta aparte para los totales (sin las columnas del listado: MySQL no admite mezclarlas con SUM/COUNT).
-        $totals = (clone $query)->toBase()->cloneWithout(['columns', 'orders', 'limit', 'offset'])->selectRaw('COUNT(*) as n, COALESCE(SUM(bins), 0) as bins, COALESCE(SUM(kg_received), 0) as kg')->first();
+        $totals = (clone $query)->toBase()->cloneWithout(['columns', 'orders', 'limit', 'offset'])->cloneWithoutBindings(['select', 'order'])->selectRaw('COUNT(*) as n, COALESCE(SUM(bins), 0) as bins, COALESCE(SUM(kg_received), 0) as kg')->first();
 
         return view('lots.index', ['lots' => $query->paginate($this->perPage($request))->withQueryString(), 'totals' => $totals] + $this->options());
     }

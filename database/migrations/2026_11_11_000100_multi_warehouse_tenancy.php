@@ -65,9 +65,45 @@ return new class extends Migration
         }
     }
 
+    /**
+     * Deshacer (sólo para desarrollo y tests): vuelve los únicos a ser de todo el sistema y quita las columnas
+     * agregadas. Si dos galpones repiten un código, fallará al recrear el índice único: es lo correcto.
+     */
     public function down(): void
     {
-        // Volver a un solo galpón no es seguro (podría haber códigos repetidos entre galpones): no se deshace.
+        foreach (array_merge(Tenancy::TABLES, Tenancy::SHARED_TABLES) as $table) {
+            if (! Schema::hasTable($table)) {
+                continue;
+            }
+            $indexes = Schema::getIndexes($table);
+            foreach ($indexes as $index) {
+                if (! $index['unique'] || ! str_contains($index['name'], '_wh_')) {
+                    continue;
+                }
+                $columns = array_values(array_diff($index['columns'], ['warehouse_id']));
+                $plain = substr($table.'_'.implode('_', $columns).'_idx', 0, 60);
+                $hasPlain = in_array($plain, array_column($indexes, 'name'), true);
+                Schema::table($table, function (Blueprint $t) use ($index, $columns, $plain, $hasPlain) {
+                    $t->dropUnique($index['name']);
+                    $t->unique($columns);
+                    if ($hasPlain) {
+                        $t->dropIndex($plain);
+                    }
+                });
+            }
+            if (! in_array($table, Tenancy::LEGACY_TABLES, true) && Schema::hasColumn($table, 'warehouse_id')) {
+                Schema::table($table, function (Blueprint $t) {
+                    $t->dropIndex(['warehouse_id']);
+                    $t->dropColumn('warehouse_id');
+                });
+            }
+        }
+        if (Schema::hasColumn('users', 'warehouse_id')) {
+            Schema::table('users', function (Blueprint $t) {
+                $t->dropIndex(['warehouse_id']);
+                $t->dropColumn('warehouse_id');
+            });
+        }
     }
 
     private function firstWarehouseId(): ?int

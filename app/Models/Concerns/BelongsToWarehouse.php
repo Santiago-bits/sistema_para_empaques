@@ -21,6 +21,9 @@ trait BelongsToWarehouse
         static::addGlobalScope(new WarehouseScope);
 
         static::creating(function ($model) {
+            if (! \App\Support\Tenancy::ready() && ! in_array($model->getTable(), \App\Support\Tenancy::LEGACY_TABLES, true)) {
+                return; // base todavía sin actualizar: la columna aún no existe
+            }
             if (empty($model->warehouse_id)) {
                 $model->warehouse_id = CurrentWarehouse::id();
                 // Sólo la auditoría admite registros sin galpón (acciones del Super Administrador sobre todo el sistema).

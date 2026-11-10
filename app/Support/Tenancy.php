@@ -34,6 +34,40 @@ class Tenancy
      */
     public const SHARED_TABLES = ['roles', 'settings'];
 
+    /** Tablas que ya tenían warehouse_id antes del multigalpón. */
+    public const LEGACY_TABLES = [
+        'account_movements', 'cash_sessions', 'checks', 'container_movements', 'crates', 'daily_closings', 'dtv_documents',
+        'loads', 'lots', 'pallets', 'production_lines', 'production_records', 'warehouse_locations',
+    ];
+
+    private const READY_KEY = 'galpon.tenancy_ready';
+
+    /**
+     * ¿La base ya tiene las columnas del multigalpón? Justo después de subir una actualización el código nuevo
+     * corre con la base vieja hasta que UpgradeDatabase la pone al día: mientras tanto no se filtra (si no, la
+     * primera visita daría error antes de poder actualizar la base).
+     */
+    public static function ready(): bool
+    {
+        if (app()->bound(self::READY_KEY)) {
+            return app(self::READY_KEY);
+        }
+        try {
+            $ready = \Illuminate\Support\Facades\Schema::hasColumn('users', 'warehouse_id');
+        } catch (\Throwable) {
+            $ready = false;
+        }
+        app()->instance(self::READY_KEY, $ready);
+
+        return $ready;
+    }
+
+    /** Después de migrar se vuelve a preguntar. */
+    public static function refresh(): void
+    {
+        app()->forgetInstance(self::READY_KEY);
+    }
+
     public static function isTenantTable(string $table): bool
     {
         return in_array($table, self::TABLES, true);

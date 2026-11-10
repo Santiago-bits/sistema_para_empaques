@@ -99,7 +99,7 @@ class LoadsTest extends TestCase
         Crate::query()->whereKey($ids[0])->update(['warehouse_id' => $other->id]);
 
         $this->postJson(route('loads.crates.assign', $load), ['ids' => $ids])->assertOk()
-            ->assertJsonPath('assigned', 0)->assertJsonPath('rejected.0.reason', 'Pertenece a otro galpón.');
+            ->assertJsonPath('assigned', 0)->assertJsonPath('rejected.0.reason', 'El cajón no existe o fue eliminado.');
     }
 
     public function test_tampered_filters_do_not_break_the_builder(): void
