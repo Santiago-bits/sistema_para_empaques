@@ -38,6 +38,9 @@
     <div class="grid gap-6 lg:grid-cols-3">
         <div class="space-y-6 lg:col-span-2">
             <x-panel title="Administrador general del galpón" :padding="false">
+                <x-slot:actions>
+                    <a href="{{ route('superadmin.users.index', ['warehouse' => $warehouse->id]) }}" class="btn btn-secondary btn-sm"><x-icon name="users" class="size-4"/> Ver todos sus usuarios ({{ num($usersCount) }})</a>
+                </x-slot:actions>
                 <table class="table">
                     <thead><tr><th>Usuario</th><th>Nombre</th><th>Último ingreso</th><th>Contraseña</th></tr></thead>
                     <tbody>

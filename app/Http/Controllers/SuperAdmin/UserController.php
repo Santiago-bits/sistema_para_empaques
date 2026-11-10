@@ -33,10 +33,21 @@ class UserController extends Controller
             'status' => ['nullable', Rule::in(array_keys(UserStatus::options()))],
             'role_id' => ['nullable', 'integer'],
             'filter' => ['nullable', Rule::in(['temporary', 'never', 'inactive_30'])],
+            'warehouse' => ['nullable', 'regex:/^(\d+|super)$/'],
         ]);
 
+        // Multigalpón: primero un cuadro por galpón; al elegir uno, sus usuarios. Buscar o filtrar mira a todos.
+        $warehouseParam = $request->query('warehouse');
+        $searching = collect(['q', 'status', 'role_id', 'filter'])->contains(fn ($k) => filled($request->query($k)));
+        if ($warehouseParam === null && ! $searching) {
+            return view('superadmin.users.warehouses', $this->warehouseCards());
+        }
+        $warehouse = is_numeric($warehouseParam) ? \App\Models\Warehouse::query()->findOrFail((int) $warehouseParam) : null;
+
         $users = User::query()
-            ->with('role')
+            ->with(['role', 'warehouse:id,name'])
+            ->when($warehouse, fn ($q) => $q->where('warehouse_id', $warehouse->id))
+            ->when($warehouseParam === 'super', fn ($q) => $q->whereNull('warehouse_id'))
             ->when($request->query('q'), function ($q, $term) {
                 $like = '%'.addcslashes((string) $term, '%_\\').'%';
                 $q->where(fn ($w) => $w->where('first_name', 'like', $like)->orWhere('last_name', 'like', $like)
@@ -53,9 +64,26 @@ class UserController extends Controller
 
         return view('superadmin.users.index', [
             'users' => $users,
+            'warehouse' => $warehouse,
+            'warehouseParam' => $warehouseParam,
             'roles' => Role::query()->orderBy('name')->pluck('name', 'id'),
             'statuses' => UserStatus::options(),
         ]);
+    }
+
+    /** Un cuadro por galpón con sus números, y uno para los Super Administradores (no son de ningún galpón). */
+    private function warehouseCards(): array
+    {
+        $counts = User::query()->selectRaw('warehouse_id, COUNT(*) as total')
+            ->selectRaw("SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) as active")
+            ->selectRaw('SUM(CASE WHEN must_change_password = 1 THEN 1 ELSE 0 END) as temporary')
+            ->selectRaw('SUM(CASE WHEN last_login_at IS NULL THEN 1 ELSE 0 END) as never')
+            ->groupBy('warehouse_id')->get()->keyBy(fn ($r) => $r->warehouse_id ?? 'super');
+
+        return [
+            'warehouses' => \App\Models\Warehouse::query()->orderByDesc('active')->orderBy('name')->get(),
+            'counts' => $counts,
+        ];
     }
 
     public function show(Request $request, User $user): View

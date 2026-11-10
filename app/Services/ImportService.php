@@ -116,23 +116,8 @@ class ImportService
 
             $definition = $this->definition($locked->type);
             $result = $this->analyze($definition, $locked->path, $locked->mode ?: 'create');
-            $model = $definition->modelClass();
             $now = now();
-
-            $inserts = array_values(array_filter($result['valid'], fn ($r) => ! isset($r['id'])));
-            $updates = array_values(array_filter($result['valid'], fn ($r) => isset($r['id'])));
-
-            foreach (array_chunk($inserts, self::CHUNK) as $chunk) {
-                $model::query()->insert(array_map(
-                    fn (array $row) => $row['data'] + ['warehouse_id' => $locked->warehouse_id, 'created_at' => $now, 'updated_at' => $now],
-                    $chunk
-                ));
-            }
-            foreach ($updates as $row) {
-                if ($row['data'] !== []) {
-                    $model::query()->whereKey($row['id'])->update($row['data'] + ['updated_at' => $now]);
-                }
-            }
+            [$inserts, $updates] = $this->write($definition, $result, (int) $locked->warehouse_id, $now);
 
             $imported = count($result['valid']);
             $locked->update([
@@ -151,6 +136,87 @@ class ImportService
 
             return $imported;
         });
+    }
+
+    /**
+     * Guarda las filas válidas de un análisis (nuevas en bloque, existentes una por una).
+     *
+     * @return array{0: list<array>, 1: list<array>} [nuevas, actualizadas]
+     */
+    private function write(CatalogDefinition $definition, array $result, int $warehouseId, $now): array
+    {
+        $model = $definition->modelClass();
+        $inserts = array_values(array_filter($result['valid'], fn ($r) => ! isset($r['id'])));
+        $updates = array_values(array_filter($result['valid'], fn ($r) => isset($r['id'])));
+
+        foreach (array_chunk($inserts, self::CHUNK) as $chunk) {
+            $model::query()->insert(array_map(
+                fn (array $row) => $row['data'] + ['warehouse_id' => $warehouseId, 'created_at' => $now, 'updated_at' => $now],
+                $chunk
+            ));
+        }
+        foreach ($updates as $row) {
+            if ($row['data'] !== []) {
+                $model::query()->whereKey($row['id'])->update($row['data'] + ['updated_at' => $now]);
+            }
+        }
+
+        return [$inserts, $updates];
+    }
+
+    /**
+     * Vista previa realista de una carpeta: las planillas que dependen de otras (camiones y choferes de sus
+     * transportistas, destinos de sus clientes, empleados de sus cuadrillas) se validan como si las otras ya
+     * estuvieran cargadas. Se carga todo en orden dentro de una transacción y se DESHACE: no se guarda nada,
+     * sólo se actualizan los números de correctas y errores que se ven antes de confirmar.
+     */
+    public function simulateGroup(string $group): void
+    {
+        $batches = $this->pendingInOrder($group);
+        if (! $batches->contains(fn (ImportBatch $b) => $this->definition($b->type)->importRelations() !== [])) {
+            return;
+        }
+
+        $results = [];
+        DB::beginTransaction();
+        try {
+            $now = now();
+            foreach ($batches as $batch) {
+                try {
+                    $definition = $this->definition($batch->type);
+                    $results[$batch->id] = $this->analyze($definition, $batch->path, $batch->mode ?: 'create');
+                    $this->write($definition, $results[$batch->id], (int) $batch->warehouse_id, $now);
+                } catch (\Throwable) {
+                    unset($results[$batch->id]); // si una planilla no se puede leer, queda como estaba
+                }
+            }
+        } finally {
+            DB::rollBack();
+        }
+
+        foreach ($batches as $batch) {
+            $result = $results[$batch->id] ?? null;
+            if ($result === null || $this->definition($batch->type)->importRelations() === []) {
+                continue;
+            }
+            $batch->update([
+                'total_rows' => $result['total'],
+                'valid_rows' => count($result['valid']),
+                'updated_rows' => count(array_filter($result['valid'], fn ($r) => isset($r['id']))),
+                'error_rows' => $result['error_rows'],
+                'errors' => array_slice($result['errors'], 0, self::MAX_STORED_ERRORS),
+            ]);
+        }
+    }
+
+    /** Planillas pendientes de una carpeta en el orden en que se cargan (primero de las que dependen otras). */
+    private function pendingInOrder(string $group): \Illuminate\Support\Collection
+    {
+        $order = array_flip(array_keys(CatalogRegistry::importable()));
+
+        return ImportBatch::query()->where('group_uuid', $group)->where('status', 'validated')->get()
+            ->sortBy(fn (ImportBatch $b) => [$this->definition($b->type)->importRelations() === [] ? 0 : 1, $order[$b->type] ?? 99, $b->id])
+            ->values();
     }
 
     public function discard(ImportBatch $batch): void
@@ -249,9 +315,7 @@ class ImportService
      */
     public function confirmGroup(string $group): array
     {
-        $order = array_flip(array_keys(CatalogRegistry::importable()));
-        $batches = ImportBatch::query()->where('group_uuid', $group)->where('status', 'validated')->get()
-            ->sortBy(fn (ImportBatch $b) => [$this->definition($b->type)->importRelations() === [] ? 0 : 1, $order[$b->type] ?? 99, $b->id]);
+        $batches = $this->pendingInOrder($group);
 
         $imported = [];
         $failed = [];
@@ -448,10 +512,13 @@ class ImportService
             if ($validator->fails()) {
                 $failed = $validator->failed();
                 foreach ($validator->errors()->messages() as $field => $messages) {
-                    $message = isset($failed[$field]['Unique'])
+                    $virtual = array_search($field, $relations, true);
+                    $message = isset($failed[$field]['Exists']) && $virtual !== false
+                        ? 'No se encontró «'.$row[$virtual].'» en '.mb_strtolower($attributes[$field] ?? $field).': tiene que estar cargado antes, o venir su planilla en la misma carpeta (se busca por CUIT, razón social, nombre o código).'
+                        : (isset($failed[$field]['Unique'])
                         ? 'Ya existe en el sistema un registro con ese '.($attributes[$field] ?? $field).($upsert ? ' (y no coincide con el resto de los datos).' : ' (duplicado). Para actualizarlo, importá con «Agregar nuevos y actualizar los existentes».')
-                        : $messages[0];
-                    $rowErrors[] = ['row' => $number, 'field' => $headerByField[$field] ?? $field, 'message' => $message];
+                        : $messages[0]);
+                    $rowErrors[] = ['row' => $number, 'field' => $headerByField[$field] ?? ($virtual !== false ? ($headerByField[$virtual] ?? $virtual) : $field), 'message' => $message];
                 }
             }
 

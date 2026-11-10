@@ -101,4 +101,33 @@ class WarehousesPanelTest extends TestCase
         $this->put(route('superadmin.warehouses.update', $first), ['name' => $first->name, 'active' => 0])->assertSessionHasErrors('active');
         $this->assertTrue($first->fresh()->active);
     }
+
+    public function test_users_tab_shows_one_card_per_warehouse_and_then_its_users(): void
+    {
+        $super = $this->superAdmin();
+        $first = Warehouse::query()->sole();
+        $second = app(\App\Services\WarehouseService::class)->create(['name' => 'Galpón Dos'], $super);
+        User::factory()->role('supervisor')->inWarehouse($first->id)->create(['first_name' => 'Ana', 'last_name' => 'DelPrimero']);
+        User::factory()->role('supervisor')->inWarehouse($second->id)->create(['first_name' => 'Beto', 'last_name' => 'DelSegundo', 'must_change_password' => true]);
+
+        // Primero los cuadros: un galpón por cuadro y los Super Administradores aparte; todavía ningún usuario.
+        $this->get(route('superadmin.users.index'))->assertOk()
+            ->assertSee($first->name)->assertSee('Galpón Dos')->assertSee('Super Administradores')
+            ->assertSee('data-warehouse-card', false)->assertDontSee('DelPrimero')->assertDontSee('DelSegundo');
+
+        // Al entrar a un galpón: sólo sus usuarios.
+        $this->get(route('superadmin.users.index', ['warehouse' => $second->id]))->assertOk()
+            ->assertSee('Usuarios de Galpón Dos')->assertSee('DelSegundo')->assertDontSee('DelPrimero');
+        $this->get(route('superadmin.users.index', ['warehouse' => $first->id, 'filter' => 'temporary']))->assertOk()
+            ->assertDontSee('DelSegundo')->assertDontSee('DelPrimero');
+        $this->get(route('superadmin.users.index', ['warehouse' => 'super']))->assertOk()
+            ->assertSee($super->username)->assertDontSee('DelPrimero');
+
+        // Buscar mira todos los galpones y dice de cuál es cada uno.
+        $this->get(route('superadmin.users.index', ['q' => 'Del']))->assertOk()
+            ->assertSee('DelPrimero')->assertSee('DelSegundo')->assertSee('<th>Galpón</th>', false);
+
+        $this->get(route('superadmin.users.index', ['warehouse' => 999]))->assertNotFound();
+        $this->get(route('superadmin.users.index', ['warehouse' => 'otro']))->assertSessionHasErrors('warehouse');
+    }
 }

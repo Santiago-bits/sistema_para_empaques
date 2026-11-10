@@ -96,7 +96,9 @@ class DestinationDefinition extends CatalogDefinition
             $digits = preg_replace('/\D/', '', $text);
             $row['client_id'] = $text === '' ? null : (
                 (strlen($digits) === 11 ? \App\Models\Client::query()->where('cuit', $digits)->value('id') : null)
-                ?? \App\Models\Client::query()->whereRaw('LOWER(business_name) = ?', [mb_strtolower($text)])->value('id') ?? -1
+                ?? \App\Models\Client::query()->whereRaw('LOWER(business_name) = ?', [mb_strtolower($text)])->value('id')
+                // También por nombre de fantasía (en las planillas el cliente suele figurar así).
+                ?? \App\Models\Client::query()->whereRaw('LOWER(name) = ?', [mb_strtolower($text)])->value('id') ?? -1
             );
             unset($row['client']);
         }
