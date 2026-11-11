@@ -34,12 +34,12 @@
                 <x-input name="guide_number" label="N° de guía" :value="$load->guide_number" maxlength="40" hint="Guía de tránsito / DTV."/>
             </div>
             <h3 class="mt-6 mb-2 text-sm font-semibold text-stone-700 dark:text-stone-300">Datos comerciales</h3>
-            <div class="grid gap-4 md:grid-cols-4">
+            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <x-select name="commercial_destination" label="Destino comercial" :options="\App\Models\Load::COMMERCIAL_DESTINATIONS" :value="$load->commercial_destination" placeholder="—"/>
                 <x-select name="sales_channel" label="Canal de comercialización" :options="\App\Models\Load::SALES_CHANNELS" :value="$load->sales_channel" placeholder="—"/>
                 <x-select name="sale_condition" label="Condición de venta" :options="\App\Models\Load::SALE_CONDITIONS" :value="$load->sale_condition" placeholder="—"/>
-                <x-input name="freight_amount" inputmode="decimal" label="Flete ($)" :value="$load->freight_amount !== null ? num($load->freight_amount, 2) : null"
                 <x-input name="unit_price" inputmode="decimal" label="Precio por unidad ($)" :value="$load->unit_price !== null ? num($load->unit_price, 2) : null" hint="Subtotal = cajones × precio (como en la planilla de cargas)."/>
+                <x-input name="freight_amount" inputmode="decimal" label="Flete ($)" :value="$load->freight_amount !== null ? num($load->freight_amount, 2) : null"
                          hint="Al despachar, se le acredita al transportista en su cuenta corriente."/>
             </div>
             <div class="mt-4"><x-textarea name="notes" label="Observaciones" :value="$load->notes"/></div>

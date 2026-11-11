@@ -122,6 +122,14 @@ class ScreensCrawlTest extends TestCase
                 $message = $response->exception ? Str::limit($response->exception->getMessage(), 200) : '';
                 $failures[] = "{$status} {$name} {$url} {$message}";
             }
+            // Componentes mal cerrados en una vista: quedan a la vista restos como «hint="…"/>» o un «<x-input» sin procesar.
+            if ($status === 200 && str_contains((string) $response->headers->get('Content-Type'), 'html')) {
+                $html = (string) $response->getContent();
+                $text = strip_tags(preg_replace('#<(script|style)\b[^>]*>.*?</\1>#is', '', $html));
+                if (preg_match('/<x-[a-z]/', $html) || preg_match('/\b(hint|label|placeholder|:value|:options)="[^"]*"\s*\/?>/', $text, $m)) {
+                    $failures[] = "{$status} {$name} {$url} componente sin procesar: ".Str::limit($m[0] ?? '<x-…', 80);
+                }
+            }
         }
 
         $this->assertGreaterThan(40, $visited, 'Se esperaban recorrer muchas pantallas');
