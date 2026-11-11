@@ -29,13 +29,20 @@
     <x-filters :exports="[['label' => 'Excel', 'format' => 'xlsx', 'route' => route('dtv.index')], ['label' => 'CSV', 'format' => 'csv', 'route' => route('dtv.index')]]">
         <x-input name="q" label="Buscar" :value="request('q')" placeholder="N° DTV, destinatario, destino, transporte"/>
         <x-select name="direction" label="Ingreso / egreso" :options="\App\Models\DtvDocument::DIRECTIONS" :value="request('direction')" placeholder="Todos"/>
+        <x-select name="origin" label="Viene de" :options="\App\Models\DtvDocument::PLACES" :value="request('origin')" placeholder="Cualquier origen"/>
+        <x-select name="target" label="Va a" :options="\App\Models\DtvDocument::PLACES" :value="request('target')" placeholder="Cualquier destino"/>
+        <x-select name="doc_type" label="Tipo" :options="$docTypes" :value="request('doc_type')" placeholder="Todos"/>
+        <x-select name="transport" label="Transporte / chofer" :options="$transports" :value="request('transport')" placeholder="Todos"/>
+        <x-select name="establishment" label="Establecimiento" :options="$establishments" :value="request('establishment')" placeholder="Todos"/>
         <x-select name="species" label="Especie" :options="$species" :value="request('species')" placeholder="Todas"/>
+        <x-select name="arca_status" label="Estado en ARCA" :options="\App\Models\DtvDocument::ARCA_STATUSES" :value="request('arca_status')" placeholder="Todos"/>
+        <x-select name="intervention" label="Requiere intervención" :options="['yes' => 'Sí', 'no' => 'No']" :value="request('intervention')" placeholder="Todos"/>
         <x-input name="from" type="date" label="Desde" :value="request('from')"/>
         <x-input name="to" type="date" label="Hasta" :value="request('to')"/>
     </x-filters>
 
     <x-table class="mb-8">
-        <thead><tr><th>Fecha</th><th>E / I</th><th>N° DTV-e</th><th>Tipo</th><th>Destinatario</th><th>Destino</th><th>Especie</th><th>Variedad</th><th class="num">Cant.</th><th>Unidad</th><th class="num">Kg</th><th class="num">Kg totales</th><th>Transporte</th></tr></thead>
+        <thead><tr><th>Fecha</th><th>E / I</th><th>N° DTV-e</th><th>Tipo</th><th>Destinatario</th><th>Destino</th><th>Especie</th><th>Variedad</th><th class="num">Cant.</th><th>Unidad</th><th class="num">Kg</th><th class="num">Kg totales</th><th>Transporte</th><th>Estado ARCA</th></tr></thead>
         <tbody>
             @forelse ($lines as $line)
                 <tr>
@@ -47,14 +54,22 @@
                     <td class="text-sm">{{ $line->destination }}</td>
                     <td class="text-sm">{{ $line->species }}</td>
                     <td class="text-sm">{{ $line->variety_label ?? $line->variety_name }}</td>
-                    <td class="num">{{ num($line->quantity, 2) }}</td>
+                    <td class="num">{{ $line->quantity !== null ? num($line->quantity, 2) : '—' }}</td>
                     <td class="text-sm">{{ $line->unit }}</td>
                     <td class="num">{{ $line->kg_per_unit !== null ? num($line->kg_per_unit, 2) : '—' }}</td>
-                    <td @class(['num font-medium', 'text-red-600 dark:text-red-400' => $line->direction === 'out'])>{{ ($line->direction === 'out' ? '−' : '').num($line->kg_total, 2) }}</td>
+                    <td @class(['num font-medium', 'text-red-600 dark:text-red-400' => $line->direction === 'out'])>{{ $line->kg_total !== null ? ($line->direction === 'out' ? '−' : '').num($line->kg_total, 2) : '—' }}</td>
                     <td class="text-sm">{{ $line->transport }}</td>
+                    <td class="whitespace-nowrap text-sm">
+                        @if ($line->arca_status)
+                            <x-badge :color="match ($line->arca_status) { 'closed' => 'green', 'voided' => 'stone', default => 'sky' }">{{ \App\Models\DtvDocument::ARCA_STATUSES[$line->arca_status] ?? $line->arca_status }}</x-badge>
+                        @endif
+                        @if ($line->needs_intervention)
+                            <x-badge color="amber" title="Requiere intervención">Intervención</x-badge>
+                        @endif
+                    </td>
                 </tr>
             @empty
-                <x-empty :colspan="13" message="Todavía no hay DTV-e cargados. Cargá uno nuevo o importá tu planilla de Excel."/>
+                <x-empty :colspan="14" message="Todavía no hay DTV-e cargados. Cargá uno nuevo o importá tu planilla de Excel."/>
             @endforelse
         </tbody>
         <x-slot:footer>{{ $lines->links() }}</x-slot:footer>
@@ -85,7 +100,8 @@
                 <p class="text-sm text-stone-600 dark:text-stone-400">
                     Subí la planilla donde llevás los DTV-e (la hoja «DTV-e» tiene que ser la primera). Se buscan solas las columnas
                     FECHA, E / I, N° DTV-e, TIPO, EMISOR, ESTABLECIMIENTO, DESTINATARIO, DESTINO, ESPECIE, VARIEDAD, CANT., UNIDAD, KG,
-                    KG TOTALES y TRANSPORTE. Los DTV-e que ya estén cargados no se repiten.
+                    KG TOTALES y TRANSPORTE. También sirve el listado que se descarga de ARCA (# Movimiento, Tipo, Origen, Destino,
+                    fechas, Estado y Requiere intervención). Los DTV-e que ya estén cargados no se repiten: se les actualiza el estado.
                 </p>
                 <form method="POST" action="{{ route('dtv.import') }}" enctype="multipart/form-data" class="mt-3 space-y-3" x-data="{ busy: false }" @submit="busy = true">
                     @csrf

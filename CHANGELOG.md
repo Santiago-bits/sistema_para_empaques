@@ -13,6 +13,10 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
   vinculan a los galpones y no salen en etiquetas, facturas, remitos, romaneos ni resúmenes de cuenta. Las tablas
   quedan en la base sin uso (las migraciones sólo agregan). La «Tasa de asociación» de Tesorería sigue igual.
 
+### Arreglado
+- **Nueva carga y Corregir carga**: el campo «Flete ($)» estaba mal armado y desarmaba el formulario (no aparecía
+  y quedaba texto suelto en pantalla).
+
 ### Cambiado
 - **Leyes en la etiqueta de fábrica**: el origen («Producción Argentina»), SENASA, registro provincial, RENSPA y el
   Decreto-Ley 9.244/63 se imprimen salvo que se apaguen. La pantalla de imprimir avisa qué números legales faltan
@@ -22,6 +26,13 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
   pestaña elegida bien marcada.
 
 ### Agregado
+- **DTV-e como control de ARCA** (módulo propio «DTV-e (SENASA)», se puede apagar si el galpón no lo usa): cada DTV-e
+  guarda también lo del listado de ARCA (fecha de carga, vencimiento, estado Emitido/Cerrado/Anulado y si requiere
+  intervención) y se puede registrar sin especies ni kilos. Filtros nuevos: de dónde viene y a dónde va según el tipo
+  (EMP empaque, CTC centro de tratamiento cuarentenario, EST establecimiento…), tipo, transporte/chofer,
+  establecimiento, estado e intervención, además de ingreso/egreso, especie y fechas. La importación acepta el
+  listado que se descarga de ARCA (# Movimiento, Tipo, Origen, Destino, fechas, Estado) y, si el DTV-e ya estaba
+  cargado, le actualiza el estado sin duplicarlo ni tocar sus kilos.
 - **Etiquetas que se leen bien y a prueba de cambios**: el código del cajón va grande; donde iba el QR hay un
   **recuadro de seguridad** con el **peso neto en grande**, calibre, fecha de empaque y un **código de control**
   (CTRL) sobre un fondo rayado (si se borra o raspa algo, se nota). Si alguien cambia a mano el peso, el control no

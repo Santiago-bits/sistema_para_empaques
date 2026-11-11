@@ -77,6 +77,10 @@ return [
             'locations.manage' => 'Gestionar ubicaciones',
             'locations.move' => 'Mover pallets/cajones',
         ],
+        'dtv' => [
+            'dtv.view' => 'Ver DTV-e (SENASA)',
+            'dtv.manage' => 'Cargar, importar y modificar DTV-e',
+        ],
         'loads' => [
             'loads.view' => 'Ver cargas',
             'loads.create' => 'Crear cargas',
@@ -85,8 +89,6 @@ return [
             'loads.reopen' => 'Reabrir cargas cerradas',
             'loads.dispatch' => 'Despachar (checklist)',
             'loads.cancel' => 'Cancelar cargas',
-            'dtv.view' => 'Ver DTV-e (SENASA)',
-            'dtv.manage' => 'Cargar y modificar DTV-e',
             'treatments.view' => 'Ver tratamientos',
             'treatments.manage' => 'Cargar y modificar tratamientos',
         ],

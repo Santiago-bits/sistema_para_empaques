@@ -12,7 +12,7 @@
             <x-table class="border-0 shadow-none">
                 <thead><tr><th>Especie</th><th>Variedad</th><th class="num">Cantidad</th><th>Unidad</th><th class="num">Kg por unidad</th><th class="num">Kg totales</th></tr></thead>
                 <tbody>
-                    @foreach ($document->lines as $line)
+                    @forelse ($document->lines as $line)
                         <tr>
                             <td>{{ $line->species ?: '—' }}</td>
                             <td>{{ $line->varietyLabel() ?: '—' }}</td>
@@ -21,7 +21,9 @@
                             <td class="num">{{ $line->kg_per_unit !== null ? num($line->kg_per_unit, 2) : '—' }}</td>
                             <td class="num font-medium">{{ num($line->kg_total, 2) }}</td>
                         </tr>
-                    @endforeach
+                    @empty
+                        <x-empty :colspan="6" message="Sin líneas: se registró sólo el movimiento."/>
+                    @endforelse
                 </tbody>
                 <x-slot:footer>
                     <div class="flex justify-between text-sm font-semibold"><span>Total</span><span class="tabular-nums">{{ kg($document->lines->sum('kg_total')) }}</span></div>
@@ -39,6 +41,10 @@
                     'Destinatario' => $document->recipient,
                     'Destino' => $document->destination,
                     'Transporte' => $document->transport,
+                    'Fecha de carga' => $document->loaded_on ? fdate($document->loaded_on) : null,
+                    'Vencimiento' => $document->expires_on ? fdate($document->expires_on) : null,
+                    'Estado en ARCA' => $document->arca_status ? (\App\Models\DtvDocument::ARCA_STATUSES[$document->arca_status] ?? $document->arca_status) : null,
+                    'Requiere intervención' => $document->needs_intervention ? 'Sí' : 'No',
                     'Carga' => $document->relatedLoad?->number,
                     'Lote' => $document->lot?->code,
                     'Observaciones' => $document->notes,

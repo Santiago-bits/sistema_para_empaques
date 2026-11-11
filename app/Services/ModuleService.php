@@ -26,6 +26,8 @@ class ModuleService
         'quality' => ['Calidad', 'Controles de calidad, rechazos y merma', true, false],
         'locations' => ['Ubicaciones', 'Inventario físico, mapa del galpón y movimientos', true, false],
         'loads' => ['Cargas', 'Armado de cargas, cierre y despacho', true, false],
+        // Sólo para control: el movimiento se hace en ARCA. Cada galpón lo usa si quiere.
+        'dtv' => ['DTV-e (SENASA)', 'Registro de los DTV-e que se hacen en ARCA: ingresos, egresos, tipos, transporte y kilos', true, false],
         'remitos' => ['Remitos', 'Remitos, QR y entregas', true, false],
         'documents' => ['Documentación', 'Adjuntos asociados a entidades', true, false],
         'reports' => ['Reportes', 'Informes, estadísticas y exportaciones', true, false],

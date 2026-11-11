@@ -24,7 +24,8 @@
                 <x-input name="date" type="date" label="Fecha" :value="old('date', $document->date?->toDateString() ?? $document->date)" required/>
                 <x-select name="direction" label="Ingreso o egreso" :options="\App\Models\DtvDocument::DIRECTIONS" :value="old('direction', $document->direction)" required/>
                 <x-input name="number" label="N° DTV-e" :value="old('number', $document->number)" required class="code" placeholder="14606819-7"/>
-                <x-select name="doc_type" label="Tipo" :options="$docTypes" :value="old('doc_type', $document->doc_type)" placeholder="—"/>
+                <x-input name="doc_type" label="Tipo (origen-destino)" :value="old('doc_type', $document->doc_type)" list="dtv-types" class="code" placeholder="EMP-CTC"
+                         hint="EMP empaque · CTC tratamiento cuarentenario · EST establecimiento"/>
                 <x-input name="issuer" label="Emisor" :value="old('issuer', $document->issuer)"/>
                 <x-input name="establishment" label="Establecimiento" :value="old('establishment', $document->establishment)" placeholder="E-2929-b-C"/>
                 <x-input name="recipient" label="Destinatario" :value="old('recipient', $document->recipient)"/>
@@ -32,9 +33,26 @@
                 <x-input name="transport" label="Transporte (camionero o empresa)" :value="old('transport', $document->transport)" class="sm:col-span-2"/>
                 <x-input name="notes" label="Observaciones" :value="old('notes', $document->notes)" class="sm:col-span-2"/>
             </div>
+            <datalist id="dtv-types">
+                @foreach ($docTypes as $type => $label)
+                    @if ($type !== 'OTRO')<option value="{{ $type }}">@endif
+                @endforeach
+            </datalist>
+        </x-panel>
+
+        <x-panel title="Datos de ARCA (opcional)">
+            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <x-input name="loaded_on" type="date" label="Fecha de carga" :value="old('loaded_on', $document->loaded_on?->toDateString())"/>
+                <x-input name="expires_on" type="date" label="Fecha de vencimiento" :value="old('expires_on', $document->expires_on?->toDateString())"/>
+                <x-select name="arca_status" label="Estado" :options="\App\Models\DtvDocument::ARCA_STATUSES" :value="old('arca_status', $document->arca_status)" placeholder="—"/>
+                <div class="flex items-end pb-2">
+                    <x-checkbox name="needs_intervention" label="Requiere intervención" :checked="(bool) old('needs_intervention', $document->needs_intervention)"/>
+                </div>
+            </div>
         </x-panel>
 
         <x-panel title="Líneas (especie y variedad)">
+            <p class="mb-3 text-sm text-stone-500 dark:text-stone-400">Opcional: si sólo querés registrar el movimiento de ARCA, dejá la cantidad vacía.</p>
             @error('lines')<p class="mb-3 text-sm text-red-600">{{ $message }}</p>@enderror
             <div class="space-y-3">
                 <template x-for="(line, i) in lines" :key="i">

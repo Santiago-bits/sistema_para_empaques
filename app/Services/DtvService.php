@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Exceptions\BusinessException;
 use App\Models\DtvDocument;
 use App\Models\Load;
 use App\Models\Lot;
@@ -26,10 +25,8 @@ class DtvService
      */
     public function save(?DtvDocument $document, array $header, array $lines, User $by, ?string $reason = null): DtvDocument
     {
+        // Sin líneas también vale: muchos se cargan sólo para el control (número, tipo, estado en ARCA).
         $lines = $this->normalizeLines($lines);
-        if ($lines === []) {
-            throw new BusinessException('El DTV-e necesita al menos una línea con cantidad.');
-        }
 
         return DB::transaction(function () use ($document, $header, $lines, $by, $reason) {
             $creating = $document === null;

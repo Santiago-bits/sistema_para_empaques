@@ -69,7 +69,7 @@ return [
         'items' => [
             ['label' => 'Cargas', 'route' => 'loads.index', 'icon' => 'truck', 'permission' => 'loads.view', 'module' => 'loads'],
             ['label' => 'Remitos', 'route' => 'remitos.index', 'icon' => 'document', 'permission' => 'remitos.view', 'module' => 'remitos'],
-            ['label' => 'DTV-e (SENASA)', 'route' => 'dtv.index', 'icon' => 'document', 'permission' => 'dtv.view', 'module' => 'loads'],
+            ['label' => 'DTV-e (SENASA)', 'route' => 'dtv.index', 'icon' => 'document', 'permission' => 'dtv.view', 'module' => 'dtv'],
             ['label' => 'Tratamientos', 'route' => 'treatments.index', 'icon' => 'check-badge', 'permission' => 'treatments.view', 'module' => 'loads'],
             ['label' => 'Documentos', 'route' => 'documents.index', 'icon' => 'folder', 'permission' => 'documents.view', 'module' => 'documents'],
         ],

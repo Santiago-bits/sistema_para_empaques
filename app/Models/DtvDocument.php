@@ -19,16 +19,33 @@ class DtvDocument extends Model
 
     public const DIRECTIONS = ['in' => 'Ingreso', 'out' => 'Egreso'];
 
-    public const DOC_TYPES = ['EMP-CTC' => 'EMP-CTC', 'PROD-EMP' => 'PROD-EMP', 'EMP-EMP' => 'EMP-EMP', 'EMP-MER' => 'EMP-MER', 'OTRO' => 'Otro'];
+    /** Tipos de movimiento habituales (origen-destino). Se puede escribir cualquier otro que use ARCA. */
+    public const DOC_TYPES = [
+        'EST-EMP' => 'EST-EMP', 'PROD-EMP' => 'PROD-EMP', 'EMP-CTC' => 'EMP-CTC', 'EMP-MER' => 'EMP-MER', 'EMP-MIN' => 'EMP-MIN',
+        'EMP-EMP' => 'EMP-EMP', 'CTC-MER' => 'CTC-MER', 'CTC-MIN' => 'CTC-MIN', 'CTC-EMP' => 'CTC-EMP', 'OTRO' => 'Otro',
+    ];
+
+    /** Códigos de lugar que forman el tipo («EMP-CTC» = de empaque a centro de tratamiento cuarentenario). */
+    public const PLACES = [
+        'EMP' => 'EMP · Empaque',
+        'CTC' => 'CTC · Centro de tratamiento cuarentenario',
+        'EST' => 'EST · Establecimiento (finca)',
+        'PROD' => 'PROD · Productor',
+        'MER' => 'MER · Mercado',
+        'MIN' => 'MIN',
+    ];
+
+    /** Estado del movimiento en ARCA. */
+    public const ARCA_STATUSES = ['issued' => 'Emitido', 'closed' => 'Cerrado', 'voided' => 'Anulado'];
 
     protected $fillable = [
         'warehouse_id', 'date', 'direction', 'number', 'doc_type', 'issuer', 'establishment', 'recipient', 'destination',
-        'transport', 'notes', 'load_id', 'lot_id', 'created_by',
+        'transport', 'notes', 'load_id', 'lot_id', 'created_by', 'loaded_on', 'expires_on', 'arca_status', 'needs_intervention',
     ];
 
     protected function casts(): array
     {
-        return ['date' => 'date'];
+        return ['date' => 'date', 'loaded_on' => 'date', 'expires_on' => 'date', 'needs_intervention' => 'boolean'];
     }
 
     public function lines(): HasMany
