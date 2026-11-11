@@ -67,6 +67,8 @@
                             <x-input name="weight_min" inputmode="decimal" label="Peso mínimo (kg)" :value="$s['production.weight_min']" required/>
                             <x-input name="weight_max" inputmode="decimal" label="Peso máximo (kg)" :value="$s['production.weight_max']" required
                                      hint="Fuera de rango requiere autorización de supervisor."/>
+                            <x-input name="pallet_capacity" type="number" min="1" max="50" label="Cajones por pallet" :value="$s['production.pallet_capacity']" required
+                                     hint="Cuántos cajones entran en un pallet (de 1 a 50). Cada pallet puede tener su propio número."/>
                             <x-select name="scale_driver" label="Origen del peso" :options="['manual' => 'Manual (teclado)', 'api' => 'Balanza vía API']" :value="$s['production.scale_driver']"/>
                             <x-input name="target_daily_kg" inputmode="decimal" hint="Ej.: 10.000" label="Objetivo diario (kg)" :value="$s['production.target_daily_kg']" required/>
                             <x-input name="target_weekly_kg" inputmode="decimal" hint="Ej.: 10.000" label="Objetivo semanal (kg)" :value="$s['production.target_weekly_kg']" required/>

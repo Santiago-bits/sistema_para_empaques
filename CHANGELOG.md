@@ -2,6 +2,17 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). Versionado semántico.
 
+## [Sin publicar]
+
+### Agregado
+- **Capacidad de cada pallet (1 a 50 cajones)**: valor general en Configuración → Producción («Cajones por pallet») y
+  propio de cada pallet. El sistema no deja cargar más cajones que esa cantidad (los anulados no cuentan); el pallet
+  muestra «40 de 50 · Faltan 10» y el listado «40 / 50». Se ve de qué **ingreso de fruta (bines)** sale cada pallet.
+
+### Corregido
+- El botón «Escanear cajones» de Registros de producción decía «Escanear cajocaneo».
+- En las listas con búsqueda, «Todos» / «Todas» se ven como texto normal (antes en gris, parecía deshabilitado).
+
 ## [1.12.0] - 2026-11-10
 
 ### Agregado
@@ -72,6 +83,8 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
   agrupados por causa (como mucho un correo cada 15 minutos). Se configura en Herramientas técnicas → Avisos por correo,
   con botones para mandar un correo de prueba, revisar ahora y limpiar.
 - **Limpieza semanal**: cada 7 días se borran los errores técnicos viejos y se vacían los logs (la auditoría no se toca).
+
+### Corregido
 
 ### Seguridad
 - Nadie que no sea el Super Administrador puede dar permisos que él mismo no tiene (ni editando un rol, ni con

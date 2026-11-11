@@ -24,7 +24,9 @@
     </x-page-header>
 
     <div class="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <x-stat label="Cajones" :value="num($totals->crates)" icon="box"/>
+        @php($limit = $pallet->capacityLimit())
+        <x-stat label="Cajones" :value="num($totals->crates).' de '.num($limit)" icon="box"
+                :hint="$totals->crates >= $limit ? 'Pallet completo' : 'Faltan '.num($limit - $totals->crates)"/>
         <x-stat label="Kg procesados" :value="kg($totals->kg, 1)" icon="scale" color="accent"/>
         <x-stat label="Peso bruto" :value="$pallet->gross_weight ? kg($pallet->gross_weight, 1) : '—'" icon="pallet" color="sky"/>
         <x-stat label="Ubicación" :value="$pallet->location?->name ?? 'Sin ubicar'" icon="pin" color="violet"/>
@@ -35,7 +37,8 @@
             <x-panel title="Datos">
                 <x-dl :items="[
                     'Código de barras' => $pallet->barcode,
-                    'Lote' => $pallet->lot?->code,
+                    'Ingreso de fruta (bines)' => $pallet->lot ? $pallet->lot->code.($pallet->lot->bins ? ' · '.num($pallet->lot->bins).' bines' : '').($pallet->lot->producer ? ' · '.$pallet->lot->producer->name : '') : null,
+                    'Cajones que entran' => num($limit),
                     'Productor' => $pallet->producer?->name,
                     'Propietario' => $pallet->owner?->name,
                     'Variedad' => $pallet->variety?->name,

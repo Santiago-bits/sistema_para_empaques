@@ -67,12 +67,12 @@ function enhance(select) {
     let lastIndex = -1;
 
     const selectedOption = () => select.options[select.selectedIndex] ?? null;
-    const placeholderOption = () => [...select.options].find((o) => o.value === '') ?? null;
 
     function showSelected() {
         const opt = selectedOption();
-        input.value = opt && opt.value !== '' ? opt.text.trim() : '';
-        input.placeholder = placeholderOption()?.text.trim() || 'Escribí para buscar…';
+        // «Todos», «Sin lote», etc. se muestran como texto normal (no en gris): es una opción elegida, no un campo vacío.
+        input.value = opt ? opt.text.trim() : '';
+        input.placeholder = 'Escribí para buscar…';
         input.classList.toggle('is-invalid', select.classList.contains('is-invalid'));
         lastIndex = select.selectedIndex;
     }

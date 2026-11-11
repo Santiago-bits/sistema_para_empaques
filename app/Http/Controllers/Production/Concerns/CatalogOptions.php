@@ -46,7 +46,7 @@ trait CatalogOptions
     {
         return Lot::query()->when($onlyOpen, fn ($q) => $q->where('status', 'open'))
             ->with('producer:id,name')->latest('date')->limit(300)->get()
-            ->mapWithKeys(fn (Lot $l) => [$l->id => $l->code.($l->producer ? ' — '.$l->producer->name : '')]);
+            ->mapWithKeys(fn (Lot $l) => [$l->id => $l->code.($l->producer ? ' — '.$l->producer->name : '').($l->bins ? ' · '.$l->bins.' bines' : '')]);
     }
 
     protected function locationOptions(): Collection
