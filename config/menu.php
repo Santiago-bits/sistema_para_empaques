@@ -57,7 +57,6 @@ return [
         // Debajo del título se muestra el código del galpón en ARCA (Configuración → ARCA).
         'show_warehouse_code' => true,
         'items' => [
-            ['label' => 'Cámaras de frío', 'route' => 'cold-rooms.index', 'icon' => 'snow', 'permission' => 'cold_rooms.view', 'module' => 'cold_rooms'],
             ['label' => 'Insumos', 'route' => 'supplies.index', 'icon' => 'archive', 'permission' => 'supplies.view', 'module' => 'supplies'],
             ['label' => 'Rendimiento de cera', 'route' => 'yields.index', 'icon' => 'chart-line', 'permission' => 'supplies.view', 'module' => 'supplies'],
             ['label' => 'Mantenimiento', 'route' => 'machines.index', 'icon' => 'wrench', 'permission' => 'maintenance.view', 'module' => 'maintenance'],
@@ -119,7 +118,7 @@ return [
             ['label' => 'Historial de cambios', 'route' => 'admin.audit.index', 'icon' => 'eye', 'permission' => 'audit.view', 'module' => 'core'],
             ['label' => 'Quién está conectado', 'route' => 'admin.sessions.index', 'icon' => 'signal', 'permission' => 'sessions.manage', 'module' => 'core'],
             ['label' => 'Copias de seguridad', 'route' => 'backups.index', 'icon' => 'database', 'permission' => 'backups.manage', 'module' => 'core'],
-            ['label' => 'Balanzas y sensores', 'route' => 'admin.tokens.index', 'icon' => 'key', 'permission' => 'api.tokens', 'module' => 'core'],
+            ['label' => 'Balanzas y conexiones', 'route' => 'admin.tokens.index', 'icon' => 'key', 'permission' => 'api.tokens', 'module' => 'core'],
             ['label' => 'Ayuda y atajos', 'route' => 'help.shortcuts', 'icon' => 'keyboard', 'permission' => null, 'module' => 'core'],
             ['label' => 'Soporte', 'route' => 'support.index', 'icon' => 'lifebuoy', 'permission' => 'support.use', 'module' => 'core'],
             ['label' => 'Herramientas técnicas', 'route' => 'developer.index', 'icon' => 'code', 'permission' => 'developer', 'module' => 'core'],

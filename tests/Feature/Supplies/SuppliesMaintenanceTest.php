@@ -3,14 +3,13 @@
 namespace Tests\Feature\Supplies;
 
 use App\Models\Alert;
-use App\Models\ColdRoom;
 use App\Models\Machine;
 use App\Models\Supply;
 use App\Services\ModuleService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-class SuppliesMaintenanceColdRoomsTest extends TestCase
+class SuppliesMaintenanceTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -81,25 +80,5 @@ class SuppliesMaintenanceColdRoomsTest extends TestCase
     {
         $this->actingAsRole('admin');
         $this->get(route('machines.index'))->assertNotFound();
-        $this->get(route('cold-rooms.index'))->assertNotFound();
-    }
-
-    public function test_cold_room_out_of_range_reading_creates_single_alert(): void
-    {
-        app(ModuleService::class)->setEnabled('cold_rooms', true);
-        $this->actingAsRole('admin');
-        $this->post(route('cold-rooms.store'), ['code' => 'CAM-1', 'name' => 'Cámara 1', 'temp_min' => '2', 'temp_max' => '6', 'active' => '1'])
-            ->assertSessionHasNoErrors();
-        $room = ColdRoom::query()->firstOrFail();
-
-        $this->post(route('cold-rooms.readings.store', $room), ['temperature' => '4'])->assertSessionHas('success');
-        $this->assertSame(0, Alert::query()->where('type', 'temperature')->count());
-
-        $this->post(route('cold-rooms.readings.store', $room), ['temperature' => '9,5']);
-        $this->post(route('cold-rooms.readings.store', $room), ['temperature' => '10']);
-        $this->assertSame(1, Alert::query()->where('type', 'temperature')->open()->count());
-
-        $this->get(route('cold-rooms.index'))->assertOk()->assertSee('FUERA DE RANGO');
-        $this->get(route('cold-rooms.show', $room))->assertOk();
     }
 }

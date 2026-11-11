@@ -120,7 +120,7 @@ class HubController extends Controller
         $this->audit->log('settings', null, null, ['demo.sample_data_at' => true], 'Cargó los datos de ejemplo');
 
         return redirect()->route('superadmin.index')->with('success',
-            'Listo: se cargaron ejemplos de todo (fichas, cámaras de frío, lotes, pallets, cajones, cargas, remitos, facturas, caja, cheques, '
+            'Listo: se cargaron ejemplos de todo (fichas, lotes, pallets, cajones, cargas, remitos, facturas, caja, cheques, '
             .'mantenimiento, incidentes y más). Recorré el menú para verlos.');
     }
 

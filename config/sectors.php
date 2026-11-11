@@ -39,9 +39,9 @@ return [
     ],
     'warehouse' => [
         'label' => 'Galpón y cámaras',
-        'description' => 'Ubicaciones, mover pallets y temperaturas de cámaras frigoríficas.',
+        'description' => 'Ubicaciones y mover pallets.',
         'icon' => 'map',
-        'permissions' => ['locations.view', 'locations.move', 'locations.manage', 'cold_rooms.view', 'cold_rooms.manage', 'pallets.view', 'crates.view'],
+        'permissions' => ['locations.view', 'locations.move', 'locations.manage', 'pallets.view', 'crates.view'],
     ],
     'loads' => [
         'label' => 'Cargas y despacho',

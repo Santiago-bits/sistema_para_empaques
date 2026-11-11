@@ -34,13 +34,15 @@ class ModuleService
         'supplies' => ['Insumos', 'Stock de materiales e inventario', true, false],
         'incidents' => ['Incidentes', 'Registro y seguimiento de incidentes', true, false],
         'maintenance' => ['Mantenimiento', 'Maquinaria y mantenimientos', false, false],
-        'cold_rooms' => ['Cámaras frigoríficas', 'Temperatura y humedad', false, false],
         'treasury' => ['Tesorería', 'Caja, cuentas corrientes, cheques y cotización del dólar', true, false],
         'costs' => ['Costos', 'Costos y rentabilidad', false, false],
         'client_portal' => ['Portal de clientes', 'Acceso de propietarios/clientes a su información', false, false],
         'whatsapp' => ['WhatsApp', 'Notificaciones por WhatsApp (integración futura)', false, false],
         'mobile_app' => ['Aplicación móvil', 'API para aplicación móvil', false, false],
     ];
+
+    /** Partes que se sacaron del sistema: no se ofrecen ni se pueden prender aunque la base las tenga activadas. */
+    public const REMOVED = ['cold_rooms'];
 
     /** @var array<string, array> Estados por galpón (cada galpón activa sus propios módulos). */
     private array $states = [];
@@ -72,6 +74,9 @@ class ModuleService
 
     public function enabled(string $key): bool
     {
+        if (in_array($key, self::REMOVED, true)) {
+            return false;
+        }
         if (isset(self::CATALOG[$key]) && self::CATALOG[$key][3]) {
             return true;
         }

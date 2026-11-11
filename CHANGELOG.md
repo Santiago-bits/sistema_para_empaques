@@ -5,6 +5,10 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 ## [Sin publicar]
 
 ### Quitado
+- **Cámaras de frío** (temperatura y humedad): sin menú, pantallas, permisos, sensores por API ni alertas de
+  temperatura. Quedan apagadas en todos los galpones aunque alguno las tuviera prendidas; al actualizar se borran
+  sus permisos y se cierran las alertas de temperatura abiertas. Las tablas quedan en la base sin uso. «Balanzas y
+  sensores» pasa a llamarse «Balanzas y conexiones».
 - **Asociaciones de citricultores** (de la v1.12.0): ya no hay pantalla ni pestaña en Administración general, no se
   vinculan a los galpones y no salen en etiquetas, facturas, remitos, romaneos ni resúmenes de cuenta. Las tablas
   quedan en la base sin uso (las migraciones sólo agregan). La «Tasa de asociación» de Tesorería sigue igual.

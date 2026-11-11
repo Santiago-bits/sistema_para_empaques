@@ -105,7 +105,7 @@
             <div class="max-w-2xl">
                 <p class="font-semibold">Datos de ejemplo</p>
                 <p class="mt-1 text-sm text-stone-600 dark:text-stone-400">
-                    Carga al menos 10 ejemplos de todo: productores, clientes, proveedores, camioneros, camiones, cámaras de frío, lotes,
+                    Carga al menos 10 ejemplos de todo: productores, clientes, proveedores, camioneros, camiones, lotes,
                     pallets, cajones con etiqueta, cargas, remitos, facturas, caja, cheques, mantenimiento, incidentes y más. Sirve para ver
                     cómo se ve cada pantalla y probarla. Úsalo en un galpón de prueba, no en el de un galpón real.
                 </p>

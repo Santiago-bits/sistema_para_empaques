@@ -17,11 +17,12 @@ class ModuleController extends Controller
 {
     public function index(): View
     {
-        return view('admin.modules.index', ['modules' => Module::query()->orderBy('sort')->get()]);
+        return view('admin.modules.index', ['modules' => Module::query()->whereNotIn('key', \App\Services\ModuleService::REMOVED)->orderBy('sort')->get()]);
     }
 
     public function update(Request $request, Module $module, ModuleService $modules): RedirectResponse
     {
+        abort_if(in_array($module->key, \App\Services\ModuleService::REMOVED, true), 404);
         $data = $request->validate(['enabled' => ['required', 'boolean']]);
 
         if ($module->is_core) {

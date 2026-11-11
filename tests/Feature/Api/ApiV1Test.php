@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Api;
 
-use App\Models\ColdRoom;
 use App\Models\User;
 use App\Services\Devices\ApiScaleReader;
 use App\Services\ModuleService;
@@ -49,7 +48,6 @@ class ApiV1Test extends TestCase
         $admin = User::factory()->role('admin')->create();
         $scaleOnly = $this->bearer($admin, ['scale:write']);
         $this->getJson('/api/v1/cajones', $scaleOnly)->assertForbidden();
-        $this->postJson('/api/v1/sensores/lecturas', ['sensor_key' => 'X', 'temperature' => 2], $scaleOnly)->assertForbidden();
     }
 
     public function test_token_never_exceeds_its_user_permissions(): void
@@ -84,22 +82,6 @@ class ApiV1Test extends TestCase
 
         $this->postJson('/api/v1/balanza/lecturas', ['station' => 'l1', 'weight' => 6000], $headers)->assertUnprocessable()->assertJsonValidationErrors('weight');
         $this->postJson('/api/v1/balanza/lecturas', ['station' => '../x', 'weight' => -1], $headers)->assertUnprocessable()->assertJsonValidationErrors(['station', 'weight']);
-    }
-
-    public function test_sensor_reading_records_temperature_and_raises_alert(): void
-    {
-        app(ModuleService::class)->setEnabled('cold_rooms', true);
-        $admin = User::factory()->role('admin')->create();
-        $room = ColdRoom::query()->create(['code' => 'CAM-1', 'name' => 'Cámara 1', 'sensor_key' => 'SENS-01', 'temp_min' => 0, 'temp_max' => 4, 'active' => true]);
-        $headers = $this->bearer($admin, ['sensors:write']);
-
-        $this->postJson('/api/v1/sensores/lecturas', ['sensor_key' => 'SENS-01', 'temperature' => 2.5, 'humidity' => 90], $headers)
-            ->assertCreated()->assertJsonPath('data.out_of_range', false);
-        $this->postJson('/api/v1/sensores/lecturas', ['sensor_key' => 'SENS-01', 'temperature' => 9], $headers)
-            ->assertCreated()->assertJsonPath('data.out_of_range', true);
-        $this->assertDatabaseHas('alerts', ['type' => 'temperature', 'severity' => 'critical']);
-        $this->postJson('/api/v1/sensores/lecturas', ['sensor_key' => 'NO-EXISTE', 'temperature' => 2], $headers)->assertNotFound();
-        $this->assertSame(2, $room->readings()->count());
     }
 
     public function test_token_management_screen(): void

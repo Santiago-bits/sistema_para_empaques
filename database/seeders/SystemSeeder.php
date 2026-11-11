@@ -49,10 +49,18 @@ class SystemSeeder extends Seeder
                 $this->grades();
                 $this->containerTypes();
                 $this->season();
+                $this->removedModules();
             });
             app(ModuleService::class)->flush();
         };
         $warehouseId ? \App\Support\CurrentWarehouse::runFor($warehouseId, $seed) : $seed();
+    }
+
+    /** Partes que se sacaron (cámaras de frío): apagadas y sin alertas abiertas que ya nadie va a poder resolver. */
+    private function removedModules(): void
+    {
+        Module::query()->whereIn('key', ModuleService::REMOVED)->update(['enabled' => false]);
+        \App\Models\Alert::query()->where('type', 'temperature')->whereNull('resolved_at')->update(['resolved_at' => now(), 'updated_at' => now()]);
     }
 
     private function companyAndWarehouse(): void
@@ -64,6 +72,9 @@ class SystemSeeder extends Seeder
 
     private function permissionsAndRoles(): void
     {
+        // Permisos de partes que se sacaron del sistema (p. ej. cámaras de frío): se borran (y de roles y usuarios).
+        Permission::query()->whereIn('module', ModuleService::REMOVED)->delete();
+
         $new = [];
         foreach (config('permissions.permissions') as $module => $permissions) {
             foreach ($permissions as $slug => $name) {

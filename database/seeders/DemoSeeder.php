@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Client;
-use App\Models\ColdRoom;
 use App\Models\Destination;
 use App\Models\Driver;
 use App\Models\Lot;
@@ -316,15 +315,10 @@ class DemoSeeder extends Seeder
         }
         $make(['type' => 'dispatch', 'code' => 'DESP', 'name' => 'Zona de despacho', 'capacity_pallets' => 20, 'map_x' => 9, 'map_y' => 1, 'map_w' => 2, 'map_h' => 3]);
 
-        // 10 cámaras de frío (dos filas de cinco en el mapa).
+        // 10 cámaras (lugares del mapa del galpón, dos filas de cinco).
         for ($n = 1; $n <= 10; $n++) {
-            $location = $make(['type' => 'cold_room', 'code' => "CAM-$n", 'name' => "Cámara $n", 'capacity_pallets' => 30,
+            $make(['type' => 'cold_room', 'code' => "CAM-$n", 'name' => "Cámara $n", 'capacity_pallets' => 30,
                 'map_x' => 1 + (($n - 1) % 5) * 2, 'map_y' => $n <= 5 ? 4 : 6, 'map_w' => 2, 'map_h' => 2]);
-            $lemons = $n >= 9;
-            ColdRoom::query()->firstOrCreate(['code' => "CAM-$n"], [
-                'name' => 'Cámara '.$n.($lemons ? ' (limones)' : ''), 'location_id' => $location->id,
-                'temp_min' => $lemons ? 8 : 2, 'temp_max' => $lemons ? 12 : 6, 'humidity_min' => 85, 'humidity_max' => 95,
-            ]);
         }
     }
 
@@ -493,18 +487,6 @@ class DemoSeeder extends Seeder
             ]);
         }
 
-        foreach (ColdRoom::query()->whereIn('code', array_map(fn ($n) => "CAM-$n", range(1, 10)))->get() as $room) {
-            $rows = [];
-            for ($h = 47; $h >= 0; $h--) {
-                $temp = round(4 + sin($h / 4) * 1.5 + (random_int(-5, 5) / 10), 2);
-                $rows[] = [
-                    'cold_room_id' => $room->id, 'temperature' => $temp, 'humidity' => random_int(86, 94), 'source' => 'manual',
-                    'out_of_range' => $temp < (float) $room->temp_min || $temp > (float) $room->temp_max,
-                    'recorded_at' => now()->subHours($h),
-                ];
-            }
-            DB::table('temperature_records')->insert($rows);
-        }
     }
 
     /**

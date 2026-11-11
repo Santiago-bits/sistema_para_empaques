@@ -34,7 +34,7 @@ class IsolationTest extends TestCase
     private const PARAMS = [
         'user' => User::class, 'log' => \App\Models\AuditLog::class, 'lot' => \App\Models\Lot::class, 'pallet' => \App\Models\Pallet::class,
         'crate' => Crate::class, 'packer' => \App\Models\Packer::class, 'location' => \App\Models\WarehouseLocation::class,
-        'supply' => \App\Models\Supply::class, 'machine' => \App\Models\Machine::class, 'coldRoom' => \App\Models\ColdRoom::class,
+        'supply' => \App\Models\Supply::class, 'machine' => \App\Models\Machine::class,
         'qualityControl' => \App\Models\QualityControl::class, 'import' => \App\Models\ImportBatch::class, 'load' => Load::class,
         'remito' => \App\Models\Remito::class, 'invoice' => \App\Models\Invoice::class, 'document' => \App\Models\Document::class,
         'incident' => \App\Models\Incident::class, 'alert' => \App\Models\Alert::class, 'ticket' => \App\Models\SupportTicket::class,

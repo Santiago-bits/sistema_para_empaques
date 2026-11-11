@@ -8,6 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * EN DESUSO: las cámaras de frío se sacaron del sistema. El modelo queda sólo para que el historial de cambios
+ * (auditoría) muestre los registros viejos; las tablas quedan en la base sin uso.
+ */
 class ColdRoom extends Model
 {
     use BelongsToWarehouse;

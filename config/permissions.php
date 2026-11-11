@@ -127,10 +127,6 @@ return [
             'maintenance.view' => 'Ver mantenimiento',
             'maintenance.manage' => 'Gestionar máquinas y mantenimientos',
         ],
-        'cold_rooms' => [
-            'cold_rooms.view' => 'Ver cámaras frigoríficas',
-            'cold_rooms.manage' => 'Registrar temperaturas y gestionar cámaras',
-        ],
         'costs' => [
             'costs.view' => 'Ver costos',
             'costs.manage' => 'Gestionar costos',
@@ -195,7 +191,7 @@ return [
             'permissions' => [
                 'dashboard.view', 'catalogs.view', 'lots.view', 'crates.view', 'pallets.view', 'traceability.view',
                 'quality.view', 'quality.manage', 'production.view', 'reports.view', 'support.use', 'alerts.view',
-                'incidents.view', 'incidents.manage', 'cold_rooms.view', 'cold_rooms.manage',
+                'incidents.view', 'incidents.manage',
             ],
         ],
         'billing' => [
@@ -220,7 +216,7 @@ return [
                 'stoppages.manage', 'quality.view', 'locations.view', 'loads.view', 'loads.reopen', 'remitos.view',
                 'documents.view', 'reports.view', 'reports.export_excel', 'reports.export_pdf', 'stats.view',
                 'audit.view', 'closings.manage', 'alerts.view', 'alerts.manage', 'incidents.view', 'incidents.manage',
-                'supplies.view', 'maintenance.view', 'cold_rooms.view', 'support.use', 'staff.view', 'treasury.view',
+                'supplies.view', 'maintenance.view', 'support.use', 'staff.view', 'treasury.view',
                 'dtv.view', 'treatments.view',
                 'containers.view',
             ],

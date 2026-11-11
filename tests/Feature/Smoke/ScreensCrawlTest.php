@@ -33,7 +33,7 @@ class ScreensCrawlTest extends TestCase
         'location' => \App\Models\WarehouseLocation::class,
         'supply' => \App\Models\Supply::class,
         'machine' => \App\Models\Machine::class,
-        'coldRoom' => \App\Models\ColdRoom::class,
+       
         'qualityControl' => \App\Models\QualityControl::class,
         'import' => \App\Models\ImportBatch::class,
         'load' => \App\Models\Load::class,

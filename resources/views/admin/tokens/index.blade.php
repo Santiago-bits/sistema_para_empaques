@@ -1,11 +1,11 @@
-<x-layouts.app title="Balanzas y sensores">
-    <x-page-header title="Balanzas y sensores" subtitle="Llaves de conexión para equipos que mandan datos solos al sistema."/>
+<x-layouts.app title="Balanzas y conexiones">
+    <x-page-header title="Balanzas y conexiones" subtitle="Llaves de conexión para equipos que mandan datos solos al sistema."/>
 
     <div class="panel mb-6 p-5">
         <p class="font-semibold">¿Para qué sirve esto?</p>
         <p class="mt-1 text-sm text-stone-600 dark:text-stone-400">
-            Si tenés una <strong>balanza</strong> o un <strong>sensor de temperatura</strong> que se conecta al sistema, acá creás su
-            «llave de conexión» y se la cargás al equipo (lo hace el técnico que lo instala). Así el equipo manda los pesos o la temperatura
+            Si tenés una <strong>balanza</strong> que se conecta al sistema, acá creás su
+            «llave de conexión» y se la cargás al equipo (lo hace el técnico que lo instala). Así la balanza manda los pesos
             sin que nadie los escriba a mano.
         </p>
         <p class="mt-2 text-sm font-medium text-stone-800 dark:text-stone-200">Si no tenés equipos así, no hace falta tocar nada en esta pantalla.</p>
@@ -55,7 +55,7 @@
         <x-panel title="Conectar un equipo nuevo">
             <form method="POST" action="{{ route('admin.tokens.store') }}" class="space-y-4">
                 @csrf
-                <x-input name="name" label="Nombre del equipo" required maxlength="60" hint="Ej.: Balanza línea 1, Sensor cámara 2"/>
+                <x-input name="name" label="Nombre del equipo" required maxlength="60" hint="Ej.: Balanza línea 1"/>
                 @if ($owners)
                     <x-select name="owner_id" label="A nombre de" :options="$owners" :value="auth()->id()" hint="El equipo puede hacer, como máximo, lo mismo que ese usuario."/>
                 @endif

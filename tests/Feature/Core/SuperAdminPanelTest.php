@@ -208,7 +208,7 @@ class SuperAdminPanelTest extends TestCase
 
         foreach ([\App\Models\Producer::class, \App\Models\Owner::class, \App\Models\Client::class, \App\Models\Destination::class, \App\Models\Provider::class,
             \App\Models\Transporter::class, \App\Models\Truck::class, \App\Models\Driver::class, \App\Models\Variety::class, \App\Models\Size::class,
-            \App\Models\ColdRoom::class, \App\Models\Supply::class, \App\Models\Machine::class, \App\Models\Incident::class, \App\Models\Cost::class,
+            \App\Models\Supply::class, \App\Models\Machine::class, \App\Models\Incident::class, \App\Models\Cost::class,
             \App\Models\ProductionStoppage::class, \App\Models\ContainerType::class, \App\Models\Employee::class, \App\Models\ExchangeRate::class,
             \App\Models\Check::class, \App\Models\CashMovement::class, \App\Models\Lot::class, \App\Models\Pallet::class, \App\Models\Crate::class,
             \App\Models\Packer::class, \App\Models\InventoryMovement::class, \App\Models\Treatment::class, \App\Models\SupplyYield::class] as $model) {

@@ -4,15 +4,12 @@ namespace App\Services;
 
 use App\Enums\CrateStatus;
 use App\Enums\LoadStatus;
-use App\Models\ColdRoom;
 use App\Models\Crate;
 use App\Models\Driver;
 use App\Models\Load;
 use App\Models\Machine;
 use App\Models\ProductionRecord;
 use App\Models\Supply;
-use App\Models\TemperatureRecord;
-use Illuminate\Support\Carbon;
 use Throwable;
 
 /**
@@ -29,7 +26,6 @@ class AlertChecker
         'document_expiring' => 'catalogs',
         'maintenance_due' => 'maintenance',
         'crates_unprocessed' => 'crates',
-        'temperature' => 'cold_rooms',
         'production_low' => 'production',
     ];
 
@@ -234,34 +230,6 @@ class AlertChecker
     }
 
     /** @return list<string> */
-    protected function checkTemperature(): array
-    {
-        $active = [];
-
-        ColdRoom::query()->where('active', true)->get()->each(function (ColdRoom $room) use (&$active) {
-            $last = TemperatureRecord::query()->where('cold_room_id', $room->id)
-                ->latest('recorded_at')->latest('id')->first();
-
-            if (! $last || ! $last->out_of_range) {
-                return;
-            }
-
-            $fingerprint = self::temperatureFingerprint($room);
-            $this->alerts->raise(
-                'temperature',
-                'Temperatura fuera de rango: '.$room->name,
-                self::temperatureMessage($room, (float) $last->temperature, $last->humidity !== null ? (float) $last->humidity : null, $last->recorded_at),
-                $room,
-                'critical',
-                $fingerprint,
-            );
-            $active[] = $fingerprint;
-        });
-
-        return $active;
-    }
-
-    /** @return list<string> */
     protected function checkProductionLow(): array
     {
         $now = now();
@@ -296,21 +264,5 @@ class AlertChecker
         );
 
         return [$fingerprint];
-    }
-
-    public static function temperatureFingerprint(ColdRoom $room): string
-    {
-        return 'temperature:cold_room:'.$room->id;
-    }
-
-    public static function temperatureMessage(ColdRoom $room, float $temperature, ?float $humidity, ?Carbon $at): string
-    {
-        $text = 'Lectura de '.num($temperature, 1).' °C';
-        if ($humidity !== null) {
-            $text .= ' / '.num($humidity, 0).' % HR';
-        }
-
-        return $text.' (rango '.num($room->temp_min, 1).' a '.num($room->temp_max, 1).' °C)'
-            .($at ? ' el '.fdate($at, true) : '').'.';
     }
 }

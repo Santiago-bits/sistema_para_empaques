@@ -40,6 +40,4 @@ Route::prefix('v1')->name('api.v1.')->middleware(['auth:sanctum', 'active', 'thr
 
     Route::post('balanza/lecturas', [DeviceController::class, 'scale'])
         ->middleware(['abilities:scale:write', 'module:production', 'throttle:scan'])->name('scale.readings');
-    Route::post('sensores/lecturas', [DeviceController::class, 'sensor'])
-        ->middleware(['abilities:sensors:write', 'module:cold_rooms'])->name('sensors.readings');
 });

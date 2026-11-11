@@ -75,7 +75,7 @@ class SettingsService
             'weight' => 'required', 'lot_id' => 'optional', 'notes' => 'optional', 'pallet_id' => 'optional',
         ], 'json', 'fields'],
         'alerts.enabled' => [[
-            'stock_low' => true, 'load_pending' => true, 'temperature' => true, 'production_low' => false,
+            'stock_low' => true, 'load_pending' => true, 'production_low' => false,
             'document_expiring' => true, 'maintenance_due' => true, 'crates_unprocessed' => true,
         ], 'json', 'alerts'],
         'alerts.load_pending_hours' => [24, 'int', 'alerts'],
