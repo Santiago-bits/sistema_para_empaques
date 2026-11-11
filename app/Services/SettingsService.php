@@ -58,6 +58,8 @@ class SettingsService
         'network.allowed_ranges' => [['127.0.0.1/32', '192.168.0.0/16', '10.0.0.0/8', '172.16.0.0/12'], 'json', 'security'],
         'production.weight_min' => [5, 'float', 'production'],
         'production.weight_max' => [30, 'float', 'production'],
+        // Cajones que entran en un pallet si el pallet no indica otro número (de 1 a 50).
+        'production.pallet_capacity' => [50, 'int', 'production'],
         'production.require_lot' => [false, 'bool', 'production'],
         'production.sound_success' => [true, 'bool', 'production'],
         'production.sound_error' => [true, 'bool', 'production'],

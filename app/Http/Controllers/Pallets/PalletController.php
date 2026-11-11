@@ -26,7 +26,7 @@ class PalletController extends Controller
     {
         $pallets = Pallet::query()
             ->with('lot:id,code', 'producer:id,name', 'owner:id,name', 'variety:id,name', 'location:id,code,name')
-            ->withCount('crates')
+            ->withCount(['crates' => fn ($q) => $q->where('status', '!=', \App\Enums\CrateStatus::Voided->value)])
             ->when($request->filled('q'), function ($q) use ($request) {
                 $term = trim((string) $request->string('q'));
                 $q->where(fn ($w) => $w->where('code', 'like', $term.'%')->orWhere('barcode', $term));
@@ -75,7 +75,7 @@ class PalletController extends Controller
             ->with('variety:id,name', 'size:id,name', 'packer:id,code,first_name,last_name')
             ->orderBy('code')->paginate(50, ['*'], 'crates_page')->withQueryString();
 
-        $totals = Crate::query()->where('pallet_id', $pallet->id)
+        $totals = Crate::query()->where('pallet_id', $pallet->id)->where('status', '!=', \App\Enums\CrateStatus::Voided->value)
             ->selectRaw('COUNT(*) as crates, COALESCE(SUM(weight), 0) as kg')->first();
 
         $documents = module_enabled('documents') && method_exists($pallet, 'documents')

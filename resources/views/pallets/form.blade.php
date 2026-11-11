@@ -21,8 +21,8 @@
 
         <x-panel title="Origen y propiedad">
             <div class="grid gap-4 md:grid-cols-3">
-                <x-select name="lot_id" label="Lote" :options="$lots" :value="$pallet->lot_id" placeholder="Sin lote"
-                          hint="Si elegís un lote, productor/propietario/variedad se completan desde él."/>
+                <x-select name="lot_id" label="Ingreso de fruta (bines)" :options="$lots" :value="$pallet->lot_id" placeholder="Sin ingreso"
+                          hint="De qué ingreso (bines) sale la fruta de este pallet. Completa solo productor, propietario y variedad."/>
                 <x-select name="producer_id" label="Productor" :options="$producers" :value="$pallet->producer_id" placeholder="—" hint="Quién produjo la fruta."/>
                 <x-select name="owner_id" label="Propietario" :options="$owners" :value="$pallet->owner_id" placeholder="—" hint="A quién pertenece comercialmente."/>
                 <x-select name="variety_id" label="Variedad" :options="$varieties" :value="$pallet->variety_id" placeholder="—"/>
@@ -33,7 +33,9 @@
 
         <x-panel title="Contenido">
             <div class="grid gap-4 md:grid-cols-3">
-                <x-input name="quantity" type="number" min="0" label="Cantidad de cajones/bins" :value="$pallet->quantity"/>
+                <x-input name="capacity" type="number" min="1" max="50" label="Cajones que entran" :value="$pallet->capacity ?? setting('production.pallet_capacity', 50)"
+                         hint="De 1 a 50. El sistema no deja cargar más cajones que este número."/>
+                <x-input name="quantity" type="number" min="0" label="Cantidad declarada (cajones/bins)" :value="$pallet->quantity"/>
                 <x-input name="gross_weight" inputmode="decimal" label="Peso bruto (kg)" hint="Ej.: 1.250,5" :value="$pallet->gross_weight"/>
             </div>
             <div class="mt-4">

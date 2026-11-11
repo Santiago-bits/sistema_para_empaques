@@ -40,6 +40,7 @@ class PalletRequest extends FormRequest
             'origin' => ['nullable', 'string', 'max:255'],
             'received_at' => ['required', 'date', 'before_or_equal:'.now()->addDay()->toDateString()],
             'quantity' => ['nullable', 'integer', 'min:0', 'max:100000'],
+            'capacity' => ['nullable', 'integer', 'min:1', 'max:'.\App\Models\Pallet::MAX_CAPACITY],
             'gross_weight' => ['nullable', 'numeric', 'min:0', 'max:99999999'],
             'location_id' => ['nullable', 'integer', Rule::exists('warehouse_locations', 'id')->where('active', true)],
             'notes' => ['nullable', 'string', 'max:2000'],
@@ -52,7 +53,7 @@ class PalletRequest extends FormRequest
         return [
             'code' => 'código', 'barcode' => 'código de barras', 'lot_id' => 'lote', 'producer_id' => 'productor',
             'owner_id' => 'propietario', 'variety_id' => 'variedad', 'origin' => 'procedencia', 'received_at' => 'fecha de ingreso',
-            'quantity' => 'cantidad', 'gross_weight' => 'peso bruto', 'location_id' => 'ubicación', 'notes' => 'observaciones',
+            'quantity' => 'cantidad', 'capacity' => 'cajones que entran', 'gross_weight' => 'peso bruto', 'location_id' => 'ubicación', 'notes' => 'observaciones',
         ];
     }
 

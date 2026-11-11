@@ -35,17 +35,19 @@ class DatabaseUpgradeTest extends TestCase
     {
         $admin = $this->actingAsRole('admin');
         // Simula un servidor con el código nuevo y la base vieja (sin las tablas ni los permisos de la última versión).
-        Artisan::call('migrate:rollback', ['--step' => 6, '--force' => true]);
+        Artisan::call('migrate:rollback', ['--step' => 7, '--force' => true]);
         \App\Models\Permission::query()->whereIn('slug', ['dtv.view', 'dtv.manage'])->delete();
         @unlink(storage_path('framework/schema.ok'));
         $this->assertFalse(Schema::hasTable('dtv_documents'));
         $this->assertFalse(Schema::hasTable('container_movements'));
+        $this->assertFalse(Schema::hasColumn('pallets', 'capacity'));
         $this->assertNotSame([], app(DatabaseUpgrader::class)->pending());
 
         $this->get(route('lots.index'))->assertOk();
 
         $this->assertTrue(Schema::hasTable('dtv_documents'));
         $this->assertTrue(Schema::hasTable('container_movements'));
+        $this->assertTrue(Schema::hasColumn('pallets', 'capacity'));
         $this->assertTrue(Schema::hasColumn('lots', 'bins'));
         $this->assertTrue(Schema::hasColumn('import_batches', 'group_uuid'));
         $this->assertTrue(Schema::hasColumn('licenses', 'admin_username'));
@@ -62,7 +64,7 @@ class DatabaseUpgradeTest extends TestCase
     {
         $this->actingAsRole('super_admin');
         $this->post(route('superadmin.confirm.store'), ['password' => 'password']);
-        Artisan::call('migrate:rollback', ['--step' => 6, '--force' => true]);
+        Artisan::call('migrate:rollback', ['--step' => 7, '--force' => true]);
         // Un intento automático que falló hace un rato: no se reintenta solo, se muestra el aviso.
         file_put_contents(storage_path('framework/upgrade.json'), json_encode(['ok' => false, 'at' => time(), 'error' => 'Prueba de error']));
         @unlink(storage_path('framework/schema.ok'));
@@ -70,10 +72,12 @@ class DatabaseUpgradeTest extends TestCase
         $this->get(route('superadmin.index'))->assertOk()->assertSee('La base de datos no está al día')->assertSee('Prueba de error');
         $this->assertFalse(Schema::hasTable('dtv_documents'));
         $this->assertFalse(Schema::hasTable('container_movements'));
+        $this->assertFalse(Schema::hasColumn('pallets', 'capacity'));
 
         $this->post(route('superadmin.upgrade'))->assertRedirect(route('superadmin.index'))->assertSessionHas('success');
         $this->assertTrue(Schema::hasTable('dtv_documents'));
         $this->assertTrue(Schema::hasTable('container_movements'));
+        $this->assertTrue(Schema::hasColumn('pallets', 'capacity'));
         $this->get(route('superadmin.index'))->assertDontSee('La base de datos no está al día');
     }
 }

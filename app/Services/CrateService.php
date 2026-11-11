@@ -83,6 +83,9 @@ class CrateService
     {
         return DB::transaction(function () use ($data, $user) {
             $data = $this->inherit($data);
+            if (! empty($data['pallet_id'])) {
+                $this->assertPalletHasRoom((int) $data['pallet_id']);
+            }
             $code = trim((string) ($data['code'] ?? '')) ?: $this->sequences->next('crate');
 
             $crate = Crate::query()->create(array_merge($this->only($data), [
@@ -138,6 +141,9 @@ class CrateService
             }
 
             $values = $this->only($this->inherit($data, $locked));
+            if (! empty($values['pallet_id']) && (int) $values['pallet_id'] !== (int) $locked->pallet_id) {
+                $this->assertPalletHasRoom((int) $values['pallet_id']);
+            }
             $locked->fill($values);
             $criticalChanges = array_intersect(array_keys($locked->getDirty()), self::CRITICAL_FIELDS);
 
@@ -220,6 +226,23 @@ class CrateService
         ], fn ($v) => $v !== null);
 
         $record->update($changes);
+    }
+
+    /**
+     * Cada pallet lleva como mucho su capacidad (1 a 50 cajones). Se bloquea el pallet para que dos personas
+     * cargando a la vez no lo pasen del límite.
+     */
+    private function assertPalletHasRoom(int $palletId): void
+    {
+        $pallet = Pallet::query()->whereKey($palletId)->lockForUpdate()->first();
+        if (! $pallet) {
+            return;
+        }
+        $limit = $pallet->capacityLimit();
+        $used = $pallet->cratesCount();
+        if ($used >= $limit) {
+            throw new BusinessException("El pallet {$pallet->code} ya está completo ({$used} de {$limit} cajones). Usá otro pallet o cambiá su capacidad.");
+        }
     }
 
     /** Completa lote/productor/propietario/variedad desde el pallet o el lote si no se indicaron. */

@@ -44,7 +44,7 @@
                         <td>{{ $pallet->producer?->name ?? '—' }}</td>
                         <td>{{ $pallet->owner?->name ?? '—' }}</td>
                         <td>{{ $pallet->variety?->name ?? '—' }}</td>
-                        <td class="num">{{ num($pallet->crates_count) }}</td>
+                        <td class="num"><span @class(['font-semibold text-emerald-600 dark:text-emerald-400' => $pallet->crates_count >= $pallet->capacityLimit()])>{{ num($pallet->crates_count) }} / {{ num($pallet->capacityLimit()) }}</span></td>
                         <td>{{ $pallet->location?->name ?? '—' }}</td>
                         <td><x-status :status="$pallet->status"/></td>
                     </tr>

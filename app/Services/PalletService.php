@@ -116,7 +116,7 @@ class PalletService
     private function only(array $data): array
     {
         return array_intersect_key($data, array_flip([
-            'barcode', 'lot_id', 'producer_id', 'owner_id', 'variety_id', 'origin', 'received_at', 'quantity',
+            'barcode', 'lot_id', 'producer_id', 'owner_id', 'variety_id', 'origin', 'received_at', 'quantity', 'capacity',
             'gross_weight', 'location_id', 'notes',
         ]));
     }

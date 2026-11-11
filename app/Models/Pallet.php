@@ -20,9 +20,24 @@ class Pallet extends Model
     /** Bloqueo optimista: se incrementa en cada cambio de estado o edición crítica. */
     protected $attributes = ['version' => 0];
 
+    /** Máximo de cajones que puede llevar un pallet. */
+    public const MAX_CAPACITY = 50;
+
+    /** Cajones que entran en este pallet: el suyo o el de Configuración → Producción. */
+    public function capacityLimit(): int
+    {
+        return (int) ($this->capacity ?: setting('production.pallet_capacity', self::MAX_CAPACITY));
+    }
+
+    /** Cajones que ocupan lugar en el pallet (los anulados no cuentan). */
+    public function cratesCount(): int
+    {
+        return Crate::query()->where('pallet_id', $this->id)->where('status', '!=', \App\Enums\CrateStatus::Voided->value)->count();
+    }
+
     protected $fillable = [
         'warehouse_id', 'season_id', 'code', 'barcode', 'lot_id', 'producer_id', 'owner_id', 'variety_id',
-        'origin', 'received_at', 'quantity', 'gross_weight', 'status', 'location_id', 'notes', 'created_by',
+        'origin', 'received_at', 'quantity', 'capacity', 'gross_weight', 'status', 'location_id', 'notes', 'created_by',
     ];
 
     protected function casts(): array
