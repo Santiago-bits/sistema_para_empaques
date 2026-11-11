@@ -5,11 +5,16 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 ## [Sin publicar]
 
 ### Agregado
+- **Etiquetas por rango, más rápido**: «CJ-» va solo (se escribe sólo el número) y «Hasta» se completa de a 50
+  (se puede cambiar con las flechitas o a mano; «Volver a 50» lo recalcula). Al abrir propone el bloque de 50 del
+  último cajón. Generar cajones nuevos viene en 50 por defecto.
 - **Capacidad de cada pallet (1 a 50 cajones)**: valor general en Configuración → Producción («Cajones por pallet») y
   propio de cada pallet. El sistema no deja cargar más cajones que esa cantidad (los anulados no cuentan); el pallet
   muestra «40 de 50 · Faltan 10» y el listado «40 / 50». Se ve de qué **ingreso de fruta (bines)** sale cada pallet.
 
 ### Corregido
+- Reimprimir por rango no encontraba los cajones si el código se escribía con menos ceros («CJ-00001» en vez de
+  «CJ-000001»): ahora se arma el código completo desde el número.
 - El botón «Escanear cajones» de Registros de producción decía «Escanear cajocaneo».
 - En las listas con búsqueda, «Todos» / «Todas» se ven como texto normal (antes en gris, parecía deshabilitado).
 

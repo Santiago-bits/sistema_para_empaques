@@ -43,7 +43,18 @@ class LabelController extends Controller
         if (! empty($data['ids'])) {
             $query->whereIn('id', $data['ids']);
         } elseif (! empty($data['from'])) {
-            $query->whereBetween('code', [trim($data['from']), trim($data['to'] ?? $data['from'])]);
+            // Se puede escribir sólo el número («101») o el código con menos ceros: se arma el código completo.
+            $sequences = app(\App\Services\SequenceService::class);
+            $from = $sequences->normalize('crate', $data['from']);
+            $to = $sequences->normalize('crate', (string) ($data['to'] ?? '') ?: $data['from']);
+            [$a, $b] = [$sequences->numberOf('crate', $from), $sequences->numberOf('crate', $to)];
+            if ($a !== null && $b !== null && $b < $a) {
+                return back()->withInput()->with('error', '«Hasta» tiene que ser mayor o igual que «Desde».');
+            }
+            if ($a !== null && $b !== null && $b - $a + 1 > LabelService::MAX_LABELS) {
+                return back()->withInput()->with('error', 'Son '.num($b - $a + 1).' etiquetas: como mucho '.LabelService::MAX_LABELS.' por vez.');
+            }
+            $query->whereBetween('code', [$from, $to]);
         } elseif (! empty($data['pallet_id'])) {
             $query->where('pallet_id', $data['pallet_id']);
         } else {
@@ -136,6 +147,17 @@ class LabelController extends Controller
         ]);
     }
 
+    /** Primer número del bloque de 50 donde está el último cajón creado (1, 51, 101…). */
+    private function suggestedFrom(): int
+    {
+        $last = app(\App\Services\SequenceService::class)->numberOf('crate', Crate::query()->latest('id')->value('code'));
+
+        return $last ? intdiv($last - 1, self::BLOCK) * self::BLOCK + 1 : 1;
+    }
+
+    /** De a cuántas etiquetas se imprime por defecto. */
+    public const BLOCK = 50;
+
     private function formData(string $type): array
     {
         return [
@@ -143,6 +165,10 @@ class LabelController extends Controller
             'pallets' => Pallet::query()->whereNot('status', 'voided')->latest('received_at')->limit(300)->pluck('code', 'id'),
             'lots' => $this->lotOptions(true),
             'varieties' => $this->varietyOptions(),
+            // Rango sugerido: el bloque de 50 del último cajón (por ejemplo, 101 a 150).
+            'cratePrefix' => app(\App\Services\SequenceService::class)->shape('crate')[0],
+            'cratePadding' => app(\App\Services\SequenceService::class)->shape('crate')[1],
+            'suggestedFrom' => $this->suggestedFrom(),
             'width' => (int) setting('labels.width', 100),
             'height' => (int) setting('labels.height', 50),
         ];
