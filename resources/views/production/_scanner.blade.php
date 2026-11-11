@@ -36,7 +36,7 @@
                 <div class="relative min-w-0 flex-1">
                     <input id="scan-crate" data-scan {{ code_attrs('crate') }} x-ref="crate" x-model.trim="form.crate_code" @keydown.enter.prevent="afterCrate()"
                            class="{{ $field }}" :class="crateState === 'error' ? 'border-red-500' : (crateState === 'ok' ? 'border-emerald-500' : 'border-stone-300 dark:border-stone-700')"
-                           placeholder="Escanear o escribir el número" inputmode="text" spellcheck="false">
+                           placeholder="Número" inputmode="text" spellcheck="false">
                     <span x-show="crateInfo" x-text="crateInfo" class="absolute top-1/2 right-4 -translate-y-1/2 text-sm font-medium text-stone-500"></span>
                 </div>
                 <x-scan-camera target="scan-crate" title="Escanear cajón" class="px-4"/>
@@ -52,7 +52,7 @@
                 <div class="relative min-w-0 flex-1">
                     <input id="scan-packer" data-scan x-ref="packer" x-model.trim="form.packer_code" @keydown.enter.prevent="afterPacker()"
                            class="{{ $field }}" :class="packerState === 'error' ? 'border-red-500' : (packerState === 'ok' ? 'border-emerald-500' : 'border-stone-300 dark:border-stone-700')"
-                           placeholder="Escanear credencial (EMB…)" spellcheck="false">
+                           placeholder="Credencial" spellcheck="false">
                     <span x-show="packerName" x-text="packerName" class="absolute top-1/2 right-4 -translate-y-1/2 text-sm font-medium text-stone-500"></span>
                 </div>
                 <x-scan-camera target="scan-packer" title="Escanear credencial del embalador" class="px-4"/>

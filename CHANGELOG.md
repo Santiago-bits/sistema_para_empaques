@@ -5,6 +5,15 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 ## [Sin publicar]
 
 ### Agregado
+- **Etiquetas que se leen bien y a prueba de cambios**: el código del cajón va grande; donde iba el QR hay un
+  **recuadro de seguridad** con el **peso neto en grande**, calibre, fecha de empaque y un **código de control**
+  (CTRL) sobre un fondo rayado (si se borra o raspa algo, se nota). Si alguien cambia a mano el peso, el control no
+  coincide con el que muestra el sistema en «Verificar etiqueta» (ficha del cajón, del pallet y Seguir un cajón).
+  El código de barras sale siempre entero y a lo ancho, con el número abajo; si los datos no entran, la letra se
+  achica sola. Etiquetas chicas (menos de 55×38 mm): sólo código, peso con control y código de barras. Tamaño mínimo
+  50×30 mm.
+- **Cajón de madera de fábrica**: cada galpón trae el envase «Cajón de madera» y los cajones nuevos (escaneo,
+  etiquetas, alta a mano) lo toman si no se elige otro. Se cambia en Configuración → Producción → «Envase de los cajones».
 - **Códigos con sólo el número en todo el sistema**: en los campos de cajón, pallet, lote, carga y remito el prefijo
   («CJ-», «PAL-», «LOT-», «CARG-», «0001-») va fijo al lado y alcanza con escribir el número (al apretar Enter o
   filtrar, «123» pasa a «CJ-000123»). Vale en los filtros de Cajones, Producción, Lotes, Cargas y Remitos, en el alta
@@ -18,6 +27,8 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
   muestra «40 de 50 · Faltan 10» y el listado «40 / 50». Se ve de qué **ingreso de fruta (bines)** sale cada pallet.
 
 ### Corregido
+- El código de barras de la etiqueta salía cortado abajo (el lector podía no leerlo).
+- En Escanear cajones, los textos de ayuda de los campos grandes se cortaban en el celular.
 - Reimprimir por rango no encontraba los cajones si el código se escribía con menos ceros («CJ-00001» en vez de
   «CJ-000001»): ahora se arma el código completo desde el número.
 - El botón «Escanear cajones» de Registros de producción decía «Escanear cajocaneo».

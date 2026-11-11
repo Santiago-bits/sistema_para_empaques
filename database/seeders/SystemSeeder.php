@@ -47,6 +47,7 @@ class SystemSeeder extends Seeder
                 $this->reasons();
                 $this->shifts();
                 $this->grades();
+                $this->containerTypes();
                 $this->season();
             });
             app(ModuleService::class)->flush();
@@ -138,6 +139,15 @@ class SystemSeeder extends Seeder
         foreach ([['EXT', 'Extra'], ['ELE', 'Elegido'], ['COM', 'Comercial']] as $i => [$code, $name]) {
             \App\Models\Grade::query()->create(['code' => $code, 'name' => $name, 'sort_order' => $i + 1]);
         }
+    }
+
+    /** Envase de siempre de los cajones: el cajón de madera (si el galpón todavía no tiene uno). */
+    private function containerTypes(): void
+    {
+        if (\App\Models\ContainerType::withTrashed()->where('name', 'like', '%madera%')->where('kind', '!=', 'bin')->exists()) {
+            return;
+        }
+        \App\Models\ContainerType::query()->create(['code' => 'CAJMAD', 'name' => 'Cajón de madera', 'kind' => 'crate', 'active' => true]);
     }
 
     private function shifts(): void

@@ -23,6 +23,8 @@
         </x-slot:actions>
     </x-page-header>
 
+    @include('labels._verify', ['item' => $pallet])
+
     <div class="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
         @php($limit = $pallet->capacityLimit())
         <x-stat label="Cajones" :value="num($totals->crates).' de '.num($limit)" icon="box"

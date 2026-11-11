@@ -142,8 +142,8 @@ class LabelController extends Controller
             'ids' => ['nullable', 'array', 'max:'.LabelService::MAX_LABELS],
             'ids.*' => ['integer'],
             'copies' => ['nullable', 'integer', 'min:1', 'max:5'],
-            'width' => ['nullable', 'integer', 'min:30', 'max:200'],
-            'height' => ['nullable', 'integer', 'min:20', 'max:200'],
+            'width' => ['nullable', 'integer', 'min:50', 'max:200'], // más chica no entra legible código + peso + código de barras
+            'height' => ['nullable', 'integer', 'min:30', 'max:200'],
         ]);
     }
 

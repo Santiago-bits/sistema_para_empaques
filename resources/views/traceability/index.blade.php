@@ -18,6 +18,7 @@
             <x-status :status="$crateTrace['crate']->status"/>
             <a href="{{ route('crates.show', $crateTrace['crate']) }}" class="link text-sm">Abrir ficha</a>
         </div>
+        @include('labels._verify', ['item' => $crateTrace['crate']])
         @include('traceability._trace', ['chain' => $crateTrace['chain'], 'timeline' => $crateTrace['timeline']])
     @elseif ($palletTrace)
         <div class="mb-4 flex flex-wrap items-center gap-3">
@@ -26,6 +27,7 @@
             @if (Route::has('pallets.show'))<a href="{{ route('pallets.show', $palletTrace['pallet']) }}" class="link text-sm">Abrir ficha</a>@endif
             <span class="text-sm text-stone-500">{{ num($palletTrace['summary']['crates']) }} cajones · {{ kg($palletTrace['summary']['kg']) }}</span>
         </div>
+        @include('labels._verify', ['item' => $palletTrace['pallet']])
         @include('traceability._trace', ['chain' => $palletTrace['chain'], 'timeline' => $palletTrace['timeline']])
     @endif
 </x-layouts.app>

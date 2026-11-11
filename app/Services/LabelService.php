@@ -48,18 +48,26 @@ class LabelService
             'title' => 'Cajón',
             'lines' => array_values(array_filter([
                 ['Variedad', $crate->variety?->name],
-                ['Calibre', $crate->size?->name],
                 ['Selección', $crate->grade?->name],
-                ['Kg', $weight],
                 ['Destino', $destination],
                 ['Envase', $crate->containerType?->name],
                 ['Lote', $crate->lot?->code],
                 ['Pallet', $crate->pallet?->code],
                 ['Productor', $crate->producer?->name],
                 ['Empacador N°', $crate->packer?->code],
-                ['Empaque', ($crate->processed_at ?? $crate->created_at)?->format('d/m/Y')],
             ], fn ($line) => $line[1] !== null && $line[1] !== '')),
+            // Recuadro de seguridad (donde antes iba el QR): peso en grande y los datos que no se pueden tocar.
+            'security' => [
+                'label' => 'Peso neto',
+                'value' => $weight ?? '—',
+                'details' => array_values(array_filter([
+                    $crate->size?->name ? 'Calibre '.$crate->size->name : null,
+                    ($date = ($crate->processed_at ?? $crate->created_at)?->format('d/m/Y')) ? 'Empaque '.$date : null,
+                ])),
+            ],
+            'control' => $this->controlCode($crate),
             'barcode_svg' => $this->barcodeSvg($crate->barcode ?: $crate->code),
+            'barcode_text' => $crate->barcode ?: $crate->code,
             'qr_svg' => $this->qrSvg($this->qrPayload('CJ', $crate->code)),
         ];
     }
@@ -77,9 +85,18 @@ class LabelService
                 ['Productor', $pallet->producer?->name],
                 ['Propietario', $pallet->owner?->name],
                 ['Ingreso', fdate($pallet->received_at, true)],
-                ['Cantidad', $pallet->quantity ? num($pallet->quantity) : null],
             ], fn ($line) => $line[1] !== null && $line[1] !== '')),
+            'security' => [
+                'label' => 'Capacidad',
+                'value' => num($pallet->capacityLimit()).' cajones',
+                'details' => array_values(array_filter([
+                    $pallet->gross_weight ? 'Bruto '.kg($pallet->gross_weight, 1) : null,
+                    $pallet->received_at ? 'Ingreso '.$pallet->received_at->format('d/m/Y') : null,
+                ])),
+            ],
+            'control' => $this->controlCode($pallet),
             'barcode_svg' => $this->barcodeSvg($pallet->barcode ?: $pallet->code),
+            'barcode_text' => $pallet->barcode ?: $pallet->code,
             'qr_svg' => $this->qrSvg($this->qrPayload('PAL', $pallet->code)),
         ];
     }
@@ -120,6 +137,28 @@ class LabelService
     }
 
     /** El QR lleva la URL de trazabilidad: escaneado con un celular abre la ficha (requiere login). */
+    /**
+     * Código de control de la etiqueta (4 caracteres): sale del código, el peso (o los cajones) y la fecha, firmado
+     * con la clave del sistema. Si alguien cambia a mano el peso impreso, el control ya no coincide con el que
+     * muestra el sistema en la ficha del cajón o del pallet: la etiqueta queda en evidencia.
+     */
+    public function controlCode(Crate|Pallet $item): string
+    {
+        $data = $item instanceof Crate
+            ? 'CJ|'.$item->code.'|'.($item->weight !== null ? number_format((float) $item->weight, 2, '.', '') : '-').'|'.($item->processed_at ?? $item->created_at)?->format('Ymd')
+            : 'PAL|'.$item->code.'|'.$item->capacityLimit().'|'.$item->received_at?->format('Ymd');
+        $hash = hash_hmac('sha256', $data, (string) config('app.key'));
+        $alphabet = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ'; // sin 0/O ni 1/I: no se confunden al leerlos
+        $n = hexdec(substr($hash, 0, 8));
+        $out = '';
+        for ($i = 0; $i < 4; $i++) {
+            $out .= $alphabet[$n % 32];
+            $n = intdiv($n, 32);
+        }
+
+        return $out;
+    }
+
     private function qrPayload(string $type, string $code): string
     {
         return route('traceability.index', ['code' => $code]);

@@ -133,6 +133,7 @@ class SettingController extends Controller
             'target_monthly_kg' => ['required', 'numeric', 'min:0'],
             'scale_driver' => ['required', Rule::in(['manual', 'api'])],
             'pallet_capacity' => ['sometimes', 'required', 'integer', 'min:1', 'max:'.\App\Models\Pallet::MAX_CAPACITY],
+            'default_container_type_id' => ['sometimes', 'nullable', 'integer', Rule::exists('container_types', 'id')->whereNull('deleted_at')],
         ]);
         foreach ($data as $key => $value) {
             $this->settings->set("production.$key", $value);

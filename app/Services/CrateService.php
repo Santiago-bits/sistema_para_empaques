@@ -86,6 +86,8 @@ class CrateService
             if (! empty($data['pallet_id'])) {
                 $this->assertPalletHasRoom((int) $data['pallet_id']);
             }
+            // Si no se eligió envase, va el de siempre (cajón de madera).
+            $data['container_type_id'] = ($data['container_type_id'] ?? null) ?: \App\Models\ContainerType::defaultForCrates();
             $code = trim((string) ($data['code'] ?? '')) ?: $this->sequences->next('crate');
 
             $crate = Crate::query()->create(array_merge($this->only($data), [

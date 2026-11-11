@@ -195,6 +195,7 @@ class ProductionService
                     'status' => CrateStatus::Registered,
                     'quality_status' => 'pending',
                     'lot_id' => $data['lot_id'] ?? null,
+                    'container_type_id' => \App\Models\ContainerType::defaultForCrates(),
                     'season_id' => Season::current()?->id,
                     'created_by' => $user->id,
                 ]);

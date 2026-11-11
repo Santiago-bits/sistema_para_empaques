@@ -60,6 +60,8 @@ class SettingsService
         'production.weight_max' => [30, 'float', 'production'],
         // Cajones que entran en un pallet si el pallet no indica otro número (de 1 a 50).
         'production.pallet_capacity' => [50, 'int', 'production'],
+        // Envase de los cajones nuevos (0 = el «Cajón de madera» del galpón).
+        'production.default_container_type_id' => [0, 'int', 'production'],
         'production.require_lot' => [false, 'bool', 'production'],
         'production.sound_success' => [true, 'bool', 'production'],
         'production.sound_error' => [true, 'bool', 'production'],

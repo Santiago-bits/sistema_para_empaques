@@ -24,6 +24,17 @@ class ContainerType extends Model
         return ['active' => 'boolean', 'tare_kg' => 'decimal:2', 'capacity_kg' => 'decimal:2'];
     }
 
+    /** Envase con el que se dan de alta los cajones si no se elige otro (Configuración → Producción). */
+    public static function defaultForCrates(): ?int
+    {
+        $id = (int) setting('production.default_container_type_id', 0);
+        if ($id && self::query()->whereKey($id)->where('active', true)->exists()) {
+            return $id;
+        }
+
+        return self::query()->where('active', true)->where('kind', '!=', 'bin')->where('name', 'like', '%madera%')->orderBy('id')->value('id');
+    }
+
     public function crates(): HasMany
     {
         return $this->hasMany(Crate::class);

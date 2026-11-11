@@ -19,6 +19,7 @@
         </x-slot:actions>
     </x-page-header>
 
+    @include('labels._verify', ['item' => $crate])
     @include('traceability._trace', ['chain' => $chain, 'timeline' => $timeline])
 
     @can('crates.void')
