@@ -45,7 +45,6 @@
                 <div>Fecha: {{ fdate($invoice->issued_on) }}</div>
                 <div>CUIT: {{ \App\Rules\Cuit::format(setting('arca.cuit') ?: setting('company.cuit')) }}</div>
                 @if (filled(setting('arca.warehouse_code')))<div>Galpón ARCA N° {{ setting('arca.warehouse_code') }}</div>@endif
-                @if ($associationsLine = \App\Support\CurrentWarehouse::associationsLine())<div>{{ $associationsLine }}</div>@endif
             </td>
         </tr>
     </table>

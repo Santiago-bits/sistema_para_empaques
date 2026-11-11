@@ -4,6 +4,11 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 
 ## [Sin publicar]
 
+### Quitado
+- **Asociaciones de citricultores** (de la v1.12.0): ya no hay pantalla ni pestaña en Administración general, no se
+  vinculan a los galpones y no salen en etiquetas, facturas, remitos, romaneos ni resúmenes de cuenta. Las tablas
+  quedan en la base sin uso (las migraciones sólo agregan). La «Tasa de asociación» de Tesorería sigue igual.
+
 ### Cambiado
 - **Leyes en la etiqueta de fábrica**: el origen («Producción Argentina»), SENASA, registro provincial, RENSPA y el
   Decreto-Ley 9.244/63 se imprimen salvo que se apaguen. La pantalla de imprimir avisa qué números legales faltan

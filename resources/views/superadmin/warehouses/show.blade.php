@@ -82,7 +82,6 @@
                 'Código' => $warehouse->code,
                 'CUIT' => $settings['cuit'] ? \App\Rules\Cuit::format($settings['cuit']) : null,
                 'Código ARCA del galpón' => $settings['arca'] ?: null,
-                'Asociaciones' => $warehouse->associations->pluck('name')->join(', ') ?: 'Ninguna',
                 'Dirección' => $warehouse->address,
                 'Usuarios' => num($usersCount),
                 'Cajones (30 días)' => num($crates30),

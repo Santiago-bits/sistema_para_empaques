@@ -33,12 +33,6 @@ class Warehouse extends Model
         return $this->belongsToMany(User::class, 'user_warehouse');
     }
 
-    /** Asociaciones de citricultores a las que pertenece el galpón. */
-    public function associations(): BelongsToMany
-    {
-        return $this->belongsToMany(Association::class)->withTimestamps()->orderBy('name');
-    }
-
     public function locations(): HasMany
     {
         return $this->hasMany(WarehouseLocation::class);

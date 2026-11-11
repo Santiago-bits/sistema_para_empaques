@@ -34,8 +34,6 @@ class BrowserLabelPrinter implements LabelPrinter
             'back' => $options['back'] ?? null,
             'companyLine' => app(\App\Services\LabelService::class)->companyLine(),
             'regulatoryLine' => app(\App\Services\LabelService::class)->regulatoryLine(),
-            // Asociaciones de citricultores del galpón (salen en todas sus etiquetas: cajones y pallets).
-            'associationsLine' => \App\Support\CurrentWarehouse::associationsLine(),
         ]);
     }
 }

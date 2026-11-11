@@ -17,7 +17,6 @@
            Si los datos no entran, se achica la letra (script de abajo): el código de barras nunca se corta. */
         .label { width: {{ $width }}mm; height: {{ $height }}mm; border: 1px dashed #999; padding: 1.8mm 2.2mm; display: flex; flex-direction: column; gap: .7mm; overflow: hidden; page-break-after: always; break-after: page; }
         .company { flex: none; font-size: {{ $height < 45 ? 6 : 7 }}pt; font-weight: 700; line-height: 1.15; border-bottom: .3mm solid #000; padding-bottom: .4mm; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .associations { flex: none; font-size: 6pt; font-weight: 600; line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .middle { flex: 1 1 auto; min-height: 0; display: flex; gap: 1.8mm; }
         .info { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: .5mm; overflow: hidden; }
         .head { flex: none; display: flex; align-items: baseline; gap: 1.5mm; white-space: nowrap; overflow: hidden; }
@@ -42,7 +41,7 @@
         .barcode-text { font-family: Consolas, 'Courier New', monospace; font-size: {{ $height < 45 ? 6.5 : 7.5 }}pt; font-weight: 700; letter-spacing: .15em; line-height: 1.1; }
         .regulatory { flex: none; font-size: {{ $height < 45 ? 4.8 : 5.8 }}pt; line-height: 1.12; text-align: center; border-top: .3mm solid #000; padding-top: .4mm; }
         /* Etiquetas chiquitas (menos de 55×38 mm): sólo código, peso con control y código de barras. */
-        .compact .company, .compact .associations, .compact .lines, .compact .s-label, .compact .s-detail { display: none; }
+        .compact .company, .compact .lines, .compact .s-label, .compact .s-detail { display: none; }
         .compact .middle { flex-direction: column; gap: .5mm; }
         .compact .secure { width: auto; flex-direction: row; justify-content: space-between; align-items: center; padding: .4mm 1mm; border-width: .4mm; }
         .compact .secure .s-value { font-size: 10pt; }
@@ -65,7 +64,6 @@
         @foreach ($labels as $label)
             <div @class(['label', 'compact' => $width < 55 || $height < 38])>
                 @if (! empty($companyLine))<div class="company">{{ $companyLine }}</div>@endif
-                @if (! empty($associationsLine))<div class="associations">{{ $associationsLine }}</div>@endif
                 <div class="middle">
                     <div class="info">
                         <div class="head">

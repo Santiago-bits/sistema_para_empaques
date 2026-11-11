@@ -26,22 +26,6 @@
             @endif
         </x-panel>
 
-        <x-panel title="Asociaciones de citricultores">
-            @if ($associations->isEmpty())
-                <p class="text-sm text-stone-500">Todavía no hay asociaciones. Cargalas en <a href="{{ route('superadmin.associations.index') }}" class="link">Administración general → Asociaciones</a>.</p>
-            @else
-                <p class="mb-3 text-sm text-stone-600 dark:text-stone-400">Tildá a cuáles pertenece este galpón (una o varias). Salen impresas en sus etiquetas, facturas y remitos.</p>
-                <input type="hidden" name="associations" value="">
-                <div class="grid gap-2 sm:grid-cols-2">
-                    @foreach ($associations as $a)
-                        <label class="flex items-center gap-2 text-sm">
-                            <input type="checkbox" name="associations[]" value="{{ $a->id }}" class="size-4" @checked(in_array($a->id, (array) old('associations', $linked)))>
-                            {{ $a->name }}@if (! $a->active) <span class="text-xs text-stone-400">(inactiva)</span>@endif
-                        </label>
-                    @endforeach
-                </div>
-            @endif
-        </x-panel>
 
         <div class="flex justify-end gap-2">
             <a href="{{ route('superadmin.warehouses.index') }}" class="btn btn-secondary">Cancelar</a>
