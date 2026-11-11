@@ -1,7 +1,24 @@
 <x-layouts.app title="Etiquetas">
     <x-page-header :title="$type === 'crates' ? 'Etiquetas de cajones' : 'Etiquetas de pallets'"
-                   subtitle="Código de barras Code128 + QR. Se imprimen desde el navegador en la impresora de etiquetas configurada en Windows."
+                   subtitle="Código de barras, peso con código de control y datos legales. Se imprimen desde el navegador en la impresora de etiquetas."
                    :back="$type === 'crates' ? route('crates.index') : route('pallets.index')"/>
+
+    {{-- Las leyes son obligatorias en la etiqueta: si faltan los números, se avisa acá. --}}
+    @php($missingLegal = app(\App\Services\LabelService::class)->missingRegulatory())
+    @if ($missingLegal)
+        <div class="mb-6 border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200" role="alert">
+            @if ($missingLegal === ['off'])
+                <strong>Los datos legales no se están imprimiendo</strong> (SENASA, registro provincial, RENSPA, origen y decreto).
+            @else
+                <strong>Faltan datos legales para la etiqueta:</strong> {{ implode(', ', $missingLegal) }}.
+            @endif
+            @can('settings.manage')
+                <a href="{{ route('admin.settings.index', ['tab' => 'label']) }}" class="link ml-1">Cargarlos en Configuración → Etiquetas</a>
+            @else
+                Pedile al administrador que los cargue en Configuración → Etiquetas.
+            @endcan
+        </div>
+    @endif
 
     <div class="grid gap-6 lg:grid-cols-2">
         @if ($type === 'crates')

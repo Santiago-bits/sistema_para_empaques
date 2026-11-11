@@ -88,7 +88,8 @@ class SettingsService
         'arca.warehouse_code' => ['', 'string', 'arca'], // código del galpón en ARCA; lo carga el dueño
         // Etiqueta de la caja (datos oficiales del empaque, como la etiqueta impresa del envase).
         'label.show_company' => [true, 'bool', 'label'],
-        'label.show_regulatory' => [false, 'bool', 'label'],
+        // Las leyes (origen, SENASA, registro, RENSPA, decreto) salen en la etiqueta salvo que se apaguen.
+        'label.show_regulatory' => [true, 'bool', 'label'],
         'label.senasa_number' => ['', 'string', 'label'],
         'label.provincial_registry' => ['', 'string', 'label'],
         'label.renspa' => ['', 'string', 'label'],

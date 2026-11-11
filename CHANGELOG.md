@@ -5,6 +5,9 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 ## [Sin publicar]
 
 ### Cambiado
+- **Leyes en la etiqueta de fábrica**: el origen («Producción Argentina»), SENASA, registro provincial, RENSPA y el
+  Decreto-Ley 9.244/63 se imprimen salvo que se apaguen. La pantalla de imprimir avisa qué números legales faltan
+  cargar (o si están apagados) con un enlace a Configuración → Etiquetas.
 - **Pestañas más grandes y claras** en todas las secciones (Tesorería, Herramientas técnicas, Administración general,
   portal de clientes, Movimientos y el menú de Configuración): letra más grande y en negrita, íconos más grandes y la
   pestaña elegida bien marcada.

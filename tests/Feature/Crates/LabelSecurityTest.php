@@ -64,4 +64,29 @@ class LabelSecurityTest extends TestCase
         $this->get(route('labels.crates', ['ids' => [$crate->id], 'width' => 40, 'height' => 25]))->assertSessionHasErrors(['width', 'height']);
         $this->get(route('labels.crates', ['ids' => [$crate->id], 'width' => 50, 'height' => 30]))->assertOk()->assertSee('compact');
     }
+
+    public function test_legal_legends_print_by_default_and_missing_numbers_are_warned(): void
+    {
+        $this->actingAsRole('admin');
+        $crate = $this->crate('CJ-000001');
+
+        // De fábrica salen el origen y el decreto; y se avisa qué números faltan cargar.
+        $this->get(route('labels.crates', ['ids' => [$crate->id]]))->assertOk()
+            ->assertSee('class="regulatory"', false)->assertSee('Producción Argentina')->assertSee('Decreto-Ley 9.244/63');
+        $this->get(route('labels.crates'))->assertOk()
+            ->assertSee('Faltan datos legales para la etiqueta')->assertSee('SENASA, Registro provincial, RENSPA')
+            ->assertSee(route('admin.settings.index', ['tab' => 'label']), false);
+
+        $settings = app(SettingsService::class);
+        $settings->set('label.senasa_number', '1234');
+        $settings->set('label.provincial_registry', '0456');
+        $settings->set('label.renspa', '13.012.0.00456/00');
+        $this->get(route('labels.crates'))->assertOk()->assertDontSee('Faltan datos legales');
+        $this->get(route('labels.crates', ['ids' => [$crate->id]]))->assertOk()
+            ->assertSee('SENASA E-1234')->assertSee('Reg. Prov. Empaque N° 0456')->assertSee('RENSPA 13.012.0.00456/00');
+
+        // Si se apagan, se avisa que no se están imprimiendo.
+        $settings->set('label.show_regulatory', false);
+        $this->get(route('labels.crates'))->assertOk()->assertSee('Los datos legales no se están imprimiendo');
+    }
 }

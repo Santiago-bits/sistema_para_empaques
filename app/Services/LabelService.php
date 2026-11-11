@@ -121,7 +121,7 @@ class LabelService
     /** Pie con los datos oficiales del envase: SENASA, registro provincial, RENSPA, norma y origen. */
     public function regulatoryLine(): ?string
     {
-        if (! setting('label.show_regulatory', false)) {
+        if (! setting('label.show_regulatory', true)) {
             return null;
         }
         $senasa = trim((string) setting('label.senasa_number'));
@@ -136,7 +136,6 @@ class LabelService
         return $parts ? implode(' · ', $parts) : null;
     }
 
-    /** El QR lleva la URL de trazabilidad: escaneado con un celular abre la ficha (requiere login). */
     /**
      * Código de control de la etiqueta (4 caracteres): sale del código, el peso (o los cajones) y la fecha, firmado
      * con la clave del sistema. Si alguien cambia a mano el peso impreso, el control ya no coincide con el que
@@ -159,6 +158,21 @@ class LabelService
         return $out;
     }
 
+    /** Datos legales que faltan cargar para la etiqueta (para avisar en la pantalla de imprimir). */
+    public function missingRegulatory(): array
+    {
+        if (! setting('label.show_regulatory', true)) {
+            return ['off'];
+        }
+
+        return array_keys(array_filter([
+            'SENASA' => trim((string) setting('label.senasa_number')) === '',
+            'Registro provincial' => trim((string) setting('label.provincial_registry')) === '',
+            'RENSPA' => trim((string) setting('label.renspa')) === '',
+        ]));
+    }
+
+    /** El QR lleva la URL de trazabilidad: escaneado con un celular abre la ficha (requiere login). */
     private function qrPayload(string $type, string $code): string
     {
         return route('traceability.index', ['code' => $code]);
