@@ -113,12 +113,12 @@
     @endcan
 
     {{-- Filtros: qué mostrar y entre qué fechas. --}}
-    <div class="mb-4 flex flex-wrap items-center gap-2" role="tablist" aria-label="Qué mostrar">
-        <a href="{{ route('holders.activity', [$type, $holder->getKey()] + $filters) }}" @class(['btn btn-sm', 'btn-primary' => ! $currentKind, 'btn-secondary' => $currentKind]) @if (! $currentKind) aria-current="page" @endif>Todo</a>
+    <div class="mb-4 flex flex-wrap items-end gap-1 border-b border-stone-200 dark:border-stone-800" role="tablist" aria-label="Qué mostrar">
+        <a href="{{ route('holders.activity', [$type, $holder->getKey()] + $filters) }}" @class(['tab', 'active' => ! $currentKind]) @if (! $currentKind) aria-current="page" @endif>Todo</a>
         @foreach ($kinds as $key => $label)
-            <a href="{{ route('holders.activity', [$type, $holder->getKey(), 'kind' => $key] + $filters) }}" @class(['btn btn-sm', 'btn-primary' => $currentKind === $key, 'btn-secondary' => $currentKind !== $key]) @if ($currentKind === $key) aria-current="page" @endif>{{ $label }}</a>
+            <a href="{{ route('holders.activity', [$type, $holder->getKey(), 'kind' => $key] + $filters) }}" @class(['tab', 'active' => $currentKind === $key]) @if ($currentKind === $key) aria-current="page" @endif>{{ $label }}</a>
         @endforeach
-        <form method="GET" class="ml-auto flex flex-wrap items-end gap-2" data-allow-resubmit>
+        <form method="GET" class="ml-auto flex flex-wrap items-end gap-2 pb-2" data-allow-resubmit>
             @if ($currentKind)<input type="hidden" name="kind" value="{{ $currentKind }}">@endif
             <x-input name="from" type="date" label="Desde" :value="request('from')"/>
             <x-input name="to" type="date" label="Hasta" :value="request('to')"/>

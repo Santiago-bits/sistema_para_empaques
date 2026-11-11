@@ -10,13 +10,9 @@
             <p class="text-sm text-stone-600 dark:text-stone-300">Tu usuario todavía no está vinculado a un cliente o propietario. Pedile al administrador que lo configure.</p>
         </div>
     @else
-        <nav class="mb-6 flex flex-wrap gap-1 border-b border-stone-200 dark:border-stone-800" aria-label="Secciones">
+        <nav class="tabs" aria-label="Secciones">
             @foreach ($tabs as $key => $label)
-                <a href="{{ route('portal.index', ['tab' => $key]) }}" @class([
-                    '-mb-px border-b-2 px-4 py-2 text-sm font-medium',
-                    'border-brand-600 text-brand-700 dark:text-brand-400' => $tab === $key,
-                    'border-transparent text-stone-500 hover:text-stone-800 dark:hover:text-stone-200' => $tab !== $key,
-                ]) @if ($tab === $key) aria-current="page" @endif>{{ $label }}</a>
+                <a href="{{ route('portal.index', ['tab' => $key]) }}" @class(['tab', 'active' => $tab === $key]) @if ($tab === $key) aria-current="page" @endif>{{ $label }}</a>
             @endforeach
         </nav>
 

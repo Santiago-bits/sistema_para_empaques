@@ -123,6 +123,24 @@
         @apply mt-1 text-xs text-stone-500 dark:text-stone-400;
     }
 
+    /* Pestañas de sección (Tesorería, panel, portal…): grandes, letra clara y bien distinguible la elegida. */
+    .tabs {
+        @apply mb-6 flex flex-wrap gap-1 border-b border-stone-200 dark:border-stone-800;
+    }
+
+    .tab {
+        @apply -mb-px flex shrink-0 items-center gap-2.5 border-b-[3px] border-transparent px-4 py-3 text-base font-semibold whitespace-nowrap
+            text-stone-600 transition hover:border-stone-300 hover:text-stone-900 dark:text-stone-300 dark:hover:border-stone-600 dark:hover:text-white;
+    }
+
+    .tab svg {
+        @apply size-5 shrink-0;
+    }
+
+    .tab.active {
+        @apply border-brand-600 text-brand-700 dark:border-brand-500 dark:text-brand-400;
+    }
+
     /* Botones */
     .btn {
         @apply inline-flex items-center justify-center gap-2 rounded-lg px-3.5 py-2 text-sm font-medium whitespace-nowrap

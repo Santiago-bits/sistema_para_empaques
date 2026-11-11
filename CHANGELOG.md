@@ -4,6 +4,11 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 
 ## [Sin publicar]
 
+### Cambiado
+- **Pestañas más grandes y claras** en todas las secciones (Tesorería, Herramientas técnicas, Administración general,
+  portal de clientes, Movimientos y el menú de Configuración): letra más grande y en negrita, íconos más grandes y la
+  pestaña elegida bien marcada.
+
 ### Agregado
 - **Etiquetas que se leen bien y a prueba de cambios**: el código del cajón va grande; donde iba el QR hay un
   **recuadro de seguridad** con el **peso neto en grande**, calibre, fecha de empaque y un **código de control**

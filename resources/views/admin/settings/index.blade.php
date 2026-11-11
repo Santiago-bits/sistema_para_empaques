@@ -2,10 +2,10 @@
     <x-page-header title="Configuración" subtitle="Parámetros generales del galpón. Cada cambio queda registrado en auditoría."/>
 
     <div class="flex flex-col gap-6 lg:flex-row">
-        <nav class="flex shrink-0 flex-wrap gap-1 lg:w-52 lg:flex-col">
+        <nav class="flex shrink-0 flex-wrap gap-1 lg:w-60 lg:flex-col" aria-label="Secciones de la configuración">
             @foreach ($groups as $key => $label)
                 <a href="{{ route('admin.settings.index', ['tab' => $key]) }}"
-                   @class(['rounded-lg px-3 py-2 text-sm whitespace-nowrap', 'bg-white font-medium shadow-sm ring-1 ring-stone-200 dark:bg-stone-900 dark:ring-stone-800' => $group === $key, 'text-stone-600 hover:bg-white/60 dark:text-stone-400 dark:hover:bg-stone-900/60' => $group !== $key])>
+                   @class(['border-l-[3px] px-4 py-2.5 text-base font-semibold whitespace-nowrap', 'border-brand-600 bg-white text-brand-700 shadow-sm dark:bg-stone-900 dark:text-brand-400' => $group === $key, 'border-transparent text-stone-600 hover:bg-white/60 hover:text-stone-900 dark:text-stone-300 dark:hover:bg-stone-900/60 dark:hover:text-white' => $group !== $key]) @if ($group === $key) aria-current="page" @endif>
                     {{ $label }}
                 </a>
             @endforeach
