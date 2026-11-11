@@ -13,8 +13,8 @@
             <div class="panel p-4">
                 <label for="lb-scan" class="form-label">Escanear cajón o pallet</label>
                 <div class="flex gap-2">
-                    <input id="lb-scan" data-scan x-ref="scan" x-model.trim="scanCode" @keydown.enter.prevent="scan()" class="form-input code min-w-0 flex-1 py-3 text-xl"
-                           placeholder="Código de cajón o pallet + Enter" autocomplete="off">
+                    <input id="lb-scan" data-scan {{ code_attrs('crate') }} data-code-addon="off" x-ref="scan" x-model.trim="scanCode" @keydown.enter.prevent="scan()" class="form-input code min-w-0 flex-1 py-3 text-xl"
+                           placeholder="Número de cajón (123) o PAL-… + Enter" autocomplete="off">
                     {{-- Continuo: la cámara queda abierta y cada lectura entra a la cola de la carga. --}}
                     <x-scan-camera target="lb-scan" :continuous="true" title="Cargar cajones y pallets"/>
                 </div>

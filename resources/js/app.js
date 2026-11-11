@@ -10,6 +10,7 @@ import { initShortcuts } from './lib/shortcuts';
 import { labelTables } from './lib/responsive-tables';
 import { registerApp } from './lib/install-app';
 import { initSearchableSelects, watchSearchableSelects } from './lib/searchable-select';
+import { initCodeInputs, watchCodeInputs } from './lib/code-inputs';
 
 window.Alpine = Alpine;
 window.Chart = Chart;
@@ -84,6 +85,10 @@ Alpine.start();
 // Listas largas (clientes, camioneros, variedades, …): escribir para buscar y elegir con ↑ ↓ y Enter.
 initSearchableSelects();
 watchSearchableSelects();
+
+// Códigos (CJ-, PAL-, LOT-, CARG-…): alcanza con escribir el número.
+initCodeInputs();
+watchCodeInputs();
 
 // Tablas como tarjetas en el celular: nombre de columna en cada celda.
 labelTables();

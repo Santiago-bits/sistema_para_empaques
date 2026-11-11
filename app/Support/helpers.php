@@ -10,6 +10,19 @@ if (! function_exists('setting')) {
     }
 }
 
+if (! function_exists('code_attrs')) {
+    /**
+     * Atributos para un campo de código con numeración (cajón, pallet, lote, carga, remito): el prefijo se muestra
+     * fijo al lado y alcanza con escribir el número («123» → «CJ-000123»). Ver resources/js/lib/code-inputs.js.
+     */
+    function code_attrs(string $key): \Illuminate\Support\HtmlString
+    {
+        [$prefix, $padding] = app(\App\Services\SequenceService::class)->shape($key);
+
+        return new \Illuminate\Support\HtmlString('data-code-prefix="'.e($prefix).'" data-code-padding="'.(int) $padding.'"');
+    }
+}
+
 if (! function_exists('module_enabled')) {
     function module_enabled(string $key): bool
     {

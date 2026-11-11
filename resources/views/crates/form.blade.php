@@ -18,7 +18,7 @@
                 @if ($editing)
                     <x-field label="Código"><p class="code py-2 text-lg">{{ $crate->code }}</p></x-field>
                 @else
-                    <x-input name="code" label="Código" class="code" :placeholder="$nextCode" autofocus hint="Vacío = numeración automática."/>
+                    <x-input name="code" label="Código" class="code" code="crate" autofocus :hint="'Vacío = numeración automática ('.$nextCode.').'"/>
                 @endif
                 @if ($show('barcode'))<x-input name="barcode" label="Código de barras" :value="$crate->barcode" class="code" :required="$req('barcode')"/>@endif
                 @if ($show('pallet_id'))<x-select name="pallet_id" label="Pallet" :options="$pallets" :value="$crate->pallet_id" placeholder="—" :required="$req('pallet_id')"/>@endif

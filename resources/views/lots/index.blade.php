@@ -15,7 +15,7 @@
     </div>
 
     <x-filters :exports="[['label' => 'Excel', 'format' => 'xlsx', 'route' => route('lots.index')]]">
-        <x-input name="q" label="Código" :value="request('q')" placeholder="LOT-…"/>
+        <x-input name="q" label="Código" :value="request('q')" class="code" code="lot"/>
         <x-select name="producer_id" label="Quinta / productor" :options="$producers" :value="request('producer_id')" placeholder="Todos"/>
         <x-select name="variety_id" label="Variedad" :options="$varieties" :value="request('variety_id')" placeholder="Todas"/>
         <x-select name="driver_id" label="Chofer" :options="$drivers" :value="request('driver_id')" placeholder="Todos"/>

@@ -2,7 +2,7 @@
     <x-page-header title="Remitos" subtitle="Se emiten desde una carga cerrada. Incluyen QR de consulta."/>
 
     <x-filters>
-        <x-input name="q" label="Número" :value="request('q')" class="code"/>
+        <x-input name="q" label="Número" :value="request('q')" class="code" code="remito"/>
         <x-select name="status" label="Estado" :options="$statuses" :value="request('status')" placeholder="Todos"/>
         <x-select name="client_id" label="Cliente" :options="$clients" :value="request('client_id')" placeholder="Todos"/>
         <x-input name="from" type="date" label="Desde" :value="request('from')"/>

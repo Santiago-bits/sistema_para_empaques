@@ -29,7 +29,9 @@ class PalletController extends Controller
             ->withCount(['crates' => fn ($q) => $q->where('status', '!=', \App\Enums\CrateStatus::Voided->value)])
             ->when($request->filled('q'), function ($q) use ($request) {
                 $term = trim((string) $request->string('q'));
-                $q->where(fn ($w) => $w->where('code', 'like', $term.'%')->orWhere('barcode', $term));
+                // Sólo el número («45») también encuentra al pallet PAL-000045; un código de barras numérico sigue andando.
+                $code = app(\App\Services\SequenceService::class)->normalize('pallet', $term);
+                $q->where(fn ($w) => $w->where('code', 'like', $term.'%')->orWhere('code', $code)->orWhere('barcode', $term));
             })
             ->when($request->filled('date_from'), fn ($q) => $q->where('received_at', '>=', $request->date('date_from')->startOfDay()))
             ->when($request->filled('date_to'), fn ($q) => $q->where('received_at', '<=', $request->date('date_to')->endOfDay()))

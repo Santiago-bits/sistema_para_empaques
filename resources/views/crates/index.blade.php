@@ -11,7 +11,7 @@
     </x-page-header>
 
     <x-filters>
-        <x-input name="code" label="Código" :value="request('code')" class="code" placeholder="CJ-…"/>
+        <x-input name="code" label="Código" :value="request('code')" class="code" code="crate"/>
         <x-input name="date_from" type="date" label="Alta desde" :value="request('date_from')"/>
         <x-input name="date_to" type="date" label="Alta hasta" :value="request('date_to')"/>
         <x-select name="variety_id" label="Variedad" :options="$varieties" :value="request('variety_id')" placeholder="Todas"/>
@@ -22,8 +22,8 @@
         <x-select name="lot_id" label="Lote" :options="$lots" :value="request('lot_id')" placeholder="Todos"/>
         <x-select name="producer_id" label="Productor" :options="$producers" :value="request('producer_id')" placeholder="Todos"/>
         <x-select name="owner_id" label="Propietario" :options="$owners" :value="request('owner_id')" placeholder="Todos"/>
-        <x-input name="pallet" label="Pallet" :value="request('pallet')" class="code" placeholder="PAL-…"/>
-        <x-input name="load" label="Carga" :value="request('load')" class="code" placeholder="CARG-…"/>
+        <x-input name="pallet" label="Pallet" :value="request('pallet')" class="code" code="pallet"/>
+        <x-input name="load" label="Carga" :value="request('load')" class="code" code="load"/>
     </x-filters>
 
     <div class="mb-3 flex flex-wrap items-center gap-4 text-sm text-stone-600 dark:text-stone-400">

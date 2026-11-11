@@ -10,7 +10,7 @@
     <x-filters>
         <x-input name="date_from" type="date" label="Desde" :value="request('date_from')"/>
         <x-input name="date_to" type="date" label="Hasta" :value="request('date_to')"/>
-        <x-input name="crate" label="Cajón" :value="request('crate')" class="code"/>
+        <x-input name="crate" label="Cajón" :value="request('crate')" class="code" code="crate"/>
         <x-select name="packer_id" label="Embalador" :options="$packers" :value="request('packer_id')" placeholder="Todos"/>
         <x-select name="variety_id" label="Variedad" :options="$varieties" :value="request('variety_id')" placeholder="Todas"/>
         <x-select name="size_id" label="Tamaño" :options="$sizes" :value="request('size_id')" placeholder="Todos"/>

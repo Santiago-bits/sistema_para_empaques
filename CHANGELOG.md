@@ -5,6 +5,11 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 ## [Sin publicar]
 
 ### Agregado
+- **Códigos con sólo el número en todo el sistema**: en los campos de cajón, pallet, lote, carga y remito el prefijo
+  («CJ-», «PAL-», «LOT-», «CARG-», «0001-») va fijo al lado y alcanza con escribir el número (al apretar Enter o
+  filtrar, «123» pasa a «CJ-000123»). Vale en los filtros de Cajones, Producción, Lotes, Cargas y Remitos, en el alta
+  de cajones, en Escanear cajones, en Seguir un cajón y al armar cargas (ahí sólo el número = cajón; para un pallet,
+  PAL-…). El lector de códigos sigue funcionando igual. En Pallets, buscar «45» encuentra PAL-000045.
 - **Etiquetas por rango, más rápido**: «CJ-» va solo (se escribe sólo el número) y «Hasta» se completa de a 50
   (se puede cambiar con las flechitas o a mano; «Volver a 50» lo recalcula). Al abrir propone el bloque de 50 del
   último cajón. Generar cajones nuevos viene en 50 por defecto.

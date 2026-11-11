@@ -8,7 +8,7 @@
     </x-page-header>
 
     <x-filters>
-        <x-input name="q" label="Número" :value="request('q')" class="code" placeholder="CARG-…"/>
+        <x-input name="q" label="Número" :value="request('q')" class="code" code="load"/>
         <x-select name="status" label="Estado" :options="$statuses" :value="request('status')" placeholder="Todos"/>
         <x-select name="client_id" label="Cliente" :options="$clients" :value="request('client_id')" placeholder="Todos"/>
         <x-select name="destination_id" label="Destino" :options="$destinations" :value="request('destination_id')" placeholder="Todos"/>

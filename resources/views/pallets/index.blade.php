@@ -8,7 +8,7 @@
     </x-page-header>
 
     <x-filters>
-        <x-input name="q" label="Código" :value="request('q')" placeholder="PAL-… o código de barras" class="code"/>
+        <x-input name="q" label="Código" :value="request('q')" placeholder="Número (PAL-…) o código de barras" class="code"/>
         <x-input name="date_from" type="date" label="Desde" :value="request('date_from')"/>
         <x-input name="date_to" type="date" label="Hasta" :value="request('date_to')"/>
         <x-select name="status" label="Estado" :options="$statuses" :value="request('status')" placeholder="Todos"/>

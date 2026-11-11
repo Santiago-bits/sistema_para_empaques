@@ -4,7 +4,8 @@
     <form method="GET" action="{{ route('traceability.index') }}" class="panel mb-6 flex flex-wrap items-end gap-3 p-4" data-allow-resubmit>
         <div class="min-w-64 flex-1">
             <label for="code" class="form-label">Código de cajón o pallet</label>
-            <input id="code" name="code" value="{{ $code }}" autofocus class="form-input code py-3 text-lg" placeholder="CJ-000123 · PAL-000045">
+            {{-- Sólo el número = cajón («123» → CJ-000123); para un pallet, escribir PAL-… --}}
+            <input id="code" name="code" value="{{ $code }}" autofocus class="form-input code py-3 text-lg" placeholder="Número de cajón (123) o PAL-…" {{ code_attrs('crate') }} data-code-addon="off" autocomplete="off">
         </div>
         <button class="btn btn-primary btn-lg"><x-icon name="search" class="size-5"/> Consultar</button>
     </form>
