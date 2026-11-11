@@ -59,6 +59,40 @@ class SequenceService
         return $this->format($sequence, (int) $sequence->next_number);
     }
 
+    /** Prefijo y cantidad de dígitos de una numeración (la del galpón, o la de fábrica si todavía no se usó). */
+    public function shape(string $key): array
+    {
+        $sequence = Sequence::query()->where('key', $key)->first();
+
+        return $sequence ? [(string) $sequence->prefix, (int) $sequence->padding] : (self::DEFAULTS[$key] ?? [strtoupper($key).'-', 6]);
+    }
+
+    /**
+     * Arma el código completo a partir de lo que se escribió: «101», «CJ-101» o «cj-00101» → «CJ-000101».
+     * Si no tiene números (o es de otro formato), se devuelve tal cual.
+     */
+    public function normalize(string $key, string $value): string
+    {
+        $value = trim($value);
+        [$prefix, $padding] = $this->shape($key);
+        if (preg_match('/^(.*?)(\d+)$/', $value, $m) && ($m[1] === '' || strcasecmp($m[1], $prefix) === 0)) {
+            return $prefix.str_pad(ltrim($m[2], '0') ?: '0', $padding, '0', STR_PAD_LEFT);
+        }
+
+        return $value;
+    }
+
+    /** El número de un código («CJ-000123» → 123), o null si no es de esta numeración. */
+    public function numberOf(string $key, ?string $code): ?int
+    {
+        [$prefix] = $this->shape($key);
+        if ($code === null || ! preg_match('/^'.preg_quote($prefix, '/').'(\d+)$/i', trim($code), $m)) {
+            return null;
+        }
+
+        return (int) $m[1];
+    }
+
     private function format(Sequence $sequence, int $number): string
     {
         return $sequence->prefix.str_pad((string) $number, (int) $sequence->padding, '0', STR_PAD_LEFT);
