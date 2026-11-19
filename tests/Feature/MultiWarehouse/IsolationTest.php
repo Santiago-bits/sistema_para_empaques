@@ -67,7 +67,7 @@ class IsolationTest extends TestCase
         $this->adminB = app(WarehouseService::class)->createAdmin($this->b, [
             'first_name' => 'Bea', 'last_name' => 'Beta', 'username' => 'admin_beta', 'password' => 'clave1234',
         ], $super);
-        $this->adminB->forceFill(['must_change_password' => false])->save();
+        $this->adminB->forceFill(['must_change_password' => false, 'terms_version' => \App\Support\Legal::VERSION])->save();
         CurrentWarehouse::reset();
 
         // Huellas de A: nombres y códigos propios de sus datos.

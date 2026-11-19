@@ -39,5 +39,10 @@
         @if ($google)
             @include('auth.partials.google-button')
         @endif
+
+        <p class="text-center text-xs text-stone-500 dark:text-stone-400">
+            Al ingresar aceptás los <a href="{{ route('legal.terms') }}" class="link">Términos y condiciones</a>
+            y la <a href="{{ route('legal.privacy') }}" class="link">Política de privacidad</a>.
+        </p>
     </div>
 </x-auth-shell>

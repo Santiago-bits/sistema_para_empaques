@@ -6,6 +6,7 @@
         ['superadmin.index', 'Resumen', 'chart-bar', 'superadmin.index', null],
         ['superadmin.warehouses.index', 'Galpones', 'home', 'superadmin.warehouses.*', null],
         ['superadmin.users.index', 'Usuarios', 'users', 'superadmin.users.*', null],
+        ['superadmin.legal', 'Términos', 'document', 'superadmin.legal*', null],
     ];
     if ($central) {
         $tabs[] = ['superadmin.clients.index', 'Instalaciones aparte', 'briefcase', 'superadmin.clients.*', null];

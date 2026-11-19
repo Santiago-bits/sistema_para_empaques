@@ -20,7 +20,7 @@ class SettingsService
     private const CACHE_KEY = 'galpon.settings';
 
     /** Claves comunes a todos los galpones. */
-    public const GLOBAL_PREFIXES = ['system.', 'support.', 'backup.', 'login.', 'security.'];
+    public const GLOBAL_PREFIXES = ['system.', 'support.', 'backup.', 'login.', 'security.', 'legal.'];
 
     public static function isGlobal(string $key): bool
     {
@@ -105,6 +105,12 @@ class SettingsService
         'support.email' => ['holabaseocho@gmail.com', 'string', 'support'],
         // Avisos automáticos de errores del sistema por correo (al mismo email de soporte).
         'support.error_alerts' => [true, 'bool', 'support'],
+        // Titular del servicio para los términos y condiciones y la política de privacidad (lo carga el dueño del sistema).
+        'legal.provider_name' => ['Base Ocho', 'string', 'legal'],
+        'legal.provider_cuit' => ['', 'string', 'legal'],
+        'legal.provider_address' => ['', 'string', 'legal'],
+        'legal.email' => ['', 'string', 'legal'],
+        'legal.jurisdiction' => ['', 'string', 'legal'],
         'backup.retention_days' => [30, 'int', 'backup'],
         'backup.daily' => [true, 'bool', 'backup'],
         'backup.weekly' => [true, 'bool', 'backup'],

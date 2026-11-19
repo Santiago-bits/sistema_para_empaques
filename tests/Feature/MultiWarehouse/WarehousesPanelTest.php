@@ -62,6 +62,9 @@ class WarehousesPanelTest extends TestCase
         $other = User::factory()->role('supervisor')->inWarehouse($first)->create(['first_name' => 'Pedro', 'last_name' => 'DelSur']);
         $admin->forceFill(['must_change_password' => false])->save();
         $this->actingAs($admin);
+        // Lo primero que ve el administrador nuevo: aceptar los términos y condiciones en nombre de su galpón.
+        $this->get(route('dashboard'))->assertRedirect(route('legal.accept'));
+        $this->post(route('legal.accept.store'), ['accept' => '1'])->assertRedirect();
         $this->assertSame($north->id, CurrentWarehouse::id());
         $this->get(route('dashboard'))->assertOk()->assertSee('Empaque del Norte');
         $this->get(route('admin.users.index'))->assertOk()->assertDontSee('DelSur');

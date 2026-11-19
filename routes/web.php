@@ -40,7 +40,7 @@ Route::middleware('guest')->group(function () {
     Route::post('/recuperar-acceso-dueno', [\App\Http\Controllers\Auth\OwnerRecoveryController::class, 'store'])->middleware('throttle:5,1')->name('owner.recovery.store');
 });
 
-Route::middleware(['auth', 'active', 'password.fresh', 'kiosk'])->group(function () {
+Route::middleware(['auth', 'active', 'password.fresh', 'terms', 'kiosk'])->group(function () {
     Route::get('/cambiar-contrasena', [ChangePasswordController::class, 'edit'])->name('password.change');
     Route::put('/cambiar-contrasena', [ChangePasswordController::class, 'update'])->middleware('throttle:10,1')->name('password.change.update');
     Route::get('/', HomeController::class)->name('home');

@@ -18,6 +18,9 @@ Route::prefix('administradorgeneral')->name('superadmin.')->middleware('superadm
 
     Route::get('/', [HubController::class, 'index'])->name('index');
     Route::put('gestion-de-clientes', [HubController::class, 'centralPanel'])->name('central');
+    // Términos y condiciones: datos del titular y quién los aceptó.
+    Route::get('terminos', [\App\Http\Controllers\SuperAdmin\LegalSettingsController::class, 'edit'])->name('legal');
+    Route::put('terminos', [\App\Http\Controllers\SuperAdmin\LegalSettingsController::class, 'update'])->name('legal.update');
     Route::post('datos-de-ejemplo', [HubController::class, 'sampleData'])->middleware('throttle:3,10')->name('sample');
     Route::post('actualizar-base', [HubController::class, 'upgradeDatabase'])->middleware('throttle:5,1')->name('upgrade');
 

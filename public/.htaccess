@@ -14,9 +14,10 @@
     RewriteRule .* - [E=HTTP_X_XSRF_TOKEN:%{HTTP:X-XSRF-Token}]
 
     # Redirect Trailing Slashes If Not A Folder...
+    # (Se arma con la dirección que pidió el navegador, no con la interna: en Hostinger esa lleva /public/ adelante.)
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteCond %{REQUEST_URI} (.+)/$
-    RewriteRule ^ %1 [L,R=301]
+    RewriteCond %{THE_REQUEST} \s/+(.*?)/+[\s?]
+    RewriteRule ^ /%1 [L,R=301,NE]
 
     # Send Requests To Front Controller...
     RewriteCond %{REQUEST_FILENAME} !-d
@@ -27,6 +28,8 @@
 # Archivos que sirve el servidor directo (íconos, CSS, JS): sin adivinar el tipo y sin anunciar la versión de PHP.
 <IfModule mod_headers.c>
     Header always set X-Content-Type-Options "nosniff"
+    # HTTPS obligatorio también para íconos, CSS y JS (los navegadores lo ignoran si el sitio se abre por http).
+    Header always set Strict-Transport-Security "max-age=31536000"
     Header always unset X-Powered-By
     Header unset X-Powered-By
 </IfModule>

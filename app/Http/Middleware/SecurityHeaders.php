@@ -37,6 +37,8 @@ class SecurityHeaders
                 "base-uri 'self'",
                 "form-action 'self'",
                 "frame-ancestors 'self'",
+                // Con el sitio en HTTPS, cualquier dirección http:// que quede se pide por https://.
+                ...(str_starts_with((string) config('app.url'), 'https://') ? ['upgrade-insecure-requests'] : []),
             ]));
         }
         $response->headers->set('Cross-Origin-Opener-Policy', 'same-origin');

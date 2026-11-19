@@ -16,6 +16,7 @@ class ActivityAndRomaneoTest extends TestCase
     {
         $this->seed(DemoSeeder::class);
         $admin = User::query()->where('username', 'admin.demo')->firstOrFail();
+        $admin->forceFill(['terms_version' => \App\Support\Legal::VERSION])->save();
         $this->actingAs($admin);
 
         foreach ([7, 30, 90] as $days) {

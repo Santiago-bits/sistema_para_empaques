@@ -18,6 +18,8 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
+            // Los usuarios de prueba ya aceptaron los términos vigentes (la aceptación se prueba aparte).
+            'terms_version' => \App\Support\Legal::VERSION,
             'first_name' => fake()->firstName(),
             'last_name' => fake()->lastName(),
             'username' => fake()->unique()->userName().Str::random(3),

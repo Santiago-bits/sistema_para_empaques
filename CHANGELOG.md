@@ -4,6 +4,13 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 
 ## [Sin publicar]
 
+### Agregado
+- **Términos y condiciones y Política de privacidad** (Ley 25.326), públicos en `/terminos` y `/privacidad`, con
+  enlaces en la pantalla de ingreso y al pie del menú. El administrador de cada galpón los acepta una vez (y de
+  nuevo si cambia la versión): queda registrado quién, cuándo y desde qué IP. Los datos del titular (nombre, CUIT,
+  domicilio, correo y tribunales) se cargan en Administración general → Términos, donde también se ve qué galpones
+  ya aceptaron.
+
 ### Seguridad
 - **Pruebas OWASP (ZAP y ataques a mano tipo Burp Suite)** sobre todo el sistema. Arreglado lo que encontraron:
   - El administrador de un galpón podía cambiar los permisos de los **roles del sistema** (Administrador, Embalador,
@@ -16,7 +23,8 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
   - Crear dos roles con nombres casi iguales («Jefe de línea» y «jefe-de-linea») daba error 500.
   - Cabecera **Content-Security-Policy** (sólo se cargan scripts e imágenes del propio sistema, sin `<object>`, sin
     formularios hacia afuera) y `Cross-Origin-Opener-Policy`, también en las páginas de error (404, 405) y en los
-    íconos y archivos que sirve Hostinger directo. La cookie de sesión va marcada «Secure» cuando el
+    íconos y archivos que sirve Hostinger directo (también HTTPS obligatorio). Las redirecciones de carpetas ya no
+    muestran la ruta interna `/public/`. La cookie de sesión va marcada «Secure» cuando el
     sitio está en HTTPS.
   - Librerías actualizadas por fallas publicadas: Laravel 12.73, Symfony 7.4.23, phpseclib 4.0.3 y herramientas de
     compilación de JavaScript.

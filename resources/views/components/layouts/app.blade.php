@@ -132,6 +132,8 @@
             @if ($envLabel)
                 · <span class="font-semibold text-accent-400">{{ $envLabel }}</span>
             @endif
+            · <a href="{{ route('legal.terms') }}" class="hover:text-stone-300 hover:underline">Términos</a>
+            · <a href="{{ route('legal.privacy') }}" class="hover:text-stone-300 hover:underline">Privacidad</a>
         </div>
     </aside>
 

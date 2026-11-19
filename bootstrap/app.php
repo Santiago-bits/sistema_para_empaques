@@ -29,7 +29,7 @@ use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 (static function (string $base): void {
     $code = 0;
     foreach (['.env', 'composer.json', 'composer.lock', 'config/galpon.php', 'routes/web.php', 'bootstrap/app.php'] as $file) {
-        $code = max($code, (int) @filemtime($base.'/'.$file));
+        $code = is_file($base.'/'.$file) ? max($code, (int) filemtime($base.'/'.$file)) : $code;
     }
     foreach (glob($base.'/bootstrap/cache/*.php') ?: [] as $cache) {
         if ($code > 0 && (int) @filemtime($cache) < $code) {
@@ -52,6 +52,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'active' => EnsureUserIsActive::class,
             'kiosk' => KioskMode::class,
             'password.fresh' => RequirePasswordChange::class,
+            'terms' => \App\Http\Middleware\RequireTermsAcceptance::class,
             'abilities' => \Laravel\Sanctum\Http\Middleware\CheckAbilities::class,
             'ability' => \Laravel\Sanctum\Http\Middleware\CheckForAnyAbility::class,
             'central' => \App\Http\Middleware\EnsureCentralMode::class,
