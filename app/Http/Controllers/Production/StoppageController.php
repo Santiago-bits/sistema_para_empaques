@@ -23,8 +23,8 @@ class StoppageController extends Controller
     public function index(Request $request): View
     {
         $query = ProductionStoppage::query()
-            ->when($request->filled('date_from'), fn ($q) => $q->where('started_at', '>=', $request->date('date_from')->startOfDay()))
-            ->when($request->filled('date_to'), fn ($q) => $q->where('started_at', '<=', $request->date('date_to')->endOfDay()))
+            ->when(static::dateParam($request, 'date_from'), fn ($q, $d) => $q->where('started_at', '>=', $d->startOfDay()))
+            ->when(static::dateParam($request, 'date_to'), fn ($q, $d) => $q->where('started_at', '<=', $d->endOfDay()))
             ->when($request->filled('reason_id'), fn ($q) => $q->where('reason_id', $request->integer('reason_id')))
             ->when($request->filled('production_line_id'), fn ($q) => $q->where('production_line_id', $request->integer('production_line_id')))
             ->when($request->filled('shift_id'), fn ($q) => $q->where('shift_id', $request->integer('shift_id')));

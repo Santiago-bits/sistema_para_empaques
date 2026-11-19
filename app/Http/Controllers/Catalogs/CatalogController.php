@@ -13,7 +13,6 @@ use App\Services\CatalogService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 use Illuminate\View\View;
 
 /**
@@ -108,8 +107,8 @@ class CatalogController extends Controller
             return null;
         }
         $request->validate(['from' => ['nullable', 'date'], 'to' => ['nullable', 'date', 'after_or_equal:from']]);
-        $from = $request->filled('from') ? Carbon::parse($request->query('from')) : today()->subMonths(3)->startOfMonth();
-        $to = $request->filled('to') ? Carbon::parse($request->query('to')) : today();
+        $from = static::dateParam($request, 'from') ?? today()->subMonths(3)->startOfMonth();
+        $to = static::dateParam($request, 'to') ?? today();
 
         return app(AccountService::class)->viewData($model, $from->startOfDay(), $to->endOfDay(), $request->boolean('anulados'));
     }

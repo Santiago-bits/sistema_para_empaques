@@ -127,8 +127,8 @@ class MovementController extends Controller
             ->when($request->filled('location_id'), fn ($q) => $q->where(fn ($w) => $w
                 ->where('from_location_id', $request->integer('location_id'))->orWhere('to_location_id', $request->integer('location_id'))))
             ->when($request->filled('user_id'), fn ($q) => $q->where('user_id', $request->integer('user_id')))
-            ->when($request->filled('from'), fn ($q) => $q->where('moved_at', '>=', $request->date('from')->startOfDay()))
-            ->when($request->filled('to'), fn ($q) => $q->where('moved_at', '<=', $request->date('to')->endOfDay()));
+            ->when(static::dateParam($request, 'from'), fn ($q, $d) => $q->where('moved_at', '>=', $d->startOfDay()))
+            ->when(static::dateParam($request, 'to'), fn ($q, $d) => $q->where('moved_at', '<=', $d->endOfDay()));
 
         // Recorrido completo del pallet/cajón buscado: "09:30 Cámara 1 → 12:15 Sector B → ...".
         $journey = $target

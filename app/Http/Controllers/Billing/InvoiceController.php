@@ -30,8 +30,8 @@ class InvoiceController extends Controller
             ->when($request->filled('client_id'), fn ($q) => $q->where('client_id', $request->integer('client_id')))
             ->when($request->filled('voucher_type'), fn ($q) => $q->where('voucher_type', $request->integer('voucher_type')))
             ->when($request->filled('number'), fn ($q) => $q->where('number', (int) preg_replace('/^.*-/', '', (string) $request->query('number'))))
-            ->when($request->filled('from'), fn ($q) => $q->whereDate('issued_on', '>=', $request->date('from')))
-            ->when($request->filled('to'), fn ($q) => $q->whereDate('issued_on', '<=', $request->date('to')))
+            ->when(static::dateParam($request, 'from'), fn ($q, $d) => $q->whereDate('issued_on', '>=', $d))
+            ->when(static::dateParam($request, 'to'), fn ($q, $d) => $q->whereDate('issued_on', '<=', $d))
             ->latest('issued_on')->latest('id')
             ->paginate($this->perPage($request))->withQueryString();
 

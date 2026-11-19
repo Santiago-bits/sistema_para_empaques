@@ -4,6 +4,23 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). V
 
 ## [Sin publicar]
 
+### Seguridad
+- **Pruebas OWASP (ZAP y ataques a mano tipo Burp Suite)** sobre todo el sistema. Arreglado lo que encontraron:
+  - El administrador de un galpón podía cambiar los permisos de los **roles del sistema** (Administrador, Embalador,
+    Calidad…), que comparten todos los galpones, y así dejar sin acceso a la gente de los demás. Ahora esos roles sólo
+    los cambia el Super Administrador; cada galpón tiene «Copiar y ajustar» para hacer su propia versión. La lista de
+    roles ya no cuenta usuarios de otros galpones y el nombre de un rol propio no choca con los de otros galpones.
+  - Fechas inventadas en los filtros de la dirección (`?from=<script>`) hacían caer con error 500 unas 15 pantallas
+    (auditoría, lotes, cargas, cajones, pallets, remitos, facturas, calidad, costos, cierres, movimientos, API…):
+    ahora se ignoran.
+  - Crear dos roles con nombres casi iguales («Jefe de línea» y «jefe-de-linea») daba error 500.
+  - Cabecera **Content-Security-Policy** (sólo se cargan scripts e imágenes del propio sistema, sin `<object>`, sin
+    formularios hacia afuera) y `Cross-Origin-Opener-Policy`, también en las páginas de error (404, 405) y en los
+    íconos y archivos que sirve Hostinger directo. La cookie de sesión va marcada «Secure» cuando el
+    sitio está en HTTPS.
+  - Librerías actualizadas por fallas publicadas: Laravel 12.73, Symfony 7.4.23, phpseclib 4.0.3 y herramientas de
+    compilación de JavaScript.
+
 ### Quitado
 - **Cámaras de frío** (temperatura y humedad): sin menú, pantallas, permisos, sensores por API ni alertas de
   temperatura. Quedan apagadas en todos los galpones aunque alguno las tuviera prendidas; al actualizar se borran

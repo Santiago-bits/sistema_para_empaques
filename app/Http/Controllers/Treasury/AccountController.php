@@ -153,8 +153,8 @@ class AccountController extends Controller
     private function period(Request $request): array
     {
         $request->validate(['from' => ['nullable', 'date'], 'to' => ['nullable', 'date', 'after_or_equal:from']]);
-        $from = $request->filled('from') ? Carbon::parse($request->query('from')) : today()->subMonths(3)->startOfMonth();
-        $to = $request->filled('to') ? Carbon::parse($request->query('to')) : today();
+        $from = static::dateParam($request, 'from') ?? today()->subMonths(3)->startOfMonth();
+        $to = static::dateParam($request, 'to') ?? today();
 
         return [$from->startOfDay(), $to->endOfDay()];
     }

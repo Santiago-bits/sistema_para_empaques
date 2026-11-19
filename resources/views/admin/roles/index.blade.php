@@ -19,7 +19,12 @@
                     <td class="num">{{ $role->slug === 'super_admin' ? 'Todos' : $role->permissions_count }}</td>
                     <td class="text-right whitespace-nowrap">
                         @if ($role->slug !== 'super_admin')
-                            <a href="{{ route('admin.roles.edit', $role) }}" class="link">Editar</a>
+                            @if ($role->warehouse_id === null && auth()->user()->warehouse_id !== null)
+                                {{-- Común a todos los galpones: se copia para ajustarlo a este galpón. --}}
+                                <a href="{{ route('admin.roles.create', ['from' => $role->id]) }}" class="link">Copiar y ajustar</a>
+                            @else
+                                <a href="{{ route('admin.roles.edit', $role) }}" class="link">Editar</a>
+                            @endif
                         @endif
                         @if (! $role->is_system && $role->users_count === 0)
                             <form method="POST" action="{{ route('admin.roles.destroy', $role) }}" class="inline" x-data x-confirm="¿Eliminar el rol {{ $role->name }}?">

@@ -133,10 +133,10 @@ class CrateController extends Controller
                 $term = trim((string) $request->string('code'));
                 $q->where(fn ($w) => $w->where('code', 'like', $term.'%')->orWhere('barcode', $term));
             })
-            ->when($request->filled('date_from'), fn ($q) => $q->where('created_at', '>=', $request->date('date_from')->startOfDay()))
-            ->when($request->filled('date_to'), fn ($q) => $q->where('created_at', '<=', $request->date('date_to')->endOfDay()))
-            ->when($request->filled('processed_from'), fn ($q) => $q->where('processed_at', '>=', $request->date('processed_from')->startOfDay()))
-            ->when($request->filled('processed_to'), fn ($q) => $q->where('processed_at', '<=', $request->date('processed_to')->endOfDay()))
+            ->when(static::dateParam($request, 'date_from'), fn ($q, $d) => $q->where('created_at', '>=', $d->startOfDay()))
+            ->when(static::dateParam($request, 'date_to'), fn ($q, $d) => $q->where('created_at', '<=', $d->endOfDay()))
+            ->when(static::dateParam($request, 'processed_from'), fn ($q, $d) => $q->where('processed_at', '>=', $d->startOfDay()))
+            ->when(static::dateParam($request, 'processed_to'), fn ($q, $d) => $q->where('processed_at', '<=', $d->endOfDay()))
             ->when($request->filled('variety_id'), fn ($q) => $q->where('variety_id', $request->integer('variety_id')))
             ->when($request->filled('size_id'), fn ($q) => $q->where('size_id', $request->integer('size_id')))
             ->when($request->filled('packer_id'), fn ($q) => $q->where('packer_id', $request->integer('packer_id')))

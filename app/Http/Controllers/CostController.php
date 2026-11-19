@@ -8,7 +8,6 @@ use App\Models\Load;
 use App\Services\CostService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 use Illuminate\View\View;
 
 class CostController extends Controller
@@ -24,8 +23,8 @@ class CostController extends Controller
             'category' => ['nullable', 'in:'.implode(',', array_keys(Cost::CATEGORIES))], 'q' => ['nullable', 'string', 'max:100'],
         ]);
         $filters = [
-            'from' => $request->filled('from') ? Carbon::parse($request->query('from'))->startOfDay() : today()->startOfMonth(),
-            'to' => $request->filled('to') ? Carbon::parse($request->query('to'))->endOfDay() : today()->endOfDay(),
+            'from' => static::dateParam($request, 'from')?->startOfDay() ?? today()->startOfMonth(),
+            'to' => static::dateParam($request, 'to')?->endOfDay() ?? today()->endOfDay(),
             'category' => $request->query('category'),
             'q' => $request->query('q'),
         ];

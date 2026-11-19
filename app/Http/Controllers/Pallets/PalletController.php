@@ -33,8 +33,8 @@ class PalletController extends Controller
                 $code = app(\App\Services\SequenceService::class)->normalize('pallet', $term);
                 $q->where(fn ($w) => $w->where('code', 'like', $term.'%')->orWhere('code', $code)->orWhere('barcode', $term));
             })
-            ->when($request->filled('date_from'), fn ($q) => $q->where('received_at', '>=', $request->date('date_from')->startOfDay()))
-            ->when($request->filled('date_to'), fn ($q) => $q->where('received_at', '<=', $request->date('date_to')->endOfDay()))
+            ->when(static::dateParam($request, 'date_from'), fn ($q, $d) => $q->where('received_at', '>=', $d->startOfDay()))
+            ->when(static::dateParam($request, 'date_to'), fn ($q, $d) => $q->where('received_at', '<=', $d->endOfDay()))
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->string('status')))
             ->when($request->filled('producer_id'), fn ($q) => $q->where('producer_id', $request->integer('producer_id')))
             ->when($request->filled('owner_id'), fn ($q) => $q->where('owner_id', $request->integer('owner_id')))

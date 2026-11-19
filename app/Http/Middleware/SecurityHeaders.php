@@ -19,6 +19,28 @@ class SecurityHeaders
         $response->headers->set('Referrer-Policy', 'same-origin');
         $response->headers->set('Permissions-Policy', 'camera=(self), microphone=(), geolocation=()');
 
+        // Política de contenido: la página sólo carga scripts, estilos, imágenes y conexiones del propio sistema
+        // (no hay CDN ni fuentes externas). Frena la inyección de scripts de otros sitios, los <object>/<embed>,
+        // el cambio de <base> y los formularios que mandan datos afuera. Alpine necesita 'unsafe-eval' y las
+        // pantallas tienen scripts y estilos propios en línea. Con Vite en desarrollo (npm run dev) no se aplica.
+        if (! $response->headers->has('Content-Security-Policy') && ! \Illuminate\Support\Facades\Vite::isRunningHot()) {
+            $response->headers->set('Content-Security-Policy', implode('; ', [
+                "default-src 'self'",
+                "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+                "style-src 'self' 'unsafe-inline'",
+                "img-src 'self' data: blob:",
+                "font-src 'self' data:",
+                "connect-src 'self'",
+                "media-src 'self' blob:",
+                "worker-src 'self' blob:",
+                "object-src 'none'",
+                "base-uri 'self'",
+                "form-action 'self'",
+                "frame-ancestors 'self'",
+            ]));
+        }
+        $response->headers->set('Cross-Origin-Opener-Policy', 'same-origin');
+
         // No anunciar la versión de PHP (la agrega PHP por su cuenta con expose_php).
         header_remove('X-Powered-By');
         $response->headers->remove('X-Powered-By');

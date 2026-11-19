@@ -19,8 +19,8 @@ class AuditController extends Controller
             ->when($request->filled('action'), fn ($q) => $q->where('action', $request->string('action')))
             ->when($request->filled('type'), fn ($q) => $q->where('auditable_type', $request->string('type')))
             ->when($request->filled('id'), fn ($q) => $q->where('auditable_id', $request->integer('id')))
-            ->when($request->filled('from'), fn ($q) => $q->where('created_at', '>=', $request->date('from')->startOfDay()))
-            ->when($request->filled('to'), fn ($q) => $q->where('created_at', '<=', $request->date('to')->endOfDay()))
+            ->when(static::dateParam($request, 'from'), fn ($q, $d) => $q->where('created_at', '>=', $d->startOfDay()))
+            ->when(static::dateParam($request, 'to'), fn ($q, $d) => $q->where('created_at', '<=', $d->endOfDay()))
             ->latest('created_at')->latest('id')
             ->paginate($this->perPage($request, 50))
             ->withQueryString();

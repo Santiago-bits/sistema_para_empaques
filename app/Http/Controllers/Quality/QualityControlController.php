@@ -43,8 +43,8 @@ class QualityControlController extends Controller
                     ->orWhereIn('lot_id', Lot::query()->select('id')->where('code', $code)));
             })
             ->when($request->filled('user_id'), fn ($q) => $q->where('user_id', $request->integer('user_id')))
-            ->when($request->filled('from'), fn ($q) => $q->where('controlled_at', '>=', $request->date('from')->startOfDay()))
-            ->when($request->filled('to'), fn ($q) => $q->where('controlled_at', '<=', $request->date('to')->endOfDay()))
+            ->when(static::dateParam($request, 'from'), fn ($q, $d) => $q->where('controlled_at', '>=', $d->startOfDay()))
+            ->when(static::dateParam($request, 'to'), fn ($q, $d) => $q->where('controlled_at', '<=', $d->endOfDay()))
             ->latest('controlled_at')->latest('id')
             ->paginate($this->perPage($request))
             ->withQueryString();

@@ -33,8 +33,8 @@ class LotController extends Controller
             ->when($request->filled('variety_id'), fn ($q) => $q->where('variety_id', $request->integer('variety_id')))
             ->when($request->filled('status') && array_key_exists($request->query('status'), Lot::STATUSES),
                 fn ($q) => $q->where('status', $request->query('status')))
-            ->when($request->filled('from'), fn ($q) => $q->whereDate('date', '>=', $request->date('from')))
-            ->when($request->filled('to'), fn ($q) => $q->whereDate('date', '<=', $request->date('to')))
+            ->when(static::dateParam($request, 'from'), fn ($q, $d) => $q->whereDate('date', '>=', $d))
+            ->when(static::dateParam($request, 'to'), fn ($q, $d) => $q->whereDate('date', '<=', $d))
             // «Ingresos corrientes»: los de la temporada en curso.
             ->when($request->query('season') === 'current', fn ($q) => $q->where('season_id', Season::current()?->id ?? 0))
             ->when($request->filled('driver_id'), fn ($q) => $q->where('driver_id', $request->integer('driver_id')))

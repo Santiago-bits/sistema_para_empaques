@@ -65,8 +65,9 @@ class RolesSecurityTest extends TestCase
 
     public function test_admin_cannot_grant_permissions_reserved_to_the_super_admin(): void
     {
-        $this->actingAsRole('admin');
-        $role = $this->role('supervisor');
+        $admin = $this->actingAsRole('admin');
+        // Un rol propio del galpón (los del sistema son comunes a todos y no los toca un galpón).
+        $role = Role::query()->forceCreate(['slug' => 'g'.$admin->warehouse_id.'_encargado', 'name' => 'Encargado', 'warehouse_id' => $admin->warehouse_id]);
         $this->put(route('admin.roles.update', $role), ['name' => $role->name, 'permissions' => ['dashboard.view', 'backups.restore', 'logs.view']])->assertRedirect();
         $this->assertNotContains('backups.restore', $role->permissions()->pluck('slug')->all());
         $this->assertNotContains('logs.view', $role->permissions()->pluck('slug')->all());
@@ -119,9 +120,11 @@ class RolesSecurityTest extends TestCase
 
     public function test_role_changes_take_effect_and_are_audited(): void
     {
-        $this->actingAsRole('admin');
-        $worker = User::factory()->role('quality')->create();
-        $role = $this->role('quality');
+        $admin = $this->actingAsRole('admin');
+        // Copia del rol «Calidad» propia del galpón, con su gente.
+        $role = Role::query()->forceCreate(['slug' => 'g'.$admin->warehouse_id.'_calidad', 'name' => 'Calidad del galpón', 'warehouse_id' => $admin->warehouse_id]);
+        $role->permissions()->sync($this->role('quality')->permissions()->pluck('permissions.id'));
+        $worker = User::factory()->create(['role_id' => $role->id, 'warehouse_id' => $admin->warehouse_id]);
         $this->assertTrue($worker->can('quality.view'));
 
         $slugs = $role->permissions()->pluck('slug')->reject(fn ($s) => $s === 'quality.view')->values()->all();

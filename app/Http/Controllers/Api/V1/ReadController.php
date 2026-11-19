@@ -34,7 +34,7 @@ class ReadController extends ApiController
         $page = Crate::query()->with(['variety:id,name', 'size:id,name', 'packer:id,code', 'pallet:id,code'])
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->query('status')))
             ->when($request->filled('code'), fn ($q) => $q->where('code', 'like', addcslashes(mb_strtoupper((string) $request->query('code')), '%_\\').'%'))
-            ->when($request->filled('updated_since'), fn ($q) => $q->where('updated_at', '>=', $request->date('updated_since')))
+            ->when(static::dateParam($request, 'updated_since'), fn ($q, $d) => $q->where('updated_at', '>=', $d))
             ->orderByDesc('id')->paginate($this->perPageApi($request));
 
         return response()->json($this->paginated($page, fn (Crate $c) => $this->crate($c)));
@@ -70,8 +70,8 @@ class ReadController extends ApiController
 
         $page = Load::query()->with(['client:id,business_name', 'destination:id,name', 'truck:id,plate'])
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->query('status')))
-            ->when($request->filled('from'), fn ($q) => $q->whereDate('date', '>=', $request->date('from')))
-            ->when($request->filled('to'), fn ($q) => $q->whereDate('date', '<=', $request->date('to')))
+            ->when(static::dateParam($request, 'from'), fn ($q, $d) => $q->whereDate('date', '>=', $d))
+            ->when(static::dateParam($request, 'to'), fn ($q, $d) => $q->whereDate('date', '<=', $d))
             ->orderByDesc('id')->paginate($this->perPageApi($request));
 
         return response()->json($this->paginated($page, fn (Load $l) => $this->load($l)));

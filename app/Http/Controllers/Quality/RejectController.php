@@ -114,8 +114,8 @@ class RejectController extends Controller
 
     private function period(Request $request): array
     {
-        $from = $request->filled('from') ? Carbon::parse($request->input('from'))->startOfDay() : now()->subDays(29)->startOfDay();
-        $to = $request->filled('to') ? Carbon::parse($request->input('to'))->endOfDay() : now()->endOfDay();
+        $from = static::dateParam($request, 'from')?->startOfDay() ?? now()->subDays(29)->startOfDay();
+        $to = static::dateParam($request, 'to')?->endOfDay() ?? now()->endOfDay();
 
         return [$from, $to];
     }

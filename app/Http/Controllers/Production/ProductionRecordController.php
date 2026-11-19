@@ -65,8 +65,8 @@ class ProductionRecordController extends Controller
             return view('production.mine', ['packer' => null]);
         }
 
-        $from = $request->filled('date_from') ? $request->date('date_from')->startOfDay() : today();
-        $to = $request->filled('date_to') ? $request->date('date_to')->endOfDay() : today()->endOfDay();
+        $from = static::dateParam($request, 'date_from')?->startOfDay() ?? today();
+        $to = static::dateParam($request, 'date_to')?->endOfDay() ?? today()->endOfDay();
         if ($to->lessThan($from)) {
             [$from, $to] = [$to->copy()->startOfDay(), $from->copy()->endOfDay()];
         }
@@ -97,8 +97,8 @@ class ProductionRecordController extends Controller
     private function filtered(Request $request): Builder
     {
         return ProductionRecord::query()
-            ->when($request->filled('date_from'), fn ($q) => $q->where('recorded_at', '>=', $request->date('date_from')->startOfDay()))
-            ->when($request->filled('date_to'), fn ($q) => $q->where('recorded_at', '<=', $request->date('date_to')->endOfDay()))
+            ->when(static::dateParam($request, 'date_from'), fn ($q, $d) => $q->where('recorded_at', '>=', $d->startOfDay()))
+            ->when(static::dateParam($request, 'date_to'), fn ($q, $d) => $q->where('recorded_at', '<=', $d->endOfDay()))
             ->when($request->filled('crate'), function ($q) use ($request) {
                 $term = trim((string) $request->string('crate'));
                 $q->whereIn('crate_id', \App\Models\Crate::query()->withTrashed()->select('id')

@@ -45,8 +45,8 @@ class LoadController extends Controller
             ->when($request->filled('client_id'), fn ($q) => $q->where('client_id', $request->integer('client_id')))
             ->when($request->filled('destination_id'), fn ($q) => $q->where('destination_id', $request->integer('destination_id')))
             ->when($request->filled('truck_id'), fn ($q) => $q->where('truck_id', $request->integer('truck_id')))
-            ->when($request->filled('from'), fn ($q) => $q->whereDate('date', '>=', $request->date('from')))
-            ->when($request->filled('to'), fn ($q) => $q->whereDate('date', '<=', $request->date('to')))
+            ->when(static::dateParam($request, 'from'), fn ($q, $d) => $q->whereDate('date', '>=', $d))
+            ->when(static::dateParam($request, 'to'), fn ($q, $d) => $q->whereDate('date', '<=', $d))
             ->latest('date')->latest('id')
             ->paginate($this->perPage($request))->withQueryString();
 

@@ -29,7 +29,7 @@ class ClosingController extends Controller
     public function create(Request $request): View
     {
         $request->validate(['date' => ['nullable', 'date', 'before_or_equal:today']]);
-        $date = $request->filled('date') ? Carbon::parse($request->query('date'))->startOfDay() : today();
+        $date = static::dateParam($request, 'date')?->startOfDay() ?? today();
 
         return view('closings.create', [
             'date' => $date,

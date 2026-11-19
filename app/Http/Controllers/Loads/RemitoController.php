@@ -30,8 +30,8 @@ class RemitoController extends Controller
             ->when($request->filled('status') && RemitoStatus::tryFrom((string) $request->query('status')),
                 fn ($q) => $q->where('status', $request->query('status')))
             ->when($request->filled('client_id'), fn ($q) => $q->where('client_id', $request->integer('client_id')))
-            ->when($request->filled('from'), fn ($q) => $q->where('issued_at', '>=', $request->date('from')->startOfDay()))
-            ->when($request->filled('to'), fn ($q) => $q->where('issued_at', '<=', $request->date('to')->endOfDay()))
+            ->when(static::dateParam($request, 'from'), fn ($q, $d) => $q->where('issued_at', '>=', $d->startOfDay()))
+            ->when(static::dateParam($request, 'to'), fn ($q, $d) => $q->where('issued_at', '<=', $d->endOfDay()))
             ->latest('issued_at')->latest('id')
             ->paginate($this->perPage($request))->withQueryString();
 
